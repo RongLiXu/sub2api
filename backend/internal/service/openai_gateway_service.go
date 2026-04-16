@@ -1875,6 +1875,18 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 		}
 	}
 
+	// API key accounts may still re-serialize the request body later in this
+	// pipeline (for example after injecting default instructions). Preserve the
+	// client prompt_cache_key in reqBody so OpenAI-compatible Responses upstreams
+	// can keep deriving a stable session/cache identity from it.
+	if account.Type == AccountTypeAPIKey {
+		if trimmedKey := strings.TrimSpace(promptCacheKey); trimmedKey != "" {
+			if existing, ok := reqBody["prompt_cache_key"].(string); !ok || strings.TrimSpace(existing) == "" {
+				reqBody["prompt_cache_key"] = trimmedKey
+			}
+		}
+	}
+
 	// Track if body needs re-serialization
 	bodyModified := false
 	// 单字段补丁快速路径：只要整个变更集最终可归约为同一路径的 set/delete，就避免全量 Marshal。
@@ -4317,7 +4329,7 @@ func normalizeOpenAICompactRequestBody(body []byte) ([]byte, bool, error) {
 	}
 
 	normalized := []byte(`{}`)
-	for _, field := range []string{"model", "input", "instructions", "previous_response_id"} {
+	for _, field := range []string{"model", "input", "instructions", "previous_response_id", "prompt_cache_key"} {
 		value := gjson.GetBytes(body, field)
 		if !value.Exists() {
 			continue
