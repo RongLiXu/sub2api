@@ -1816,6 +1816,9 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 
 	originalBody := body
 	reqModel, reqStream, promptCacheKey := extractOpenAIRequestMetaFromBody(body)
+	if promptCacheKey == "" {
+		promptCacheKey = s.ExtractSessionID(c, body)
+	}
 	originalModel := reqModel
 
 	isCodexCLI := openai.IsCodexOfficialClientByHeaders(c.GetHeader("User-Agent"), c.GetHeader("originator")) || (s.cfg != nil && s.cfg.Gateway.ForceCodexCLI)
@@ -1855,6 +1858,16 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 		// 透传分支只需要轻量提取字段，避免热路径全量 Unmarshal。
 		reasoningEffort := extractOpenAIReasoningEffortFromBody(body, reqModel)
 		return s.forwardOpenAIPassthrough(ctx, c, account, originalBody, reqModel, reasoningEffort, reqStream, startTime)
+	}
+
+	if account.Type == AccountTypeAPIKey {
+		normalizedBody, normalized, err := ensureOpenAIPromptCacheKeyInBody(body, promptCacheKey)
+		if err != nil {
+			return nil, err
+		}
+		if normalized {
+			body = normalizedBody
+		}
 	}
 
 	reqBody, err := getOpenAIRequestBodyMap(c, body)
@@ -2497,6 +2510,16 @@ func (s *OpenAIGatewayService) forwardOpenAIPassthrough(
 		reqStream = gjson.GetBytes(body, "stream").Bool()
 	}
 
+	if account != nil && account.Type == AccountTypeAPIKey {
+		normalizedBody, normalized, err := ensureOpenAIPromptCacheKeyInBody(body, s.ExtractSessionID(c, body))
+		if err != nil {
+			return nil, err
+		}
+		if normalized {
+			body = normalizedBody
+		}
+	}
+
 	sanitizedBody, sanitized, err := sanitizeEmptyBase64InputImagesInOpenAIBody(body)
 	if err != nil {
 		return nil, err
@@ -2742,6 +2765,8 @@ func (s *OpenAIGatewayService) buildUpstreamRequestOpenAIPassthrough(
 		if clientConversationID != "" {
 			req.Header.Set("conversation_id", isolateOpenAISessionID(apiKeyID, clientConversationID))
 		}
+	} else if account.Type == AccountTypeAPIKey {
+		applyOpenAIAPIKeySessionHeaders(req, c, strings.TrimSpace(gjson.GetBytes(body, "prompt_cache_key").String()))
 	}
 
 	// 透传模式也支持账户自定义 User-Agent 与 ForceCodexCLI 兜底。
@@ -3241,6 +3266,8 @@ func (s *OpenAIGatewayService) buildUpstreamRequest(ctx context.Context, c *gin.
 			req.Header.Set("conversation_id", isolated)
 			req.Header.Set("session_id", isolated)
 		}
+	} else if account.Type == AccountTypeAPIKey {
+		applyOpenAIAPIKeySessionHeaders(req, c, promptCacheKey)
 	}
 
 	// Apply custom User-Agent if configured
@@ -4347,6 +4374,22 @@ func normalizeOpenAICompactRequestBody(body []byte) ([]byte, bool, error) {
 	return normalized, true, nil
 }
 
+func ensureOpenAIPromptCacheKeyInBody(body []byte, promptCacheKey string) ([]byte, bool, error) {
+	trimmedKey := strings.TrimSpace(promptCacheKey)
+	if trimmedKey == "" {
+		return body, false, nil
+	}
+	existing := strings.TrimSpace(gjson.GetBytes(body, "prompt_cache_key").String())
+	if existing != "" {
+		return body, false, nil
+	}
+	next, err := sjson.SetBytes(body, "prompt_cache_key", trimmedKey)
+	if err != nil {
+		return body, false, fmt.Errorf("inject prompt_cache_key: %w", err)
+	}
+	return next, true, nil
+}
+
 func resolveOpenAICompactSessionID(c *gin.Context) string {
 	if c != nil {
 		if sessionID := strings.TrimSpace(c.GetHeader("session_id")); sessionID != "" {
@@ -4362,6 +4405,46 @@ func resolveOpenAICompactSessionID(c *gin.Context) string {
 		}
 	}
 	return uuid.NewString()
+}
+
+func resolveOpenAIClientSessionIdentifiers(c *gin.Context, promptCacheKey string) (string, string) {
+	sessionID := ""
+	conversationID := ""
+	if c != nil {
+		sessionID = strings.TrimSpace(c.GetHeader("session_id"))
+		conversationID = strings.TrimSpace(c.GetHeader("conversation_id"))
+	}
+	promptCacheKey = strings.TrimSpace(promptCacheKey)
+	if isOpenAIResponsesCompactPath(c) && sessionID == "" {
+		sessionID = resolveOpenAICompactSessionID(c)
+	}
+	if sessionID == "" {
+		sessionID = promptCacheKey
+	}
+	if conversationID == "" {
+		conversationID = promptCacheKey
+	}
+	if sessionID == "" {
+		sessionID = conversationID
+	}
+	if conversationID == "" {
+		conversationID = sessionID
+	}
+	return sessionID, conversationID
+}
+
+func applyOpenAIAPIKeySessionHeaders(req *http.Request, c *gin.Context, promptCacheKey string) {
+	if req == nil {
+		return
+	}
+	apiKeyID := getAPIKeyIDFromContext(c)
+	sessionID, conversationID := resolveOpenAIClientSessionIdentifiers(c, promptCacheKey)
+	if sessionID != "" {
+		req.Header.Set("session_id", generateSessionUUID(isolateOpenAISessionID(apiKeyID, sessionID)))
+	}
+	if conversationID != "" {
+		req.Header.Set("conversation_id", generateSessionUUID(isolateOpenAISessionID(apiKeyID, conversationID)))
+	}
 }
 
 func openAIResponsesRequestPathSuffix(c *gin.Context) string {
