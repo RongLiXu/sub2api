@@ -4358,21 +4358,21 @@ func normalizeOpenAICompactRequestBody(body []byte) ([]byte, bool, error) {
 	return normalized, true, nil
 }
 
-func ensureOpenAIPromptCacheKeyInBody(body []byte, promptCacheKey string) ([]byte, bool, error) {
-	trimmedKey := strings.TrimSpace(promptCacheKey)
-	if trimmedKey == "" {
-		return body, false, nil
-	}
-	existing := strings.TrimSpace(gjson.GetBytes(body, "prompt_cache_key").String())
-	if existing != "" {
-		return body, false, nil
-	}
-	next, err := sjson.SetBytes(body, "prompt_cache_key", trimmedKey)
-	if err != nil {
-		return body, false, fmt.Errorf("inject prompt_cache_key: %w", err)
-	}
-	return next, true, nil
-}
+// func ensureOpenAIPromptCacheKeyInBody(body []byte, promptCacheKey string) ([]byte, bool, error) {
+// 	trimmedKey := strings.TrimSpace(promptCacheKey)
+// 	if trimmedKey == "" {
+// 		return body, false, nil
+// 	}
+// 	existing := strings.TrimSpace(gjson.GetBytes(body, "prompt_cache_key").String())
+// 	if existing != "" {
+// 		return body, false, nil
+// 	}
+// 	next, err := sjson.SetBytes(body, "prompt_cache_key", trimmedKey)
+// 	if err != nil {
+// 		return body, false, fmt.Errorf("inject prompt_cache_key: %w", err)
+// 	}
+// 	return next, true, nil
+// }
 
 func resolveOpenAICompactSessionID(c *gin.Context) string {
 	if c != nil {
@@ -4417,41 +4417,41 @@ func resolveOpenAIClientSessionIdentifiers(c *gin.Context, promptCacheKey string
 	return sessionID, conversationID
 }
 
-func applyOpenAIAPIKeySessionHeaders(req *http.Request, c *gin.Context, promptCacheKey string) {
-	if req == nil {
-		return
-	}
-	apiKeyID := getAPIKeyIDFromContext(c)
-	sessionID, conversationID := resolveOpenAIClientSessionIdentifiers(c, promptCacheKey)
-	if sessionID != "" {
-		req.Header.Set("session_id", generateSessionUUID(isolateOpenAISessionID(apiKeyID, sessionID)))
-	}
-	if conversationID != "" {
-		req.Header.Set("conversation_id", generateSessionUUID(isolateOpenAISessionID(apiKeyID, conversationID)))
-	}
-}
+// func applyOpenAIAPIKeySessionHeaders(req *http.Request, c *gin.Context, promptCacheKey string) {
+// 	if req == nil {
+// 		return
+// 	}
+// 	apiKeyID := getAPIKeyIDFromContext(c)
+// 	sessionID, conversationID := resolveOpenAIClientSessionIdentifiers(c, promptCacheKey)
+// 	if sessionID != "" {
+// 		req.Header.Set("session_id", generateSessionUUID(isolateOpenAISessionID(apiKeyID, sessionID)))
+// 	}
+// 	if conversationID != "" {
+// 		req.Header.Set("conversation_id", generateSessionUUID(isolateOpenAISessionID(apiKeyID, conversationID)))
+// 	}
+// }
 
-func openAIResponsesRequestPathSuffix(c *gin.Context) string {
-	if c == nil || c.Request == nil || c.Request.URL == nil {
-		return ""
-	}
-	normalizedPath := strings.TrimRight(strings.TrimSpace(c.Request.URL.Path), "/")
-	if normalizedPath == "" {
-		return ""
-	}
-	idx := strings.LastIndex(normalizedPath, "/responses")
-	if idx < 0 {
-		return ""
-	}
-	suffix := normalizedPath[idx+len("/responses"):]
-	if suffix == "" || suffix == "/" {
-		return ""
-	}
-	if !strings.HasPrefix(suffix, "/") {
-		return ""
-	}
-	return suffix
-}
+// func openAIResponsesRequestPathSuffix(c *gin.Context) string {
+// 	if c == nil || c.Request == nil || c.Request.URL == nil {
+// 		return ""
+// 	}
+// 	normalizedPath := strings.TrimRight(strings.TrimSpace(c.Request.URL.Path), "/")
+// 	if normalizedPath == "" {
+// 		return ""
+// 	}
+// 	idx := strings.LastIndex(normalizedPath, "/responses")
+// 	if idx < 0 {
+// 		return ""
+// 	}
+// 	suffix := normalizedPath[idx+len("/responses"):]
+// 	if suffix == "" || suffix == "/" {
+// 		return ""
+// 	}
+// 	if !strings.HasPrefix(suffix, "/") {
+// 		return ""
+// 	}
+// 	return suffix
+// }
 
 func appendOpenAIResponsesRequestPathSuffix(baseURL, suffix string) string {
 	trimmedBase := strings.TrimRight(strings.TrimSpace(baseURL), "/")
