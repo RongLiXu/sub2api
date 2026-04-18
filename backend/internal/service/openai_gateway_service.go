@@ -1816,9 +1816,9 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 
 	originalBody := body
 	reqModel, reqStream, promptCacheKey := extractOpenAIRequestMetaFromBody(body)
-	if promptCacheKey == "" {
-		promptCacheKey = s.ExtractSessionID(c, body)
-	}
+	// if promptCacheKey == "" {
+	// 	promptCacheKey = s.ExtractSessionID(c, body)
+	// }
 	originalModel := reqModel
 
 	isCodexCLI := openai.IsCodexOfficialClientByHeaders(c.GetHeader("User-Agent"), c.GetHeader("originator")) || (s.cfg != nil && s.cfg.Gateway.ForceCodexCLI)
@@ -1860,15 +1860,15 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 		return s.forwardOpenAIPassthrough(ctx, c, account, originalBody, reqModel, reasoningEffort, reqStream, startTime)
 	}
 
-	if account.Type == AccountTypeAPIKey {
-		normalizedBody, normalized, err := ensureOpenAIPromptCacheKeyInBody(body, promptCacheKey)
-		if err != nil {
-			return nil, err
-		}
-		if normalized {
-			body = normalizedBody
-		}
-	}
+	// if account.Type == AccountTypeAPIKey {
+	// 	normalizedBody, normalized, err := ensureOpenAIPromptCacheKeyInBody(body, promptCacheKey)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	if normalized {
+	// 		body = normalizedBody
+	// 	}
+	// }
 
 	reqBody, err := getOpenAIRequestBodyMap(c, body)
 	if err != nil {
@@ -1892,13 +1892,13 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 	// pipeline (for example after injecting default instructions). Preserve the
 	// client prompt_cache_key in reqBody so OpenAI-compatible Responses upstreams
 	// can keep deriving a stable session/cache identity from it.
-	if account.Type == AccountTypeAPIKey {
-		if trimmedKey := strings.TrimSpace(promptCacheKey); trimmedKey != "" {
-			if existing, ok := reqBody["prompt_cache_key"].(string); !ok || strings.TrimSpace(existing) == "" {
-				reqBody["prompt_cache_key"] = trimmedKey
-			}
-		}
-	}
+	// if account.Type == AccountTypeAPIKey {
+	// 	if trimmedKey := strings.TrimSpace(promptCacheKey); trimmedKey != "" {
+	// 		if existing, ok := reqBody["prompt_cache_key"].(string); !ok || strings.TrimSpace(existing) == "" {
+	// 			reqBody["prompt_cache_key"] = trimmedKey
+	// 		}
+	// 	}
+	// }
 
 	// Track if body needs re-serialization
 	bodyModified := false
@@ -2510,15 +2510,15 @@ func (s *OpenAIGatewayService) forwardOpenAIPassthrough(
 		reqStream = gjson.GetBytes(body, "stream").Bool()
 	}
 
-	if account != nil && account.Type == AccountTypeAPIKey {
-		normalizedBody, normalized, err := ensureOpenAIPromptCacheKeyInBody(body, s.ExtractSessionID(c, body))
-		if err != nil {
-			return nil, err
-		}
-		if normalized {
-			body = normalizedBody
-		}
-	}
+	// if account != nil && account.Type == AccountTypeAPIKey {
+	// 	normalizedBody, normalized, err := ensureOpenAIPromptCacheKeyInBody(body, s.ExtractSessionID(c, body))
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	if normalized {
+	// 		body = normalizedBody
+	// 	}
+	// }
 
 	sanitizedBody, sanitized, err := sanitizeEmptyBase64InputImagesInOpenAIBody(body)
 	if err != nil {
@@ -2765,9 +2765,11 @@ func (s *OpenAIGatewayService) buildUpstreamRequestOpenAIPassthrough(
 		if clientConversationID != "" {
 			req.Header.Set("conversation_id", isolateOpenAISessionID(apiKeyID, clientConversationID))
 		}
-	} else if account.Type == AccountTypeAPIKey {
-		applyOpenAIAPIKeySessionHeaders(req, c, strings.TrimSpace(gjson.GetBytes(body, "prompt_cache_key").String()))
 	}
+
+	// if account.Type == AccountTypeAPIKey {
+	// 	applyOpenAIAPIKeySessionHeaders(req, c, strings.TrimSpace(gjson.GetBytes(body, "prompt_cache_key").String()))
+	// }
 
 	// 透传模式也支持账户自定义 User-Agent 与 ForceCodexCLI 兜底。
 	customUA := account.GetOpenAIUserAgent()
@@ -3256,7 +3258,9 @@ func (s *OpenAIGatewayService) buildUpstreamRequest(ctx context.Context, c *gin.
 			req.Header.Set("conversation_id", isolated)
 			req.Header.Set("session_id", isolated)
 		}
-	} else if account.Type == AccountTypeAPIKey {
+	}
+
+	if account.Type == AccountTypeAPIKey {
 		applyOpenAIAPIKeySessionHeaders(req, c, promptCacheKey)
 	}
 
