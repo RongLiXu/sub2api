@@ -57,7 +57,7 @@ func (s *GatewayService) ForwardAsResponses(
 
 	// 4. Model mapping
 	mappedModel := originalModel
-	reasoningEffort := ExtractResponsesReasoningEffortFromBody(body)
+	reasoningEffort := ExtractResponsesReasoningEffortFromBody(body, originalModel)
 	if account.Type == AccountTypeAPIKey {
 		mappedModel = account.GetMappedModel(originalModel)
 	}
@@ -183,13 +183,25 @@ func (s *GatewayService) ForwardAsResponses(
 }
 
 // ExtractResponsesReasoningEffortFromBody reads Responses API reasoning.effort
-// and normalizes it for usage logging.
-func ExtractResponsesReasoningEffortFromBody(body []byte) *string {
+// and compatible flat fields, then normalizes the value for usage logging. If
+// absent, it derives the effort from model suffixes such as gpt-5.5-high or
+// gpt-5.5-pro-xhigh.
+func ExtractResponsesReasoningEffortFromBody(body []byte, requestedModel string) *string {
 	raw := strings.TrimSpace(gjson.GetBytes(body, "reasoning.effort").String())
 	if raw == "" {
-		return nil
+		raw = strings.TrimSpace(gjson.GetBytes(body, "reasoning_effort").String())
 	}
-	normalized := normalizeOpenAIReasoningEffort(raw)
+	if raw == "" {
+		raw = strings.TrimSpace(gjson.GetBytes(body, "model_reasoning_effort").String())
+	}
+	if raw != "" {
+		normalized := normalizeOpenAIReasoningEffort(raw)
+		if normalized == "" {
+			return nil
+		}
+		return &normalized
+	}
+	normalized := deriveOpenAIReasoningEffortFromModel(requestedModel)
 	if normalized == "" {
 		return nil
 	}

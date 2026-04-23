@@ -172,8 +172,8 @@ func (s *GatewayService) ForwardAsChatCompletions(
 		return nil, fmt.Errorf("upstream error: %d %s", resp.StatusCode, upstreamMsg)
 	}
 
-	// 13. Extract reasoning effort from CC request body
-	reasoningEffort := extractCCReasoningEffortFromBody(body)
+	// 13. Extract reasoning effort from CC request body, falling back to model suffix.
+	reasoningEffort := extractCCReasoningEffortFromBody(body, originalModel)
 
 	// 14. Handle normal response
 	// Read Anthropic SSE → convert to Responses events → convert to CC format
@@ -190,16 +190,25 @@ func (s *GatewayService) ForwardAsChatCompletions(
 
 // extractCCReasoningEffortFromBody reads reasoning effort from a Chat Completions
 // request body. It checks both nested (reasoning.effort) and flat (reasoning_effort)
-// formats used by OpenAI-compatible clients.
-func extractCCReasoningEffortFromBody(body []byte) *string {
+// formats used by OpenAI-compatible clients, plus Codex's model_reasoning_effort.
+// If absent, it derives the effort from model suffixes such as gpt-5.5-high or
+// gpt-5.5-pro-xhigh.
+func extractCCReasoningEffortFromBody(body []byte, requestedModel string) *string {
 	raw := strings.TrimSpace(gjson.GetBytes(body, "reasoning.effort").String())
 	if raw == "" {
 		raw = strings.TrimSpace(gjson.GetBytes(body, "reasoning_effort").String())
 	}
 	if raw == "" {
-		return nil
+		raw = strings.TrimSpace(gjson.GetBytes(body, "model_reasoning_effort").String())
 	}
-	normalized := normalizeOpenAIReasoningEffort(raw)
+	if raw != "" {
+		normalized := normalizeOpenAIReasoningEffort(raw)
+		if normalized == "" {
+			return nil
+		}
+		return &normalized
+	}
+	normalized := deriveOpenAIReasoningEffortFromModel(requestedModel)
 	if normalized == "" {
 		return nil
 	}

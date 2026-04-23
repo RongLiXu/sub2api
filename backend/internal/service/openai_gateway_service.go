@@ -4994,8 +4994,12 @@ func getOpenAIReasoningEffortFromReqBody(reqBody map[string]any) (value string, 
 		}
 	}
 
-	// Fallback: some clients may use a flat field.
+	// Fallback: some clients may use flat fields. Codex config.toml uses
+	// model_reasoning_effort and may forward it through compatible clients.
 	if effort, ok := reqBody["reasoning_effort"].(string); ok {
+		return normalizeOpenAIReasoningEffort(effort), true
+	}
+	if effort, ok := reqBody["model_reasoning_effort"].(string); ok {
 		return normalizeOpenAIReasoningEffort(effort), true
 	}
 
@@ -5111,6 +5115,9 @@ func extractOpenAIReasoningEffortFromBody(body []byte, requestedModel string) *s
 	reasoningEffort := strings.TrimSpace(gjson.GetBytes(body, "reasoning.effort").String())
 	if reasoningEffort == "" {
 		reasoningEffort = strings.TrimSpace(gjson.GetBytes(body, "reasoning_effort").String())
+	}
+	if reasoningEffort == "" {
+		reasoningEffort = strings.TrimSpace(gjson.GetBytes(body, "model_reasoning_effort").String())
 	}
 	if reasoningEffort != "" {
 		normalized := normalizeOpenAIReasoningEffort(reasoningEffort)

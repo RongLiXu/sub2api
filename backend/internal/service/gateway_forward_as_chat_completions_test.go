@@ -18,19 +18,37 @@ func TestExtractCCReasoningEffortFromBody(t *testing.T) {
 	t.Parallel()
 
 	t.Run("nested reasoning.effort", func(t *testing.T) {
-		got := extractCCReasoningEffortFromBody([]byte(`{"reasoning":{"effort":"HIGH"}}`))
+		got := extractCCReasoningEffortFromBody([]byte(`{"reasoning":{"effort":"HIGH"}}`), "gpt-5.5-low")
 		require.NotNil(t, got)
 		require.Equal(t, "high", *got)
 	})
 
 	t.Run("flat reasoning_effort", func(t *testing.T) {
-		got := extractCCReasoningEffortFromBody([]byte(`{"reasoning_effort":"x-high"}`))
+		got := extractCCReasoningEffortFromBody([]byte(`{"reasoning_effort":"x-high"}`), "")
+		require.NotNil(t, got)
+		require.Equal(t, "xhigh", *got)
+	})
+
+	t.Run("codex model_reasoning_effort", func(t *testing.T) {
+		got := extractCCReasoningEffortFromBody([]byte(`{"model":"gpt-5.","model_reasoning_effort":"high"}`), "gpt-5.")
+		require.NotNil(t, got)
+		require.Equal(t, "high", *got)
+	})
+
+	t.Run("derive from gpt-5.5 model suffix", func(t *testing.T) {
+		got := extractCCReasoningEffortFromBody([]byte(`{"model":"gpt-5.5-high"}`), "gpt-5.5-high")
+		require.NotNil(t, got)
+		require.Equal(t, "high", *got)
+	})
+
+	t.Run("derive from gpt-5.5-pro model suffix", func(t *testing.T) {
+		got := extractCCReasoningEffortFromBody([]byte(`{"model":"gpt-5.5-pro-xhigh"}`), "gpt-5.5-pro-xhigh")
 		require.NotNil(t, got)
 		require.Equal(t, "xhigh", *got)
 	})
 
 	t.Run("missing effort", func(t *testing.T) {
-		require.Nil(t, extractCCReasoningEffortFromBody([]byte(`{"model":"gpt-5"}`)))
+		require.Nil(t, extractCCReasoningEffortFromBody([]byte(`{"model":"gpt-5"}`), "gpt-5"))
 	})
 }
 

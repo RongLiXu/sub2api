@@ -7,6 +7,17 @@ import (
 
 var codexModelMap = map[string]string{
 	"gpt-5.5":                    "gpt-5.5",
+	"gpt-5.5-none":               "gpt-5.5",
+	"gpt-5.5-low":                "gpt-5.5",
+	"gpt-5.5-medium":             "gpt-5.5",
+	"gpt-5.5-high":               "gpt-5.5",
+	"gpt-5.5-xhigh":              "gpt-5.5",
+	"gpt-5.5-pro":                "gpt-5.5-pro",
+	"gpt-5.5-pro-none":           "gpt-5.5-pro",
+	"gpt-5.5-pro-low":            "gpt-5.5-pro",
+	"gpt-5.5-pro-medium":         "gpt-5.5-pro",
+	"gpt-5.5-pro-high":           "gpt-5.5-pro",
+	"gpt-5.5-pro-xhigh":          "gpt-5.5-pro",
 	"gpt-5.4":                    "gpt-5.4",
 	"gpt-5.4-mini":               "gpt-5.4-mini",
 	"gpt-5.4-none":               "gpt-5.4",

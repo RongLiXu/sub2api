@@ -17,11 +17,19 @@ import (
 func TestExtractResponsesReasoningEffortFromBody(t *testing.T) {
 	t.Parallel()
 
-	got := ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"claude-sonnet-4.5","reasoning":{"effort":"HIGH"}}`))
+	got := ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"claude-sonnet-4.5","reasoning":{"effort":"HIGH"}}`), "gpt-5.5-low")
 	require.NotNil(t, got)
 	require.Equal(t, "high", *got)
 
-	require.Nil(t, ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"claude-sonnet-4.5"}`)))
+	got = ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"gpt-5.5-pro-xhigh"}`), "gpt-5.5-pro-xhigh")
+	require.NotNil(t, got)
+	require.Equal(t, "xhigh", *got)
+
+	got = ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"gpt-5.","model_reasoning_effort":"high"}`), "gpt-5.")
+	require.NotNil(t, got)
+	require.Equal(t, "high", *got)
+
+	require.Nil(t, ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"claude-sonnet-4.5"}`), "claude-sonnet-4.5"))
 }
 
 func TestHandleResponsesBufferedStreamingResponse_PreservesMessageStartCacheUsage(t *testing.T) {
