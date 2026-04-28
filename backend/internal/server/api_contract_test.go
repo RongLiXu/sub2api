@@ -529,6 +529,7 @@ func TestAPIContracts(t *testing.T) {
 								"request_id": "req_123",
 								"model": "claude-3",
 								"request_type": "stream",
+								"service_tier_multiplier": 1,
 								"openai_ws_mode": false,
 								"group_id": null,
 								"subscription_id": null,
