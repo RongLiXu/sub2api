@@ -10,7 +10,7 @@ docker run -d \
   -p 8080:8080 \
   -e DATABASE_URL="postgres://user:pass@host:5432/sub2api" \
   -e REDIS_URL="redis://host:6379" \
-  weishaw/sub2api:latest
+  {{DOCKERHUB_IMAGE}}:latest
 ```
 
 ## Docker Compose
@@ -20,7 +20,7 @@ version: '3.8'
 
 services:
   sub2api:
-    image: weishaw/sub2api:latest
+    image: {{DOCKERHUB_IMAGE}}:latest
     ports:
       - "8080:8080"
     environment:
@@ -31,7 +31,7 @@ services:
       - redis
 
   db:
-    image: postgres:15-alpine
+    image: postgres:18-alpine
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -40,7 +40,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     volumes:
       - redis_data:/data
 
@@ -72,5 +72,5 @@ volumes:
 
 ## Links
 
-- [GitHub Repository](https://github.com/weishaw/sub2api)
-- [Documentation](https://github.com/weishaw/sub2api#readme)
+- [GitHub Repository](https://github.com/{{GITHUB_REPOSITORY}})
+- [Documentation](https://github.com/{{GITHUB_REPOSITORY}}#readme)

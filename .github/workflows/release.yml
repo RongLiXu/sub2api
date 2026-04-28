@@ -87,6 +87,8 @@ jobs:
   release:
     needs: [update-version, build-frontend]
     runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -185,6 +187,24 @@ jobs:
           GITHUB_REPO_NAME: ${{ github.event.repository.name }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME || 'skip' }}
 
+      - name: Render DockerHub description
+        if: ${{ env.SIMPLE_RELEASE != 'true' && env.DOCKERHUB_USERNAME != '' }}
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          GITHUB_REPO_OWNER_LOWER: ${{ steps.lowercase.outputs.owner }}
+          GITHUB_REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          DOCKERHUB_IMAGE="${DOCKERHUB_USERNAME}/sub2api"
+          GHCR_IMAGE="ghcr.io/${GITHUB_REPO_OWNER_LOWER}/${GITHUB_REPO_NAME}"
+          GITHUB_REPOSITORY="${{ github.repository }}"
+
+          cp deploy/DOCKER.md deploy/DOCKER.rendered.md
+          sed -i \
+            -e "s|{{DOCKERHUB_IMAGE}}|${DOCKERHUB_IMAGE}|g" \
+            -e "s|{{GHCR_IMAGE}}|${GHCR_IMAGE}|g" \
+            -e "s|{{GITHUB_REPOSITORY}}|${GITHUB_REPOSITORY}|g" \
+            deploy/DOCKER.rendered.md
+
       # Update DockerHub description
       - name: Update DockerHub description
         if: ${{ env.SIMPLE_RELEASE != 'true' && env.DOCKERHUB_USERNAME != '' }}
@@ -196,7 +216,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/sub2api
           short-description: "Sub2API - AI API Gateway Platform"
-          readme-filepath: ./deploy/DOCKER.md
+          readme-filepath: ./deploy/DOCKER.rendered.md
 
       # Send Telegram notification
       - name: Send Telegram Notification
