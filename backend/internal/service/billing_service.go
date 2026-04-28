@@ -67,7 +67,11 @@ const (
 )
 
 func normalizeBillingServiceTier(serviceTier string) string {
-	return strings.ToLower(strings.TrimSpace(serviceTier))
+	value := strings.ToLower(strings.TrimSpace(serviceTier))
+	if value == "fast" {
+		return "priority"
+	}
+	return value
 }
 
 func usePriorityServiceTierPricing(serviceTier string, pricing *ModelPricing) bool {
@@ -628,23 +632,83 @@ func (s *BillingService) applyModelSpecificPricingPolicy(model string, pricing *
 	if pricing == nil {
 		return nil
 	}
-	if !isOpenAIGPT54Model(model) {
+
+	normalizedModel, ok := normalizeOpenAIGPT5BillingModel(model)
+	if !ok {
 		return pricing
 	}
-	if pricing.LongContextInputThreshold > 0 && pricing.LongContextInputMultiplier > 0 && pricing.LongContextOutputMultiplier > 0 {
+
+	adjusted := pricing
+	if normalizedModel == "gpt-5.5" {
+		adjusted = ensureOpenAIGPT55PriorityPricing(adjusted)
+	}
+
+	threshold, inputMultiplier, outputMultiplier, ok := openAIGPT5LongContextPolicy(normalizedModel)
+	if !ok {
+		return adjusted
+	}
+	if adjusted.LongContextInputThreshold > 0 && adjusted.LongContextInputMultiplier > 0 && adjusted.LongContextOutputMultiplier > 0 {
+		return adjusted
+	}
+
+	cloned := *adjusted
+	if cloned.LongContextInputThreshold <= 0 {
+		cloned.LongContextInputThreshold = threshold
+	}
+	if cloned.LongContextInputMultiplier <= 0 {
+		cloned.LongContextInputMultiplier = inputMultiplier
+	}
+	if cloned.LongContextOutputMultiplier <= 0 {
+		cloned.LongContextOutputMultiplier = outputMultiplier
+	}
+	return &cloned
+}
+
+func ensureOpenAIGPT55PriorityPricing(pricing *ModelPricing) *ModelPricing {
+	if pricing == nil {
+		return nil
+	}
+	if pricing.InputPricePerTokenPriority > 0 && pricing.OutputPricePerTokenPriority > 0 && pricing.CacheReadPricePerTokenPriority > 0 {
 		return pricing
 	}
 	cloned := *pricing
-	if cloned.LongContextInputThreshold <= 0 {
-		cloned.LongContextInputThreshold = openAIGPT54LongContextInputThreshold
+	if cloned.InputPricePerTokenPriority <= 0 {
+		cloned.InputPricePerTokenPriority = 12.5e-6 // $12.5 per MTok
 	}
-	if cloned.LongContextInputMultiplier <= 0 {
-		cloned.LongContextInputMultiplier = openAIGPT54LongContextInputMultiplier
+	if cloned.OutputPricePerTokenPriority <= 0 {
+		cloned.OutputPricePerTokenPriority = 75e-6 // $75 per MTok
 	}
-	if cloned.LongContextOutputMultiplier <= 0 {
-		cloned.LongContextOutputMultiplier = openAIGPT54LongContextOutputMultiplier
+	if cloned.CacheReadPricePerTokenPriority <= 0 {
+		cloned.CacheReadPricePerTokenPriority = 1.25e-6 // $1.25 per MTok
 	}
 	return &cloned
+}
+
+func normalizeOpenAIGPT5BillingModel(model string) (string, bool) {
+	trimmed := strings.TrimSpace(strings.ToLower(model))
+	// 仅当模型字符串实际属于 GPT-5/Codex 族时才做归一判定，避免 normalizeCodexModel
+	// 的默认兜底把非 OpenAI 模型（claude-*、gemini-*、gpt-4o）误识别为 gpt-5.4。
+	if !strings.Contains(trimmed, "gpt-5") && !strings.Contains(trimmed, "codex") {
+		return "", false
+	}
+	normalized := normalizeCodexModel(trimmed)
+	switch normalized {
+	case "gpt-5.4", "gpt-5.5", "gpt-5.5-pro":
+		return normalized, true
+	default:
+		return normalized, false
+	}
+}
+
+func openAIGPT5LongContextPolicy(normalizedModel string) (threshold int, inputMultiplier, outputMultiplier float64, ok bool) {
+	switch normalizedModel {
+	case "gpt-5.4":
+		return openAIGPT54LongContextInputThreshold, openAIGPT54LongContextInputMultiplier, openAIGPT54LongContextOutputMultiplier, true
+	case "gpt-5.5", "gpt-5.5-pro":
+		return openAIGPT55LongContextInputThreshold, openAIGPT54LongContextInputMultiplier, openAIGPT54LongContextOutputMultiplier, true
+	default:
+		return 0, 0, 0, false
+	}
 }
 
 func (s *BillingService) shouldApplySessionLongContextPricing(tokens UsageTokens, pricing *ModelPricing) bool {

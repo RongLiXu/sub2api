@@ -155,6 +155,55 @@ func TestGetModelPricing_OpenAIGPT55Fallback(t *testing.T) {
 	require.InDelta(t, 1.5, pricing.LongContextOutputMultiplier, 1e-12)
 }
 
+func TestGetModelPricing_OpenAIGPT55DynamicPricingCompletesMissingPriority(t *testing.T) {
+	pricingSvc := &PricingService{
+		pricingData: map[string]*LiteLLMModelPricing{
+			"gpt-5.5": {
+				InputCostPerToken:       5e-6,
+				OutputCostPerToken:      30e-6,
+				CacheReadInputTokenCost: 0.5e-6,
+				LiteLLMProvider:         "openai",
+				Mode:                    "chat",
+			},
+		},
+	}
+	svc := NewBillingService(&config.Config{}, pricingSvc)
+
+	pricing, err := svc.GetModelPricing("gpt-5.5")
+	require.NoError(t, err)
+	require.NotNil(t, pricing)
+	require.InDelta(t, 5e-6, pricing.InputPricePerToken, 1e-12)
+	require.InDelta(t, 12.5e-6, pricing.InputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 30e-6, pricing.OutputPricePerToken, 1e-12)
+	require.InDelta(t, 75e-6, pricing.OutputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 0.5e-6, pricing.CacheReadPricePerToken, 1e-12)
+	require.InDelta(t, 1.25e-6, pricing.CacheReadPricePerTokenPriority, 1e-12)
+	require.Equal(t, 400000, pricing.LongContextInputThreshold)
+}
+
+func TestCalculateCost_OpenAIGPT55DynamicPricingFastUsesOfficialPriority(t *testing.T) {
+	pricingSvc := &PricingService{
+		pricingData: map[string]*LiteLLMModelPricing{
+			"gpt-5.5": {
+				InputCostPerToken:       5e-6,
+				OutputCostPerToken:      30e-6,
+				CacheReadInputTokenCost: 0.5e-6,
+				LiteLLMProvider:         "openai",
+				Mode:                    "chat",
+			},
+		},
+	}
+	svc := NewBillingService(&config.Config{}, pricingSvc)
+	tokens := UsageTokens{InputTokens: 100, OutputTokens: 50, CacheReadTokens: 20}
+
+	standardCost, err := svc.CalculateCostWithServiceTier("gpt-5.5", tokens, 1, "standard")
+	require.NoError(t, err)
+	fastCost, err := svc.CalculateCostWithServiceTier("gpt-5.5", tokens, 1, "fast")
+	require.NoError(t, err)
+
+	require.InDelta(t, standardCost.TotalCost*2.5, fastCost.TotalCost, 1e-12)
+}
+
 func TestGetModelPricing_OpenAIGPT55ProFallback(t *testing.T) {
 	svc := newTestBillingService()
 
