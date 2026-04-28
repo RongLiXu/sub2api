@@ -722,16 +722,16 @@ func (s *BillingService) shouldApplySessionLongContextPricing(tokens UsageTokens
 	return totalInputTokens > pricing.LongContextInputThreshold
 }
 
-func isOpenAIGPT54Model(model string) bool {
-	trimmed := strings.TrimSpace(strings.ToLower(model))
-	// 仅当模型字符串实际属于 GPT-5/Codex 族时才做归一判定，避免 normalizeCodexModel
-	// 的默认兜底把非 OpenAI 模型（claude-*、gemini-*、gpt-4o）误识别为 gpt-5.4。
-	if !strings.Contains(trimmed, "gpt-5") && !strings.Contains(trimmed, "codex") {
-		return false
-	}
-	normalized := normalizeCodexModel(trimmed)
-	return normalized == "gpt-5.4" || normalized == "gpt-5.5" || normalized == "gpt-5.5-pro"
-}
+// func isOpenAIGPT54Model(model string) bool {
+// 	trimmed := strings.TrimSpace(strings.ToLower(model))
+// 	// 仅当模型字符串实际属于 GPT-5/Codex 族时才做归一判定，避免 normalizeCodexModel
+// 	// 的默认兜底把非 OpenAI 模型（claude-*、gemini-*、gpt-4o）误识别为 gpt-5.4。
+// 	if !strings.Contains(trimmed, "gpt-5") && !strings.Contains(trimmed, "codex") {
+// 		return false
+// 	}
+// 	normalized := normalizeCodexModel(trimmed)
+// 	return normalized == "gpt-5.4" || normalized == "gpt-5.5" || normalized == "gpt-5.5-pro"
+// }
 
 // CalculateCostWithConfig 使用配置中的默认倍率计算费用
 func (s *BillingService) CalculateCostWithConfig(model string, tokens UsageTokens) (*CostBreakdown, error) {
