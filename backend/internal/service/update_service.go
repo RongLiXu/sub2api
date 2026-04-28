@@ -279,7 +279,8 @@ func (s *UpdateService) fetchLatestRelease(ctx context.Context) (*UpdateInfo, er
 		return nil, err
 	}
 
-	latestVersion := strings.TrimPrefix(release.TagName, "v")
+	latestVersion := normalizeVersionForDisplay(release.TagName)
+	hasUpdate := compareVersions(s.currentVersion, latestVersion) < 0
 
 	assets := make([]Asset, len(release.Assets))
 	for i, a := range release.Assets {
@@ -292,8 +293,8 @@ func (s *UpdateService) fetchLatestRelease(ctx context.Context) (*UpdateInfo, er
 
 	return &UpdateInfo{
 		CurrentVersion: s.currentVersion,
-		LatestVersion:  latestVersion,
-		HasUpdate:      compareVersions(s.currentVersion, latestVersion) < 0,
+		LatestVersion:  displayLatestVersion(s.currentVersion, latestVersion),
+		HasUpdate:      hasUpdate,
 		ReleaseInfo: &ReleaseInfo{
 			Name:        release.Name,
 			Body:        release.Body,
@@ -488,7 +489,7 @@ func (s *UpdateService) getFromCache(ctx context.Context) (*UpdateInfo, error) {
 
 	return &UpdateInfo{
 		CurrentVersion: s.currentVersion,
-		LatestVersion:  cached.Latest,
+		LatestVersion:  displayLatestVersion(s.currentVersion, cached.Latest),
 		HasUpdate:      compareVersions(s.currentVersion, cached.Latest) < 0,
 		ReleaseInfo:    cached.ReleaseInfo,
 		Cached:         true,
@@ -511,30 +512,103 @@ func (s *UpdateService) saveToCache(ctx context.Context, info *UpdateInfo) {
 	_ = s.cache.SetUpdateInfo(ctx, string(data), time.Duration(updateCacheTTL)*time.Second)
 }
 
-// compareVersions compares two semantic versions
+type parsedVersion struct {
+	major    int
+	minor    int
+	patch    int
+	revision int
+}
+
+// compareVersions compares release versions.
+// The project uses tags like v0.1.119-r1 for release revisions; those should be
+// treated as newer than their base tag v0.1.119.
 func compareVersions(current, latest string) int {
 	currentParts := parseVersion(current)
 	latestParts := parseVersion(latest)
 
-	for i := 0; i < 3; i++ {
-		if currentParts[i] < latestParts[i] {
-			return -1
-		}
-		if currentParts[i] > latestParts[i] {
+	if currentParts.major != latestParts.major {
+		if currentParts.major > latestParts.major {
 			return 1
 		}
+		return -1
+	}
+	if currentParts.minor != latestParts.minor {
+		if currentParts.minor > latestParts.minor {
+			return 1
+		}
+		return -1
+	}
+	if currentParts.patch != latestParts.patch {
+		if currentParts.patch > latestParts.patch {
+			return 1
+		}
+		return -1
+	}
+	if currentParts.revision != latestParts.revision {
+		if currentParts.revision > latestParts.revision {
+			return 1
+		}
+		return -1
 	}
 	return 0
 }
 
-func parseVersion(v string) [3]int {
-	v = strings.TrimPrefix(v, "v")
-	parts := strings.Split(v, ".")
-	result := [3]int{0, 0, 0}
-	for i := 0; i < len(parts) && i < 3; i++ {
-		if parsed, err := strconv.Atoi(parts[i]); err == nil {
-			result[i] = parsed
-		}
+func parseVersion(v string) parsedVersion {
+	v = strings.TrimSpace(v)
+	v = strings.TrimPrefix(strings.TrimPrefix(v, "v"), "V")
+	if beforeMeta, _, ok := strings.Cut(v, "+"); ok {
+		v = beforeMeta
 	}
+
+	core, suffix, _ := strings.Cut(v, "-")
+	parts := strings.Split(core, ".")
+	result := parsedVersion{}
+	if len(parts) > 0 {
+		result.major = parseLeadingInt(parts[0])
+	}
+	if len(parts) > 1 {
+		result.minor = parseLeadingInt(parts[1])
+	}
+	if len(parts) > 2 {
+		result.patch = parseLeadingInt(parts[2])
+	}
+
+	result.revision = parseReleaseRevision(suffix)
 	return result
+}
+
+func parseReleaseRevision(suffix string) int {
+	suffix = strings.ToLower(strings.TrimSpace(suffix))
+	if !strings.HasPrefix(suffix, "r") {
+		return 0
+	}
+	return parseLeadingInt(strings.TrimPrefix(suffix, "r"))
+}
+
+func parseLeadingInt(s string) int {
+	var end int
+	for end < len(s) && s[end] >= '0' && s[end] <= '9' {
+		end++
+	}
+	if end == 0 {
+		return 0
+	}
+	parsed, err := strconv.Atoi(s[:end])
+	if err != nil {
+		return 0
+	}
+	return parsed
+}
+
+func displayLatestVersion(current, latest string) string {
+	if compareVersions(current, latest) > 0 {
+		return normalizeVersionForDisplay(current)
+	}
+	return normalizeVersionForDisplay(latest)
+}
+
+func normalizeVersionForDisplay(v string) string {
+	v = strings.TrimSpace(v)
+	v = strings.TrimPrefix(strings.TrimPrefix(v, "v"), "V")
+	return v
 }
