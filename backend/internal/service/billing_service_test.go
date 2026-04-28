@@ -529,6 +529,42 @@ func TestCalculateCostWithServiceTier_FlexAppliesHalfMultiplier(t *testing.T) {
 	require.InDelta(t, baseCost.TotalCost*0.5, flexCost.TotalCost, 1e-10)
 }
 
+func TestUsageService_ServiceTierDisplayMultiplierUsesBillingPricing(t *testing.T) {
+	billingSvc := newTestBillingService()
+	usageSvc := NewUsageService(nil, nil, nil, nil, billingSvc)
+
+	priority := "priority"
+	flex := "flex"
+
+	gpt55Multiplier := usageSvc.calculateServiceTierDisplayMultiplier(&UsageLog{
+		Model:           "gpt-5.5",
+		ServiceTier:     &priority,
+		InputTokens:     100,
+		OutputTokens:    50,
+		CacheReadTokens: 20,
+	})
+	require.NotNil(t, gpt55Multiplier)
+	require.InDelta(t, 2.5, *gpt55Multiplier, 1e-12)
+
+	gpt54Multiplier := usageSvc.calculateServiceTierDisplayMultiplier(&UsageLog{
+		Model:        "gpt-5.4",
+		ServiceTier:  &priority,
+		InputTokens:  100,
+		OutputTokens: 50,
+	})
+	require.NotNil(t, gpt54Multiplier)
+	require.InDelta(t, 2.0, *gpt54Multiplier, 1e-12)
+
+	flexMultiplier := usageSvc.calculateServiceTierDisplayMultiplier(&UsageLog{
+		Model:        "gpt-5.4",
+		ServiceTier:  &flex,
+		InputTokens:  100,
+		OutputTokens: 50,
+	})
+	require.NotNil(t, flexMultiplier)
+	require.InDelta(t, 0.5, *flexMultiplier, 1e-12)
+}
+
 func TestCalculateCostWithServiceTier_Gpt54MiniPriorityFallsBackToTierMultiplier(t *testing.T) {
 	svc := newTestBillingService()
 	tokens := UsageTokens{InputTokens: 120, OutputTokens: 30, CacheCreationTokens: 12, CacheReadTokens: 8}

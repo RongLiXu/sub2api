@@ -850,6 +850,7 @@ export default {
     serviceTierPriority: 'Fast',
     serviceTierFlex: 'Flex',
     serviceTierStandard: 'Standard',
+    userRate: '用户倍率',
     rate: '倍率',
     original: '原始',
     billed: '计费',

@@ -114,6 +114,9 @@ type UsageLog struct {
 	BillingMode *string
 	// ServiceTier records the OpenAI service tier used for billing, e.g. "priority" / "flex".
 	ServiceTier *string
+	// ServiceTierMultiplier is the effective cost multiplier of ServiceTier versus standard pricing.
+	// It is computed for API display and is not persisted.
+	ServiceTierMultiplier *float64
 	// ReasoningEffort is the request's reasoning effort level.
 	// OpenAI: "low" / "medium" / "high" / "xhigh"; Claude: "low" / "medium" / "high" / "max".
 	// Nil means not provided / not applicable.

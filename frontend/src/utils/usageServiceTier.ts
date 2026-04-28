@@ -23,3 +23,20 @@ export function getUsageServiceTierLabel(
   if (tier === 'standard') return translate('usage.serviceTierStandard')
   return tier
 }
+
+export function getUsageServiceTierMultiplier(
+  serviceTier: string | null | undefined,
+  model?: string | null,
+): number {
+  const tier = formatUsageServiceTier(serviceTier)
+  if (tier === 'flex') return 0.5
+  if (tier !== 'priority') return 1
+
+  return isGPT55StandardFamily(model) ? 2.5 : 2
+}
+
+function isGPT55StandardFamily(model?: string | null): boolean {
+  const normalized = model?.trim().toLowerCase().replace(/[\s_]+/g, '-') ?? ''
+  if (normalized === 'gpt-5.5') return true
+  return normalized.startsWith('gpt-5.5-') && !normalized.startsWith('gpt-5.5-pro')
+}

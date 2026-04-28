@@ -58,15 +58,17 @@ type UsageService struct {
 	userRepo             UserRepository
 	entClient            *dbent.Client
 	authCacheInvalidator APIKeyAuthCacheInvalidator
+	billingService       *BillingService
 }
 
 // NewUsageService 创建使用统计服务实例
-func NewUsageService(usageRepo UsageLogRepository, userRepo UserRepository, entClient *dbent.Client, authCacheInvalidator APIKeyAuthCacheInvalidator) *UsageService {
+func NewUsageService(usageRepo UsageLogRepository, userRepo UserRepository, entClient *dbent.Client, authCacheInvalidator APIKeyAuthCacheInvalidator, billingService *BillingService) *UsageService {
 	return &UsageService{
 		usageRepo:            usageRepo,
 		userRepo:             userRepo,
 		entClient:            entClient,
 		authCacheInvalidator: authCacheInvalidator,
+		billingService:       billingService,
 	}
 }
 
@@ -152,6 +154,7 @@ func (s *UsageService) GetByID(ctx context.Context, id int64) (*UsageLog, error)
 	if err != nil {
 		return nil, fmt.Errorf("get usage log: %w", err)
 	}
+	s.enrichUsageLogServiceTierMultiplier(log)
 	return log, nil
 }
 
@@ -161,6 +164,7 @@ func (s *UsageService) ListByUser(ctx context.Context, userID int64, params pagi
 	if err != nil {
 		return nil, nil, fmt.Errorf("list usage logs: %w", err)
 	}
+	s.enrichUsageLogsServiceTierMultiplier(logs)
 	return logs, pagination, nil
 }
 
@@ -170,6 +174,7 @@ func (s *UsageService) ListByAPIKey(ctx context.Context, apiKeyID int64, params 
 	if err != nil {
 		return nil, nil, fmt.Errorf("list usage logs: %w", err)
 	}
+	s.enrichUsageLogsServiceTierMultiplier(logs)
 	return logs, pagination, nil
 }
 
@@ -179,6 +184,7 @@ func (s *UsageService) ListByAccount(ctx context.Context, accountID int64, param
 	if err != nil {
 		return nil, nil, fmt.Errorf("list usage logs: %w", err)
 	}
+	s.enrichUsageLogsServiceTierMultiplier(logs)
 	return logs, pagination, nil
 }
 
@@ -339,7 +345,72 @@ func (s *UsageService) ListWithFilters(ctx context.Context, params pagination.Pa
 	if err != nil {
 		return nil, nil, fmt.Errorf("list usage logs with filters: %w", err)
 	}
+	s.enrichUsageLogsServiceTierMultiplier(logs)
 	return logs, result, nil
+}
+
+func (s *UsageService) enrichUsageLogsServiceTierMultiplier(logs []UsageLog) {
+	for i := range logs {
+		s.enrichUsageLogServiceTierMultiplier(&logs[i])
+	}
+}
+
+func (s *UsageService) enrichUsageLogServiceTierMultiplier(log *UsageLog) {
+	if log == nil {
+		return
+	}
+	multiplier := s.calculateServiceTierDisplayMultiplier(log)
+	if multiplier != nil {
+		log.ServiceTierMultiplier = multiplier
+	}
+}
+
+func (s *UsageService) calculateServiceTierDisplayMultiplier(log *UsageLog) *float64 {
+	serviceTier := ""
+	if log.ServiceTier != nil {
+		serviceTier = *log.ServiceTier
+	}
+	normalizedTier := normalizeBillingServiceTier(serviceTier)
+	switch normalizedTier {
+	case "", "default", "standard":
+		return float64Ptr(1)
+	case "flex":
+		return float64Ptr(serviceTierCostMultiplier(normalizedTier))
+	case "priority":
+		if s.billingService == nil {
+			return float64Ptr(serviceTierCostMultiplier(normalizedTier))
+		}
+	default:
+		return nil
+	}
+
+	model := log.Model
+	if model == "" {
+		model = log.RequestedModel
+	}
+	if model == "" {
+		return float64Ptr(serviceTierCostMultiplier(normalizedTier))
+	}
+
+	tokens := UsageTokens{
+		InputTokens:           log.InputTokens,
+		OutputTokens:          log.OutputTokens,
+		CacheCreationTokens:   log.CacheCreationTokens,
+		CacheReadTokens:       log.CacheReadTokens,
+		CacheCreation5mTokens: log.CacheCreation5mTokens,
+		CacheCreation1hTokens: log.CacheCreation1hTokens,
+		ImageOutputTokens:     log.ImageOutputTokens,
+	}
+
+	standardCost, err := s.billingService.CalculateCostWithServiceTier(model, tokens, 1, "standard")
+	if err != nil || standardCost == nil || standardCost.TotalCost <= 0 {
+		return float64Ptr(serviceTierCostMultiplier(normalizedTier))
+	}
+	tierCost, err := s.billingService.CalculateCostWithServiceTier(model, tokens, 1, normalizedTier)
+	if err != nil || tierCost == nil {
+		return float64Ptr(serviceTierCostMultiplier(normalizedTier))
+	}
+	return float64Ptr(tierCost.TotalCost / standardCost.TotalCost)
 }
 
 // GetGlobalStats returns global usage stats for a time range.

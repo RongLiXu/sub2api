@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatUsageServiceTier, getUsageServiceTierLabel, normalizeUsageServiceTier } from '@/utils/usageServiceTier'
+import {
+  formatUsageServiceTier,
+  getUsageServiceTierLabel,
+  getUsageServiceTierMultiplier,
+  normalizeUsageServiceTier,
+} from '@/utils/usageServiceTier'
 
 describe('usageServiceTier utils', () => {
   it('normalizes fast/default aliases', () => {
@@ -35,5 +40,15 @@ describe('usageServiceTier utils', () => {
     expect(getUsageServiceTierLabel('flex', translate)).toBe('Flex')
     expect(getUsageServiceTierLabel(undefined, translate)).toBe('Standard')
     expect(getUsageServiceTierLabel('custom-tier', translate)).toBe('custom-tier')
+  })
+
+  it('returns display multipliers for service tier pricing', () => {
+    expect(getUsageServiceTierMultiplier('priority', 'gpt-5.5')).toBe(2.5)
+    expect(getUsageServiceTierMultiplier('fast', 'gpt-5.5-high')).toBe(2.5)
+    expect(getUsageServiceTierMultiplier('priority', 'gpt-5.5-pro')).toBe(2)
+    expect(getUsageServiceTierMultiplier('priority', 'gpt-5.4')).toBe(2)
+    expect(getUsageServiceTierMultiplier('flex', 'gpt-5.4')).toBe(0.5)
+    expect(getUsageServiceTierMultiplier('standard', 'gpt-5.4')).toBe(1)
+    expect(getUsageServiceTierMultiplier(undefined, 'gpt-5.4')).toBe(1)
   })
 })

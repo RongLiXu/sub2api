@@ -846,6 +846,7 @@ export default {
     serviceTierPriority: 'Fast',
     serviceTierFlex: 'Flex',
     serviceTierStandard: 'Standard',
+    userRate: 'User rate',
     rate: 'Rate',
     original: 'Original',
     billed: 'Billed',

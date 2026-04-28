@@ -79,10 +79,12 @@ func TestUsageLogFromService_IncludesServiceTierForUserAndAdmin(t *testing.T) {
 	serviceTier := "priority"
 	inboundEndpoint := "/v1/chat/completions"
 	upstreamEndpoint := "/v1/responses"
+	serviceTierMultiplier := 2.5
 	log := &service.UsageLog{
 		RequestID:             "req_3",
 		Model:                 "gpt-5.4",
 		ServiceTier:           &serviceTier,
+		ServiceTierMultiplier: &serviceTierMultiplier,
 		InboundEndpoint:       &inboundEndpoint,
 		UpstreamEndpoint:      &upstreamEndpoint,
 		AccountRateMultiplier: f64Ptr(1.5),
@@ -93,12 +95,16 @@ func TestUsageLogFromService_IncludesServiceTierForUserAndAdmin(t *testing.T) {
 
 	require.NotNil(t, userDTO.ServiceTier)
 	require.Equal(t, serviceTier, *userDTO.ServiceTier)
+	require.NotNil(t, userDTO.ServiceTierMultiplier)
+	require.InDelta(t, serviceTierMultiplier, *userDTO.ServiceTierMultiplier, 1e-12)
 	require.NotNil(t, userDTO.InboundEndpoint)
 	require.Equal(t, inboundEndpoint, *userDTO.InboundEndpoint)
 	require.NotNil(t, userDTO.UpstreamEndpoint)
 	require.Equal(t, upstreamEndpoint, *userDTO.UpstreamEndpoint)
 	require.NotNil(t, adminDTO.ServiceTier)
 	require.Equal(t, serviceTier, *adminDTO.ServiceTier)
+	require.NotNil(t, adminDTO.ServiceTierMultiplier)
+	require.InDelta(t, serviceTierMultiplier, *adminDTO.ServiceTierMultiplier, 1e-12)
 	require.NotNil(t, adminDTO.InboundEndpoint)
 	require.Equal(t, inboundEndpoint, *adminDTO.InboundEndpoint)
 	require.NotNil(t, adminDTO.UpstreamEndpoint)

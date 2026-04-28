@@ -17,6 +17,7 @@ const messages: Record<string, string> = {
   'usage.serviceTierPriority': 'Fast',
   'usage.serviceTierFlex': 'Flex',
   'usage.serviceTierStandard': 'Standard',
+  'usage.userRate': 'User rate',
   'usage.rate': 'Rate',
   'usage.accountMultiplier': 'Account rate',
   'usage.original': 'Original',
@@ -69,6 +70,8 @@ describe('admin UsageTable tooltip', () => {
       account_rate_multiplier: 1,
       rate_multiplier: 1,
       service_tier: 'priority',
+      service_tier_multiplier: 2.5,
+      model: 'gpt-5.5',
       input_cost: 0.020285,
       output_cost: 0.00303,
       cache_creation_cost: 0,
@@ -100,6 +103,8 @@ describe('admin UsageTable tooltip', () => {
     expect(text).toContain('Service tier')
     expect(text).toContain('Fast')
     expect(text).toContain('Rate')
+    expect(text).toContain('2.50x')
+    expect(text).toContain('User rate')
     expect(text).toContain('1.00x')
     expect(text).toContain('Account rate')
     expect(text).toContain('User billed')

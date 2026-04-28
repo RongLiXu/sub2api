@@ -9,6 +9,7 @@ describe('usage service tier locale keys', () => {
     expect(zh.usage.serviceTierPriority).toBe('Fast')
     expect(zh.usage.serviceTierFlex).toBe('Flex')
     expect(zh.usage.serviceTierStandard).toBe('Standard')
+    expect(zh.usage.userRate).toBe('用户倍率')
   })
 
   it('contains en labels for service tier tooltip', () => {
@@ -16,5 +17,6 @@ describe('usage service tier locale keys', () => {
     expect(en.usage.serviceTierPriority).toBe('Fast')
     expect(en.usage.serviceTierFlex).toBe('Flex')
     expect(en.usage.serviceTierStandard).toBe('Standard')
+    expect(en.usage.userRate).toBe('User rate')
   })
 })
