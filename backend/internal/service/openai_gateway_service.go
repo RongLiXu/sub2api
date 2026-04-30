@@ -3098,9 +3098,9 @@ func (s *OpenAIGatewayService) buildUpstreamRequestOpenAIPassthrough(
 		}
 	}
 
-	// if account.Type == AccountTypeAPIKey {
-	// 	applyOpenAIAPIKeySessionHeaders(req, c, strings.TrimSpace(gjson.GetBytes(body, "prompt_cache_key").String()))
-	// }
+	if account.Type == AccountTypeAPIKey {
+		applyOpenAIAPIKeySessionHeaders(req, c, strings.TrimSpace(gjson.GetBytes(body, "prompt_cache_key").String()))
+	}
 
 	// 透传模式也支持账户自定义 User-Agent 与 ForceCodexCLI 兜底。
 	customUA := account.GetOpenAIUserAgent()
