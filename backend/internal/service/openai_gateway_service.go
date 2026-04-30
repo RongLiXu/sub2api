@@ -4982,7 +4982,7 @@ func normalizeOpenAICompactRequestBody(body []byte) ([]byte, bool, error) {
 		"parallel_tool_calls",
 		"reasoning",
 		"text",
-		"previous_response_id", 
+		"previous_response_id",
 		"prompt_cache_key",
 	} {
 		value := gjson.GetBytes(body, field)
