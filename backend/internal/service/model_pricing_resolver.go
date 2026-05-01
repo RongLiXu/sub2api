@@ -152,10 +152,12 @@ func (r *ModelPricingResolver) applyTokenOverrides(chPricing *ChannelModelPricin
 	if chPricing.InputPrice != nil {
 		resolved.BasePricing.InputPricePerToken = *chPricing.InputPrice
 		resolved.BasePricing.InputPricePerTokenPriority = *chPricing.InputPrice
+		resolved.BasePricing.InputPricePerTokenFlex = *chPricing.InputPrice
 	}
 	if chPricing.OutputPrice != nil {
 		resolved.BasePricing.OutputPricePerToken = *chPricing.OutputPrice
 		resolved.BasePricing.OutputPricePerTokenPriority = *chPricing.OutputPrice
+		resolved.BasePricing.OutputPricePerTokenFlex = *chPricing.OutputPrice
 	}
 	if chPricing.CacheWritePrice != nil {
 		resolved.BasePricing.CacheCreationPricePerToken = *chPricing.CacheWritePrice
@@ -165,6 +167,7 @@ func (r *ModelPricingResolver) applyTokenOverrides(chPricing *ChannelModelPricin
 	if chPricing.CacheReadPrice != nil {
 		resolved.BasePricing.CacheReadPricePerToken = *chPricing.CacheReadPrice
 		resolved.BasePricing.CacheReadPricePerTokenPriority = *chPricing.CacheReadPrice
+		resolved.BasePricing.CacheReadPricePerTokenFlex = *chPricing.CacheReadPrice
 	}
 	if chPricing.ImageOutputPrice != nil {
 		resolved.BasePricing.ImageOutputPricePerToken = *chPricing.ImageOutputPrice
@@ -216,10 +219,12 @@ func intervalToModelPricing(iv *PricingInterval, supportsCacheBreakdown bool) *M
 	if iv.InputPrice != nil {
 		pricing.InputPricePerToken = *iv.InputPrice
 		pricing.InputPricePerTokenPriority = *iv.InputPrice
+		pricing.InputPricePerTokenFlex = *iv.InputPrice
 	}
 	if iv.OutputPrice != nil {
 		pricing.OutputPricePerToken = *iv.OutputPrice
 		pricing.OutputPricePerTokenPriority = *iv.OutputPrice
+		pricing.OutputPricePerTokenFlex = *iv.OutputPrice
 	}
 	if iv.CacheWritePrice != nil {
 		pricing.CacheCreationPricePerToken = *iv.CacheWritePrice
@@ -229,6 +234,7 @@ func intervalToModelPricing(iv *PricingInterval, supportsCacheBreakdown bool) *M
 	if iv.CacheReadPrice != nil {
 		pricing.CacheReadPricePerToken = *iv.CacheReadPrice
 		pricing.CacheReadPricePerTokenPriority = *iv.CacheReadPrice
+		pricing.CacheReadPricePerTokenFlex = *iv.CacheReadPrice
 	}
 	return pricing
 }

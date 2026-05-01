@@ -145,25 +145,31 @@ func TestGetModelPricing_OpenAIGPT55Fallback(t *testing.T) {
 	require.NotNil(t, pricing)
 	require.InDelta(t, 5e-6, pricing.InputPricePerToken, 1e-12)
 	require.InDelta(t, 12.5e-6, pricing.InputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 2.5e-6, pricing.InputPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 30e-6, pricing.OutputPricePerToken, 1e-12)
 	require.InDelta(t, 75e-6, pricing.OutputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 15e-6, pricing.OutputPricePerTokenFlex, 1e-12)
 	require.Zero(t, pricing.CacheCreationPricePerToken)
 	require.InDelta(t, 0.5e-6, pricing.CacheReadPricePerToken, 1e-12)
 	require.InDelta(t, 1.25e-6, pricing.CacheReadPricePerTokenPriority, 1e-12)
-	require.Equal(t, 400000, pricing.LongContextInputThreshold)
+	require.InDelta(t, 0.25e-6, pricing.CacheReadPricePerTokenFlex, 1e-12)
+	require.Equal(t, 272000, pricing.LongContextInputThreshold)
 	require.InDelta(t, 2.0, pricing.LongContextInputMultiplier, 1e-12)
 	require.InDelta(t, 1.5, pricing.LongContextOutputMultiplier, 1e-12)
 }
 
-func TestGetModelPricing_OpenAIGPT55DynamicPricingCompletesMissingPriority(t *testing.T) {
+func TestGetModelPricing_OpenAIGPT55DynamicPricingCorrectsPriority(t *testing.T) {
 	pricingSvc := &PricingService{
 		pricingData: map[string]*LiteLLMModelPricing{
 			"gpt-5.5": {
-				InputCostPerToken:       5e-6,
-				OutputCostPerToken:      30e-6,
-				CacheReadInputTokenCost: 0.5e-6,
-				LiteLLMProvider:         "openai",
-				Mode:                    "chat",
+				InputCostPerToken:               5e-6,
+				InputCostPerTokenPriority:       10e-6,
+				OutputCostPerToken:              30e-6,
+				OutputCostPerTokenPriority:      60e-6,
+				CacheReadInputTokenCost:         0.5e-6,
+				CacheReadInputTokenCostPriority: 1e-6,
+				LiteLLMProvider:                 "openai",
+				Mode:                            "chat",
 			},
 		},
 	}
@@ -174,11 +180,14 @@ func TestGetModelPricing_OpenAIGPT55DynamicPricingCompletesMissingPriority(t *te
 	require.NotNil(t, pricing)
 	require.InDelta(t, 5e-6, pricing.InputPricePerToken, 1e-12)
 	require.InDelta(t, 12.5e-6, pricing.InputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 2.5e-6, pricing.InputPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 30e-6, pricing.OutputPricePerToken, 1e-12)
 	require.InDelta(t, 75e-6, pricing.OutputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 15e-6, pricing.OutputPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 0.5e-6, pricing.CacheReadPricePerToken, 1e-12)
 	require.InDelta(t, 1.25e-6, pricing.CacheReadPricePerTokenPriority, 1e-12)
-	require.Equal(t, 400000, pricing.LongContextInputThreshold)
+	require.InDelta(t, 0.25e-6, pricing.CacheReadPricePerTokenFlex, 1e-12)
+	require.Equal(t, 272000, pricing.LongContextInputThreshold)
 }
 
 func TestCalculateCost_OpenAIGPT55DynamicPricingFastUsesOfficialPriority(t *testing.T) {
@@ -204,6 +213,22 @@ func TestCalculateCost_OpenAIGPT55DynamicPricingFastUsesOfficialPriority(t *test
 	require.InDelta(t, standardCost.TotalCost*2.5, fastCost.TotalCost, 1e-12)
 }
 
+func TestCalculateCostWithServiceTier_Gpt55FlexUsesOfficialFlexPricing(t *testing.T) {
+	svc := newTestBillingService()
+	tokens := UsageTokens{InputTokens: 100, OutputTokens: 50, CacheReadTokens: 20}
+
+	baseCost, err := svc.CalculateCost("gpt-5.5", tokens, 1.0)
+	require.NoError(t, err)
+
+	flexCost, err := svc.CalculateCostWithServiceTier("gpt-5.5", tokens, 1.0, "flex")
+	require.NoError(t, err)
+
+	require.InDelta(t, baseCost.InputCost*0.5, flexCost.InputCost, 1e-10)
+	require.InDelta(t, baseCost.OutputCost*0.5, flexCost.OutputCost, 1e-10)
+	require.InDelta(t, baseCost.CacheReadCost*0.5, flexCost.CacheReadCost, 1e-10)
+	require.InDelta(t, baseCost.TotalCost*0.5, flexCost.TotalCost, 1e-10)
+}
+
 func TestGetModelPricing_OpenAIGPT55ProFallback(t *testing.T) {
 	svc := newTestBillingService()
 
@@ -215,9 +240,11 @@ func TestGetModelPricing_OpenAIGPT55ProFallback(t *testing.T) {
 	require.InDelta(t, 180e-6, pricing.OutputPricePerToken, 1e-12)
 	require.Zero(t, pricing.OutputPricePerTokenPriority)
 	require.Zero(t, pricing.CacheCreationPricePerToken)
-	require.Zero(t, pricing.CacheReadPricePerToken)
+	require.InDelta(t, 15e-6, pricing.InputPricePerTokenFlex, 1e-12)
+	require.InDelta(t, 90e-6, pricing.OutputPricePerTokenFlex, 1e-12)
+	require.InDelta(t, 3e-6, pricing.CacheReadPricePerToken, 1e-12)
 	require.Zero(t, pricing.CacheReadPricePerTokenPriority)
-	require.Equal(t, 400000, pricing.LongContextInputThreshold)
+	require.Equal(t, 272000, pricing.LongContextInputThreshold)
 	require.InDelta(t, 2.0, pricing.LongContextInputMultiplier, 1e-12)
 	require.InDelta(t, 1.5, pricing.LongContextOutputMultiplier, 1e-12)
 }
@@ -229,8 +256,14 @@ func TestGetModelPricing_OpenAIGPT54MiniFallback(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, pricing)
 	require.InDelta(t, 7.5e-7, pricing.InputPricePerToken, 1e-12)
+	require.InDelta(t, 1.5e-6, pricing.InputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 3.75e-7, pricing.InputPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 4.5e-6, pricing.OutputPricePerToken, 1e-12)
+	require.InDelta(t, 9e-6, pricing.OutputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 2.25e-6, pricing.OutputPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 7.5e-8, pricing.CacheReadPricePerToken, 1e-12)
+	require.InDelta(t, 1.5e-7, pricing.CacheReadPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 3.75e-8, pricing.CacheReadPricePerTokenFlex, 1e-12)
 	require.Zero(t, pricing.LongContextInputThreshold)
 }
 
@@ -671,11 +704,14 @@ func TestBillingServiceGetModelPricing_UsesDynamicPriorityFields(t *testing.T) {
 			"gpt-5.4": {
 				InputCostPerToken:               2.5e-6,
 				InputCostPerTokenPriority:       5e-6,
+				InputCostPerTokenFlex:           1.25e-6,
 				OutputCostPerToken:              15e-6,
 				OutputCostPerTokenPriority:      30e-6,
+				OutputCostPerTokenFlex:          7.5e-6,
 				CacheCreationInputTokenCost:     2.5e-6,
 				CacheReadInputTokenCost:         0.25e-6,
 				CacheReadInputTokenCostPriority: 0.5e-6,
+				CacheReadInputTokenCostFlex:     0.125e-6,
 				LongContextInputTokenThreshold:  272000,
 				LongContextInputCostMultiplier:  2.0,
 				LongContextOutputCostMultiplier: 1.5,
@@ -688,10 +724,13 @@ func TestBillingServiceGetModelPricing_UsesDynamicPriorityFields(t *testing.T) {
 	require.NoError(t, err)
 	require.InDelta(t, 2.5e-6, pricing.InputPricePerToken, 1e-12)
 	require.InDelta(t, 5e-6, pricing.InputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 1.25e-6, pricing.InputPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 15e-6, pricing.OutputPricePerToken, 1e-12)
 	require.InDelta(t, 30e-6, pricing.OutputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 7.5e-6, pricing.OutputPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 0.25e-6, pricing.CacheReadPricePerToken, 1e-12)
 	require.InDelta(t, 0.5e-6, pricing.CacheReadPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 0.125e-6, pricing.CacheReadPricePerTokenFlex, 1e-12)
 	require.Equal(t, 272000, pricing.LongContextInputThreshold)
 	require.InDelta(t, 2.0, pricing.LongContextInputMultiplier, 1e-12)
 	require.InDelta(t, 1.5, pricing.LongContextOutputMultiplier, 1e-12)
@@ -825,6 +864,7 @@ func TestGetModelPricingWithChannel_OverrideInputPriceOnly(t *testing.T) {
 	// InputPrice overridden (both normal and priority)
 	require.InDelta(t, 99e-6, pricing.InputPricePerToken, 1e-12)
 	require.InDelta(t, 99e-6, pricing.InputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 99e-6, pricing.InputPricePerTokenFlex, 1e-12)
 
 	// OutputPrice unchanged (claude-sonnet-4 fallback = 15e-6)
 	require.InDelta(t, 15e-6, pricing.OutputPricePerToken, 1e-12)
@@ -842,6 +882,7 @@ func TestGetModelPricingWithChannel_OverrideOutputPriceOnly(t *testing.T) {
 	// OutputPrice overridden
 	require.InDelta(t, 88e-6, pricing.OutputPricePerToken, 1e-12)
 	require.InDelta(t, 88e-6, pricing.OutputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 88e-6, pricing.OutputPricePerTokenFlex, 1e-12)
 
 	// InputPrice unchanged (claude-sonnet-4 fallback = 3e-6)
 	require.InDelta(t, 3e-6, pricing.InputPricePerToken, 1e-12)
@@ -862,13 +903,16 @@ func TestGetModelPricingWithChannel_OverrideAllFields(t *testing.T) {
 
 	require.InDelta(t, 10e-6, pricing.InputPricePerToken, 1e-12)
 	require.InDelta(t, 10e-6, pricing.InputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 10e-6, pricing.InputPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 20e-6, pricing.OutputPricePerToken, 1e-12)
 	require.InDelta(t, 20e-6, pricing.OutputPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 20e-6, pricing.OutputPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 5e-6, pricing.CacheCreationPricePerToken, 1e-12)
 	require.InDelta(t, 5e-6, pricing.CacheCreation5mPrice, 1e-12)
 	require.InDelta(t, 5e-6, pricing.CacheCreation1hPrice, 1e-12)
 	require.InDelta(t, 1e-6, pricing.CacheReadPricePerToken, 1e-12)
 	require.InDelta(t, 1e-6, pricing.CacheReadPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 1e-6, pricing.CacheReadPricePerTokenFlex, 1e-12)
 	require.InDelta(t, 50e-6, pricing.ImageOutputPricePerToken, 1e-12)
 }
 
@@ -896,9 +940,10 @@ func TestGetModelPricingWithChannel_CacheReadPriceAffectsPriority(t *testing.T) 
 	pricing, err := svc.GetModelPricingWithChannel("claude-sonnet-4", chPricing)
 	require.NoError(t, err)
 
-	// CacheReadPrice should set both normal and priority
+	// CacheReadPrice should set normal, priority, and flex
 	require.InDelta(t, 2e-6, pricing.CacheReadPricePerToken, 1e-12)
 	require.InDelta(t, 2e-6, pricing.CacheReadPricePerTokenPriority, 1e-12)
+	require.InDelta(t, 2e-6, pricing.CacheReadPricePerTokenFlex, 1e-12)
 }
 
 func TestGetModelPricingWithChannel_UnknownModelReturnsError(t *testing.T) {

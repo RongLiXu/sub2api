@@ -45,11 +45,14 @@ type BillingCache interface {
 type ModelPricing struct {
 	InputPricePerToken             float64 // 每token输入价格 (USD)
 	InputPricePerTokenPriority     float64 // priority service tier 下每token输入价格 (USD)
+	InputPricePerTokenFlex         float64 // flex service tier 下每token输入价格 (USD)
 	OutputPricePerToken            float64 // 每token输出价格 (USD)
 	OutputPricePerTokenPriority    float64 // priority service tier 下每token输出价格 (USD)
+	OutputPricePerTokenFlex        float64 // flex service tier 下每token输出价格 (USD)
 	CacheCreationPricePerToken     float64 // 缓存创建每token价格 (USD)
 	CacheReadPricePerToken         float64 // 缓存读取每token价格 (USD)
 	CacheReadPricePerTokenPriority float64 // priority service tier 下缓存读取每token价格 (USD)
+	CacheReadPricePerTokenFlex     float64 // flex service tier 下缓存读取每token价格 (USD)
 	CacheCreation5mPrice           float64 // 5分钟缓存创建每token价格 (USD)
 	CacheCreation1hPrice           float64 // 1小时缓存创建每token价格 (USD)
 	SupportsCacheBreakdown         bool    // 是否支持详细的缓存分类
@@ -61,7 +64,7 @@ type ModelPricing struct {
 
 const (
 	openAIGPT54LongContextInputThreshold   = 272000
-	openAIGPT55LongContextInputThreshold   = 400000
+	openAIGPT55LongContextInputThreshold   = 272000
 	openAIGPT54LongContextInputMultiplier  = 2.0
 	openAIGPT54LongContextOutputMultiplier = 1.5
 )
@@ -79,6 +82,13 @@ func usePriorityServiceTierPricing(serviceTier string, pricing *ModelPricing) bo
 		return false
 	}
 	return pricing.InputPricePerTokenPriority > 0 || pricing.OutputPricePerTokenPriority > 0 || pricing.CacheReadPricePerTokenPriority > 0
+}
+
+func useFlexServiceTierPricing(serviceTier string, pricing *ModelPricing) bool {
+	if pricing == nil || normalizeBillingServiceTier(serviceTier) != "flex" {
+		return false
+	}
+	return pricing.InputPricePerTokenFlex > 0 || pricing.OutputPricePerTokenFlex > 0 || pricing.CacheReadPricePerTokenFlex > 0
 }
 
 func serviceTierCostMultiplier(serviceTier string) float64 {
@@ -210,35 +220,43 @@ func (s *BillingService) initFallbackPricing() {
 
 	// OpenAI GPT-5.4（业务指定价格）
 	s.fallbackPrices["gpt-5.4"] = &ModelPricing{
-		InputPricePerToken:             2.5e-6,  // $2.5 per MTok
-		InputPricePerTokenPriority:     5e-6,    // $5 per MTok
-		OutputPricePerToken:            15e-6,   // $15 per MTok
-		OutputPricePerTokenPriority:    30e-6,   // $30 per MTok
-		CacheCreationPricePerToken:     2.5e-6,  // $2.5 per MTok
-		CacheReadPricePerToken:         0.25e-6, // $0.25 per MTok
-		CacheReadPricePerTokenPriority: 0.5e-6,  // $0.5 per MTok
+		InputPricePerToken:             2.5e-6,   // $2.5 per MTok
+		InputPricePerTokenPriority:     5e-6,     // $5 per MTok
+		InputPricePerTokenFlex:         1.25e-6,  // $1.25 per MTok
+		OutputPricePerToken:            15e-6,    // $15 per MTok
+		OutputPricePerTokenPriority:    30e-6,    // $30 per MTok
+		OutputPricePerTokenFlex:        7.5e-6,   // $7.5 per MTok
+		CacheReadPricePerToken:         0.25e-6,  // $0.25 per MTok
+		CacheReadPricePerTokenPriority: 0.5e-6,   // $0.5 per MTok
+		CacheReadPricePerTokenFlex:     0.125e-6, // $0.125 per MTok
 		SupportsCacheBreakdown:         false,
 		LongContextInputThreshold:      openAIGPT54LongContextInputThreshold,
 		LongContextInputMultiplier:     openAIGPT54LongContextInputMultiplier,
 		LongContextOutputMultiplier:    openAIGPT54LongContextOutputMultiplier,
 	}
-	// OpenAI GPT-5.5（400k 上下文，按官方 Standard/Priority 定价）
+	// OpenAI GPT-5.5（272k 后长上下文加价，按官方 Standard/Priority/Flex 定价）
 	s.fallbackPrices["gpt-5.5"] = &ModelPricing{
 		InputPricePerToken:             5e-6,    // $5 per MTok
 		InputPricePerTokenPriority:     12.5e-6, // $12.5 per MTok
+		InputPricePerTokenFlex:         2.5e-6,  // $2.5 per MTok
 		OutputPricePerToken:            30e-6,   // $30 per MTok
 		OutputPricePerTokenPriority:    75e-6,   // $75 per MTok
+		OutputPricePerTokenFlex:        15e-6,   // $15 per MTok
 		CacheReadPricePerToken:         0.5e-6,  // $0.50 per MTok
 		CacheReadPricePerTokenPriority: 1.25e-6, // $1.25 per MTok
+		CacheReadPricePerTokenFlex:     0.25e-6, // $0.25 per MTok
 		SupportsCacheBreakdown:         false,
 		LongContextInputThreshold:      openAIGPT55LongContextInputThreshold,
 		LongContextInputMultiplier:     openAIGPT54LongContextInputMultiplier,
 		LongContextOutputMultiplier:    openAIGPT54LongContextOutputMultiplier,
 	}
-	// OpenAI GPT-5.5 Pro（官方无缓存读折扣）
+	// OpenAI GPT-5.5 Pro（官方无 priority 价格；flex 为 50%）
 	s.fallbackPrices["gpt-5.5-pro"] = &ModelPricing{
 		InputPricePerToken:          30e-6,  // $30 per MTok
+		InputPricePerTokenFlex:      15e-6,  // $15 per MTok
 		OutputPricePerToken:         180e-6, // $180 per MTok
+		OutputPricePerTokenFlex:     90e-6,  // $90 per MTok
+		CacheReadPricePerToken:      3e-6,   // $3 per MTok
 		SupportsCacheBreakdown:      false,
 		LongContextInputThreshold:   openAIGPT55LongContextInputThreshold,
 		LongContextInputMultiplier:  openAIGPT54LongContextInputMultiplier,
@@ -246,10 +264,16 @@ func (s *BillingService) initFallbackPricing() {
 	}
 
 	s.fallbackPrices["gpt-5.4-mini"] = &ModelPricing{
-		InputPricePerToken:     7.5e-7,
-		OutputPricePerToken:    4.5e-6,
-		CacheReadPricePerToken: 7.5e-8,
-		SupportsCacheBreakdown: false,
+		InputPricePerToken:             7.5e-7,
+		InputPricePerTokenPriority:     1.5e-6,
+		InputPricePerTokenFlex:         3.75e-7,
+		OutputPricePerToken:            4.5e-6,
+		OutputPricePerTokenPriority:    9e-6,
+		OutputPricePerTokenFlex:        2.25e-6,
+		CacheReadPricePerToken:         7.5e-8,
+		CacheReadPricePerTokenPriority: 1.5e-7,
+		CacheReadPricePerTokenFlex:     3.75e-8,
+		SupportsCacheBreakdown:         false,
 	}
 	// OpenAI GPT-5.2（本地兜底）
 	s.fallbackPrices["gpt-5.2"] = &ModelPricing{
@@ -352,11 +376,14 @@ func (s *BillingService) GetModelPricing(model string) (*ModelPricing, error) {
 			return s.applyModelSpecificPricingPolicy(model, &ModelPricing{
 				InputPricePerToken:             litellmPricing.InputCostPerToken,
 				InputPricePerTokenPriority:     litellmPricing.InputCostPerTokenPriority,
+				InputPricePerTokenFlex:         litellmPricing.InputCostPerTokenFlex,
 				OutputPricePerToken:            litellmPricing.OutputCostPerToken,
 				OutputPricePerTokenPriority:    litellmPricing.OutputCostPerTokenPriority,
+				OutputPricePerTokenFlex:        litellmPricing.OutputCostPerTokenFlex,
 				CacheCreationPricePerToken:     litellmPricing.CacheCreationInputTokenCost,
 				CacheReadPricePerToken:         litellmPricing.CacheReadInputTokenCost,
 				CacheReadPricePerTokenPriority: litellmPricing.CacheReadInputTokenCostPriority,
+				CacheReadPricePerTokenFlex:     litellmPricing.CacheReadInputTokenCostFlex,
 				CacheCreation5mPrice:           price5m,
 				CacheCreation1hPrice:           price1h,
 				SupportsCacheBreakdown:         enableBreakdown,
@@ -391,10 +418,12 @@ func (s *BillingService) GetModelPricingWithChannel(model string, channelPricing
 	if channelPricing.InputPrice != nil {
 		pricing.InputPricePerToken = *channelPricing.InputPrice
 		pricing.InputPricePerTokenPriority = *channelPricing.InputPrice
+		pricing.InputPricePerTokenFlex = *channelPricing.InputPrice
 	}
 	if channelPricing.OutputPrice != nil {
 		pricing.OutputPricePerToken = *channelPricing.OutputPrice
 		pricing.OutputPricePerTokenPriority = *channelPricing.OutputPrice
+		pricing.OutputPricePerTokenFlex = *channelPricing.OutputPrice
 	}
 	if channelPricing.CacheWritePrice != nil {
 		pricing.CacheCreationPricePerToken = *channelPricing.CacheWritePrice
@@ -404,6 +433,7 @@ func (s *BillingService) GetModelPricingWithChannel(model string, channelPricing
 	if channelPricing.CacheReadPrice != nil {
 		pricing.CacheReadPricePerToken = *channelPricing.CacheReadPrice
 		pricing.CacheReadPricePerTokenPriority = *channelPricing.CacheReadPrice
+		pricing.CacheReadPricePerTokenFlex = *channelPricing.CacheReadPrice
 	}
 	if channelPricing.ImageOutputPrice != nil {
 		pricing.ImageOutputPricePerToken = *channelPricing.ImageOutputPrice
@@ -509,6 +539,16 @@ func (s *BillingService) computeTokenBreakdown(
 		}
 		if pricing.CacheReadPricePerTokenPriority > 0 {
 			cacheReadPrice = pricing.CacheReadPricePerTokenPriority
+		}
+	} else if useFlexServiceTierPricing(serviceTier, pricing) {
+		if pricing.InputPricePerTokenFlex > 0 {
+			inputPrice = pricing.InputPricePerTokenFlex
+		}
+		if pricing.OutputPricePerTokenFlex > 0 {
+			outputPrice = pricing.OutputPricePerTokenFlex
+		}
+		if pricing.CacheReadPricePerTokenFlex > 0 {
+			cacheReadPrice = pricing.CacheReadPricePerTokenFlex
 		}
 	} else {
 		tierMultiplier = serviceTierCostMultiplier(serviceTier)
@@ -668,18 +708,20 @@ func ensureOpenAIGPT55PriorityPricing(pricing *ModelPricing) *ModelPricing {
 	if pricing == nil {
 		return nil
 	}
-	if pricing.InputPricePerTokenPriority > 0 && pricing.OutputPricePerTokenPriority > 0 && pricing.CacheReadPricePerTokenPriority > 0 {
-		return pricing
-	}
 	cloned := *pricing
-	if cloned.InputPricePerTokenPriority <= 0 {
-		cloned.InputPricePerTokenPriority = 12.5e-6 // $12.5 per MTok
+	// OpenAI GPT-5.5 Priority is 2.5x standard. Override dynamic sources that
+	// may lag the official pricing page.
+	cloned.InputPricePerTokenPriority = 12.5e-6     // $12.5 per MTok
+	cloned.OutputPricePerTokenPriority = 75e-6      // $75 per MTok
+	cloned.CacheReadPricePerTokenPriority = 1.25e-6 // $1.25 per MTok
+	if cloned.InputPricePerTokenFlex <= 0 {
+		cloned.InputPricePerTokenFlex = 2.5e-6 // $2.5 per MTok
 	}
-	if cloned.OutputPricePerTokenPriority <= 0 {
-		cloned.OutputPricePerTokenPriority = 75e-6 // $75 per MTok
+	if cloned.OutputPricePerTokenFlex <= 0 {
+		cloned.OutputPricePerTokenFlex = 15e-6 // $15 per MTok
 	}
-	if cloned.CacheReadPricePerTokenPriority <= 0 {
-		cloned.CacheReadPricePerTokenPriority = 1.25e-6 // $1.25 per MTok
+	if cloned.CacheReadPricePerTokenFlex <= 0 {
+		cloned.CacheReadPricePerTokenFlex = 0.25e-6 // $0.25 per MTok
 	}
 	return &cloned
 }
