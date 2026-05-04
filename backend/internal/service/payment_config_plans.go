@@ -8,6 +8,7 @@ import (
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/subscriptionplan"
+	"github.com/Wei-Shaw/sub2api/internal/domain"
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 )
 
@@ -99,6 +100,10 @@ func (s *PaymentConfigService) GetGroupInfoMap(ctx context.Context, plans []*dbe
 	}
 	m := make(map[int64]PlanGroupInfo, len(groups))
 	for _, g := range groups {
+		modelScopes := []string{}
+		if g.Platform == domain.PlatformAntigravity {
+			modelScopes = g.SupportedModelScopes
+		}
 		m[int64(g.ID)] = PlanGroupInfo{
 			Platform:        g.Platform,
 			Name:            g.Name,
@@ -106,7 +111,7 @@ func (s *PaymentConfigService) GetGroupInfoMap(ctx context.Context, plans []*dbe
 			DailyLimitUSD:   g.DailyLimitUsd,
 			WeeklyLimitUSD:  g.WeeklyLimitUsd,
 			MonthlyLimitUSD: g.MonthlyLimitUsd,
-			ModelScopes:     g.SupportedModelScopes,
+			ModelScopes:     modelScopes,
 		}
 	}
 	return m
