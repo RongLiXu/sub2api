@@ -41,25 +41,36 @@ type BillingCache interface {
 	InvalidateAPIKeyRateLimit(ctx context.Context, keyID int64) error
 }
 
-// ModelPricing 模型价格配置（per-token价格，与LiteLLM格式一致）
+// ModelPricing 模型价格配置（per-token价格，与LiteLLM格式一致；币种由价格源决定）
 type ModelPricing struct {
-	InputPricePerToken             float64 // 每token输入价格 (USD)
-	InputPricePerTokenPriority     float64 // priority service tier 下每token输入价格 (USD)
-	InputPricePerTokenFlex         float64 // flex service tier 下每token输入价格 (USD)
-	OutputPricePerToken            float64 // 每token输出价格 (USD)
-	OutputPricePerTokenPriority    float64 // priority service tier 下每token输出价格 (USD)
-	OutputPricePerTokenFlex        float64 // flex service tier 下每token输出价格 (USD)
-	CacheCreationPricePerToken     float64 // 缓存创建每token价格 (USD)
-	CacheReadPricePerToken         float64 // 缓存读取每token价格 (USD)
-	CacheReadPricePerTokenPriority float64 // priority service tier 下缓存读取每token价格 (USD)
-	CacheReadPricePerTokenFlex     float64 // flex service tier 下缓存读取每token价格 (USD)
-	CacheCreation5mPrice           float64 // 5分钟缓存创建每token价格 (USD)
-	CacheCreation1hPrice           float64 // 1小时缓存创建每token价格 (USD)
+	InputPricePerToken             float64 // 每token输入价格
+	InputPricePerTokenPriority     float64 // priority service tier 下每token输入价格
+	InputPricePerTokenFlex         float64 // flex service tier 下每token输入价格
+	OutputPricePerToken            float64 // 每token输出价格
+	OutputPricePerTokenPriority    float64 // priority service tier 下每token输出价格
+	OutputPricePerTokenFlex        float64 // flex service tier 下每token输出价格
+	CacheCreationPricePerToken     float64 // 缓存创建每token价格
+	CacheReadPricePerToken         float64 // 缓存读取每token价格
+	CacheReadPricePerTokenPriority float64 // priority service tier 下缓存读取每token价格
+	CacheReadPricePerTokenFlex     float64 // flex service tier 下缓存读取每token价格
+	CacheCreation5mPrice           float64 // 5分钟缓存创建每token价格
+	CacheCreation1hPrice           float64 // 1小时缓存创建每token价格
 	SupportsCacheBreakdown         bool    // 是否支持详细的缓存分类
 	LongContextInputThreshold      int     // 超过阈值后按整次会话提升输入价格
 	LongContextInputMultiplier     float64 // 长上下文整次会话输入倍率
 	LongContextOutputMultiplier    float64 // 长上下文整次会话输出倍率
-	ImageOutputPricePerToken       float64 // 图片输出 token 价格 (USD)
+	ImageOutputPricePerToken       float64 // 图片输出 token 价格
+	TokenPricingTiers              []TokenPricingTier
+}
+
+type TokenPricingTier struct {
+	MinInputTokens         int
+	MaxInputTokens         int
+	MinOutputTokens        int
+	MaxOutputTokens        int
+	InputPricePerToken     float64
+	OutputPricePerToken    float64
+	CacheReadPricePerToken float64
 }
 
 const (
@@ -206,7 +217,7 @@ func (s *BillingService) initFallbackPricing() {
 	// Claude 4.6 Opus (与4.5同价)
 	s.fallbackPrices["claude-opus-4.6"] = s.fallbackPrices["claude-opus-4.5"]
 
-	// Claude 4.7 Opus (暂与4.6同价，待官方定价更新)
+	// Claude 4.7 Opus (官方与 4.6 Opus 同价)
 	s.fallbackPrices["claude-opus-4.7"] = s.fallbackPrices["claude-opus-4.6"]
 
 	// Gemini 3.1 Pro
@@ -398,6 +409,7 @@ func (s *BillingService) GetModelPricing(model string) (*ModelPricing, error) {
 				LongContextInputMultiplier:     litellmPricing.LongContextInputCostMultiplier,
 				LongContextOutputMultiplier:    litellmPricing.LongContextOutputCostMultiplier,
 				ImageOutputPricePerToken:       litellmPricing.OutputCostPerImageToken,
+				TokenPricingTiers:              convertLiteLLMTokenPricingTiers(litellmPricing.TokenPricingTiers),
 			}), nil
 		}
 	}
@@ -532,6 +544,8 @@ func (s *BillingService) computeTokenBreakdown(
 		rateMultiplier = 0
 	}
 
+	pricing = selectTokenPricingTier(pricing, tokens)
+
 	inputPrice := pricing.InputPricePerToken
 	outputPrice := pricing.OutputPricePerToken
 	cacheReadPrice := pricing.CacheReadPricePerToken
@@ -604,6 +618,61 @@ func (s *BillingService) computeTokenBreakdown(
 	bd.ActualCost = bd.TotalCost * rateMultiplier
 
 	return bd
+}
+
+func selectTokenPricingTier(pricing *ModelPricing, tokens UsageTokens) *ModelPricing {
+	if pricing == nil || len(pricing.TokenPricingTiers) == 0 {
+		return pricing
+	}
+
+	totalInputTokens := tokens.InputTokens + tokens.CacheReadTokens
+	textOutputTokens := tokens.OutputTokens - tokens.ImageOutputTokens
+	if textOutputTokens < 0 {
+		textOutputTokens = 0
+	}
+
+	for _, tier := range pricing.TokenPricingTiers {
+		if !tokenCountInRange(totalInputTokens, tier.MinInputTokens, tier.MaxInputTokens) {
+			continue
+		}
+		if !tokenCountInRange(textOutputTokens, tier.MinOutputTokens, tier.MaxOutputTokens) {
+			continue
+		}
+
+		cloned := *pricing
+		cloned.InputPricePerToken = tier.InputPricePerToken
+		cloned.OutputPricePerToken = tier.OutputPricePerToken
+		cloned.CacheReadPricePerToken = tier.CacheReadPricePerToken
+		return &cloned
+	}
+
+	return pricing
+}
+
+func tokenCountInRange(value, minValue, maxValue int) bool {
+	if value < minValue {
+		return false
+	}
+	return maxValue <= 0 || value < maxValue
+}
+
+func convertLiteLLMTokenPricingTiers(tiers []LiteLLMTokenPricingTier) []TokenPricingTier {
+	if len(tiers) == 0 {
+		return nil
+	}
+	converted := make([]TokenPricingTier, 0, len(tiers))
+	for _, tier := range tiers {
+		converted = append(converted, TokenPricingTier{
+			MinInputTokens:         tier.MinInputTokens,
+			MaxInputTokens:         tier.MaxInputTokens,
+			MinOutputTokens:        tier.MinOutputTokens,
+			MaxOutputTokens:        tier.MaxOutputTokens,
+			InputPricePerToken:     tier.InputCostPerToken,
+			OutputPricePerToken:    tier.OutputCostPerToken,
+			CacheReadPricePerToken: tier.CacheReadInputTokenCost,
+		})
+	}
+	return converted
 }
 
 // computeCacheCreationCost 计算缓存创建费用（支持 5m/1h 分类或标准计费）。

@@ -283,6 +283,44 @@ func TestParsePricingData_PreservesLongContextMultiplierFields(t *testing.T) {
 	require.InDelta(t, 2.0, pricing.LongContextOutputCostMultiplier, 1e-12)
 }
 
+func TestParsePricingData_PreservesTokenPricingTiers(t *testing.T) {
+	svc := &PricingService{}
+	pricingData, err := svc.parsePricingData([]byte(`{
+		"glm-4.7": {
+			"input_cost_per_token": 0.000002,
+			"output_cost_per_token": 0.000008,
+			"cache_read_input_token_cost": 0.0000004,
+			"litellm_provider": "zhipu",
+			"mode": "chat",
+			"token_pricing_tiers": [
+				{
+					"max_input_tokens": 32000,
+					"max_output_tokens": 200,
+					"input_cost_per_token": 0.000002,
+					"output_cost_per_token": 0.000008,
+					"cache_read_input_token_cost": 0.0000004
+				},
+				{
+					"min_input_tokens": 32000,
+					"max_input_tokens": 200000,
+					"input_cost_per_token": 0.000004,
+					"output_cost_per_token": 0.000016,
+					"cache_read_input_token_cost": 0.0000008
+				}
+			]
+		}
+	}`))
+	require.NoError(t, err)
+
+	pricing := pricingData["glm-4.7"]
+	require.NotNil(t, pricing)
+	require.Len(t, pricing.TokenPricingTiers, 2)
+	require.Equal(t, 32000, pricing.TokenPricingTiers[0].MaxInputTokens)
+	require.Equal(t, 200, pricing.TokenPricingTiers[0].MaxOutputTokens)
+	require.InDelta(t, 4e-6, pricing.TokenPricingTiers[1].InputCostPerToken, 1e-12)
+	require.InDelta(t, 16e-6, pricing.TokenPricingTiers[1].OutputCostPerToken, 1e-12)
+}
+
 func TestBundledPricing_DeepSeekV4UsesOfficialListPrices(t *testing.T) {
 	body, err := os.ReadFile("../../resources/model-pricing/model_prices_and_context_window.json")
 	require.NoError(t, err)
@@ -302,4 +340,112 @@ func TestBundledPricing_DeepSeekV4UsesOfficialListPrices(t *testing.T) {
 	require.InDelta(t, 1.45e-8, pro.CacheReadInputTokenCost, 1e-12) // $0.0145 / 1M tokens list price
 	require.InDelta(t, 1.74e-6, pro.InputCostPerToken, 1e-12)       // $1.74 / 1M tokens
 	require.InDelta(t, 3.48e-6, pro.OutputCostPerToken, 1e-12)      // $3.48 / 1M tokens
+}
+
+func TestBundledPricing_ClaudeLatestUsesOfficialListPrices(t *testing.T) {
+	body, err := os.ReadFile("../../resources/model-pricing/model_prices_and_context_window.json")
+	require.NoError(t, err)
+
+	svc := &PricingService{}
+	pricingData, err := svc.parsePricingData(body)
+	require.NoError(t, err)
+
+	opus47 := pricingData["claude-opus-4-7"]
+	require.NotNil(t, opus47)
+	require.InDelta(t, 5e-6, opus47.InputCostPerToken, 1e-12)              // $5 / 1M tokens
+	require.InDelta(t, 25e-6, opus47.OutputCostPerToken, 1e-12)            // $25 / 1M tokens
+	require.InDelta(t, 0.5e-6, opus47.CacheReadInputTokenCost, 1e-12)      // $0.50 / 1M tokens
+	require.InDelta(t, 6.25e-6, opus47.CacheCreationInputTokenCost, 1e-12) // $6.25 / 1M tokens
+	require.InDelta(t, 10e-6, opus47.CacheCreationInputTokenCostAbove1hr, 1e-12)
+
+	sonnet46 := pricingData["claude-sonnet-4-6"]
+	require.NotNil(t, sonnet46)
+	require.InDelta(t, 3e-6, sonnet46.InputCostPerToken, 1e-12)         // $3 / 1M tokens
+	require.InDelta(t, 15e-6, sonnet46.OutputCostPerToken, 1e-12)       // $15 / 1M tokens
+	require.InDelta(t, 0.3e-6, sonnet46.CacheReadInputTokenCost, 1e-12) // $0.30 / 1M tokens
+	require.InDelta(t, 3.75e-6, sonnet46.CacheCreationInputTokenCost, 1e-12)
+
+	haiku45 := pricingData["claude-haiku-4-5"]
+	require.NotNil(t, haiku45)
+	require.InDelta(t, 1e-6, haiku45.InputCostPerToken, 1e-12)         // $1 / 1M tokens
+	require.InDelta(t, 5e-6, haiku45.OutputCostPerToken, 1e-12)        // $5 / 1M tokens
+	require.InDelta(t, 0.1e-6, haiku45.CacheReadInputTokenCost, 1e-12) // $0.10 / 1M tokens
+}
+
+func TestBundledPricing_ZhipuGLMUsesOfficialListPrices(t *testing.T) {
+	body, err := os.ReadFile("../../resources/model-pricing/model_prices_and_context_window.json")
+	require.NoError(t, err)
+
+	svc := &PricingService{}
+	pricingData, err := svc.parsePricingData(body)
+	require.NoError(t, err)
+
+	glm51 := pricingData["glm-5.1"]
+	require.NotNil(t, glm51)
+	require.InDelta(t, 6e-6, glm51.InputCostPerToken, 1e-12)         // ¥6 / 1M tokens
+	require.InDelta(t, 24e-6, glm51.OutputCostPerToken, 1e-12)       // ¥24 / 1M tokens
+	require.InDelta(t, 1.3e-6, glm51.CacheReadInputTokenCost, 1e-12) // ¥1.3 / 1M tokens
+	require.Len(t, glm51.TokenPricingTiers, 2)
+	require.InDelta(t, 8e-6, glm51.TokenPricingTiers[1].InputCostPerToken, 1e-12)   // ¥8 / 1M tokens
+	require.InDelta(t, 28e-6, glm51.TokenPricingTiers[1].OutputCostPerToken, 1e-12) // ¥28 / 1M tokens
+
+	glm47 := pricingData["glm-4.7"]
+	require.NotNil(t, glm47)
+	require.Len(t, glm47.TokenPricingTiers, 3)
+	require.Equal(t, 200, glm47.TokenPricingTiers[0].MaxOutputTokens)
+	require.InDelta(t, 3e-6, glm47.TokenPricingTiers[1].InputCostPerToken, 1e-12)   // ¥3 / 1M tokens
+	require.InDelta(t, 14e-6, glm47.TokenPricingTiers[1].OutputCostPerToken, 1e-12) // ¥14 / 1M tokens
+	require.InDelta(t, 4e-6, glm47.TokenPricingTiers[2].InputCostPerToken, 1e-12)   // ¥4 / 1M tokens
+	require.InDelta(t, 16e-6, glm47.TokenPricingTiers[2].OutputCostPerToken, 1e-12) // ¥16 / 1M tokens
+
+	free := pricingData["glm-4.7-flash"]
+	require.NotNil(t, free)
+	require.Zero(t, free.InputCostPerToken)
+	require.Zero(t, free.OutputCostPerToken)
+}
+
+func TestBundledPricing_Qwen36UsesOfficialListPrices(t *testing.T) {
+	body, err := os.ReadFile("../../resources/model-pricing/model_prices_and_context_window.json")
+	require.NoError(t, err)
+
+	svc := &PricingService{}
+	pricingData, err := svc.parsePricingData(body)
+	require.NoError(t, err)
+
+	maxPreview := pricingData["qwen3.6-max-preview"]
+	require.NotNil(t, maxPreview)
+	require.InDelta(t, 9e-6, maxPreview.InputCostPerToken, 1e-12)    // ¥9 / 1M tokens
+	require.InDelta(t, 54e-6, maxPreview.OutputCostPerToken, 1e-12)  // ¥54 / 1M tokens
+	require.InDelta(t, 1.8e-6, maxPreview.CacheReadInputTokenCost, 1e-12)
+	require.Len(t, maxPreview.TokenPricingTiers, 2)
+	require.InDelta(t, 15e-6, maxPreview.TokenPricingTiers[1].InputCostPerToken, 1e-12)  // ¥15 / 1M tokens
+	require.InDelta(t, 90e-6, maxPreview.TokenPricingTiers[1].OutputCostPerToken, 1e-12) // ¥90 / 1M tokens
+
+	plus := pricingData["qwen3.6-plus"]
+	require.NotNil(t, plus)
+	require.InDelta(t, 2e-6, plus.InputCostPerToken, 1e-12)    // ¥2 / 1M tokens
+	require.InDelta(t, 12e-6, plus.OutputCostPerToken, 1e-12)  // ¥12 / 1M tokens
+	require.InDelta(t, 0.4e-6, plus.CacheReadInputTokenCost, 1e-12)
+	require.Len(t, plus.TokenPricingTiers, 2)
+	require.InDelta(t, 8e-6, plus.TokenPricingTiers[1].InputCostPerToken, 1e-12)   // ¥8 / 1M tokens
+	require.InDelta(t, 48e-6, plus.TokenPricingTiers[1].OutputCostPerToken, 1e-12) // ¥48 / 1M tokens
+
+	flash := pricingData["qwen3.6-flash"]
+	require.NotNil(t, flash)
+	require.InDelta(t, 1.2e-6, flash.InputCostPerToken, 1e-12)   // ¥1.2 / 1M tokens
+	require.InDelta(t, 7.2e-6, flash.OutputCostPerToken, 1e-12)  // ¥7.2 / 1M tokens
+	require.InDelta(t, 0.24e-6, flash.CacheReadInputTokenCost, 1e-12)
+	require.Len(t, flash.TokenPricingTiers, 2)
+	require.InDelta(t, 4.8e-6, flash.TokenPricingTiers[1].InputCostPerToken, 1e-12)   // ¥4.8 / 1M tokens
+	require.InDelta(t, 28.8e-6, flash.TokenPricingTiers[1].OutputCostPerToken, 1e-12) // ¥28.8 / 1M tokens
+
+	open35b := pricingData["qwen3.6-35b-a3b"]
+	require.NotNil(t, open35b)
+	require.InDelta(t, 1.8e-6, open35b.InputCostPerToken, 1e-12)  // ¥1.8 / 1M tokens
+	require.InDelta(t, 10.8e-6, open35b.OutputCostPerToken, 1e-12) // ¥10.8 / 1M tokens
+
+	open27b := pricingData["qwen3.6-27b"]
+	require.NotNil(t, open27b)
+	require.InDelta(t, 3e-6, open27b.InputCostPerToken, 1e-12)  // ¥3 / 1M tokens
+	require.InDelta(t, 18e-6, open27b.OutputCostPerToken, 1e-12) // ¥18 / 1M tokens
 }

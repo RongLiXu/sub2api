@@ -1317,6 +1317,7 @@ export default {
       totalAccounts: '账号总数',
       activeAccounts: '活跃账号',
       todayRequests: '今日请求',
+      newUsersToday: '今日新增用户',
       totalRequests: '总请求数',
       todayCost: '今日消费',
       totalCost: '总消费',
@@ -1330,7 +1331,11 @@ export default {
       cacheToday: '今日缓存',
       performance: '性能指标',
       avgResponse: '平均响应',
+      active: '活跃',
+      ok: '正常',
+      err: '异常',
       averageTime: '平均时间',
+      create: '创建',
       timeRange: '时间范围',
       granularity: '粒度',
       day: '按天',
@@ -1340,6 +1345,7 @@ export default {
       metricTokens: '按 Token',
       metricActualCost: '按实际消费',
       tokenUsageTrend: 'Token 使用趋势',
+      userUsageTrend: '用户用量趋势（Top 12）',
       noDataAvailable: '暂无数据',
       model: '模型',
       group: '分组',
@@ -2215,6 +2221,14 @@ export default {
         tooltip: '启用后，当请求包含 MCP 工具时，会在 system prompt 中注入 XML 格式调用协议提示词。关闭此选项可避免对某些客户端造成干扰。',
         enabled: '已启用',
         disabled: '已禁用'
+      },
+      claudeMaxSimulation: {
+        title: 'Claude Max 用量模拟',
+        tooltip:
+          '启用后，对于上游未返回缓存写入用量的 Claude 模型，系统会按确定性规则将 token 映射为少量输入加 1 小时缓存创建，同时保持总 token 不变。',
+        enabled: '已启用（模拟 1 小时缓存）',
+        disabled: '已禁用',
+        hint: '仅调整用量计费日志中的 token 分类，不会持久化单次请求映射状态。'
       },
       supportedScopes: {
         title: '支持的模型系列',
@@ -6533,6 +6547,7 @@ export default {
       refundSuccess: '退款成功',
       refundInfo: '退款信息',
       refundEnabled: '允许退款',
+      allowUserRefund: '允许用户申请退款',
       alreadyRefunded: '已退款',
       deductBalance: '扣除余额',
       deductBalanceHint: '从用户余额中扣回充值金额',

@@ -102,26 +102,27 @@ var (
 // LiteLLMModelPricing LiteLLM价格数据结构
 // 只保留我们需要的字段，使用指针来处理可能缺失的值
 type LiteLLMModelPricing struct {
-	InputCostPerToken                   float64 `json:"input_cost_per_token"`
-	InputCostPerTokenPriority           float64 `json:"input_cost_per_token_priority"`
-	InputCostPerTokenFlex               float64 `json:"input_cost_per_token_flex"`
-	OutputCostPerToken                  float64 `json:"output_cost_per_token"`
-	OutputCostPerTokenPriority          float64 `json:"output_cost_per_token_priority"`
-	OutputCostPerTokenFlex              float64 `json:"output_cost_per_token_flex"`
-	CacheCreationInputTokenCost         float64 `json:"cache_creation_input_token_cost"`
-	CacheCreationInputTokenCostAbove1hr float64 `json:"cache_creation_input_token_cost_above_1hr"`
-	CacheReadInputTokenCost             float64 `json:"cache_read_input_token_cost"`
-	CacheReadInputTokenCostPriority     float64 `json:"cache_read_input_token_cost_priority"`
-	CacheReadInputTokenCostFlex         float64 `json:"cache_read_input_token_cost_flex"`
-	LongContextInputTokenThreshold      int     `json:"long_context_input_token_threshold,omitempty"`
-	LongContextInputCostMultiplier      float64 `json:"long_context_input_cost_multiplier,omitempty"`
-	LongContextOutputCostMultiplier     float64 `json:"long_context_output_cost_multiplier,omitempty"`
-	SupportsServiceTier                 bool    `json:"supports_service_tier"`
-	LiteLLMProvider                     string  `json:"litellm_provider"`
-	Mode                                string  `json:"mode"`
-	SupportsPromptCaching               bool    `json:"supports_prompt_caching"`
-	OutputCostPerImage                  float64 `json:"output_cost_per_image"`       // 图片生成模型每张图片价格
-	OutputCostPerImageToken             float64 `json:"output_cost_per_image_token"` // 图片输出 token 价格
+	InputCostPerToken                   float64                   `json:"input_cost_per_token"`
+	InputCostPerTokenPriority           float64                   `json:"input_cost_per_token_priority"`
+	InputCostPerTokenFlex               float64                   `json:"input_cost_per_token_flex"`
+	OutputCostPerToken                  float64                   `json:"output_cost_per_token"`
+	OutputCostPerTokenPriority          float64                   `json:"output_cost_per_token_priority"`
+	OutputCostPerTokenFlex              float64                   `json:"output_cost_per_token_flex"`
+	CacheCreationInputTokenCost         float64                   `json:"cache_creation_input_token_cost"`
+	CacheCreationInputTokenCostAbove1hr float64                   `json:"cache_creation_input_token_cost_above_1hr"`
+	CacheReadInputTokenCost             float64                   `json:"cache_read_input_token_cost"`
+	CacheReadInputTokenCostPriority     float64                   `json:"cache_read_input_token_cost_priority"`
+	CacheReadInputTokenCostFlex         float64                   `json:"cache_read_input_token_cost_flex"`
+	LongContextInputTokenThreshold      int                       `json:"long_context_input_token_threshold,omitempty"`
+	LongContextInputCostMultiplier      float64                   `json:"long_context_input_cost_multiplier,omitempty"`
+	LongContextOutputCostMultiplier     float64                   `json:"long_context_output_cost_multiplier,omitempty"`
+	SupportsServiceTier                 bool                      `json:"supports_service_tier"`
+	LiteLLMProvider                     string                    `json:"litellm_provider"`
+	Mode                                string                    `json:"mode"`
+	SupportsPromptCaching               bool                      `json:"supports_prompt_caching"`
+	OutputCostPerImage                  float64                   `json:"output_cost_per_image"`       // 图片生成模型每张图片价格
+	OutputCostPerImageToken             float64                   `json:"output_cost_per_image_token"` // 图片输出 token 价格
+	TokenPricingTiers                   []LiteLLMTokenPricingTier `json:"token_pricing_tiers,omitempty"`
 }
 
 // PricingRemoteClient 远程价格数据获取接口
@@ -130,28 +131,41 @@ type PricingRemoteClient interface {
 	FetchHashText(ctx context.Context, url string) (string, error)
 }
 
+// LiteLLMTokenPricingTier 表示按请求输入/输出 token 长度选择的整段单价。
+// 边界为左闭右开；Max* 为 0 表示无上限。
+type LiteLLMTokenPricingTier struct {
+	MinInputTokens          int     `json:"min_input_tokens,omitempty"`
+	MaxInputTokens          int     `json:"max_input_tokens,omitempty"`
+	MinOutputTokens         int     `json:"min_output_tokens,omitempty"`
+	MaxOutputTokens         int     `json:"max_output_tokens,omitempty"`
+	InputCostPerToken       float64 `json:"input_cost_per_token"`
+	OutputCostPerToken      float64 `json:"output_cost_per_token"`
+	CacheReadInputTokenCost float64 `json:"cache_read_input_token_cost,omitempty"`
+}
+
 // LiteLLMRawEntry 用于解析原始JSON数据
 type LiteLLMRawEntry struct {
-	InputCostPerToken                   *float64 `json:"input_cost_per_token"`
-	InputCostPerTokenPriority           *float64 `json:"input_cost_per_token_priority"`
-	InputCostPerTokenFlex               *float64 `json:"input_cost_per_token_flex"`
-	OutputCostPerToken                  *float64 `json:"output_cost_per_token"`
-	OutputCostPerTokenPriority          *float64 `json:"output_cost_per_token_priority"`
-	OutputCostPerTokenFlex              *float64 `json:"output_cost_per_token_flex"`
-	CacheCreationInputTokenCost         *float64 `json:"cache_creation_input_token_cost"`
-	CacheCreationInputTokenCostAbove1hr *float64 `json:"cache_creation_input_token_cost_above_1hr"`
-	CacheReadInputTokenCost             *float64 `json:"cache_read_input_token_cost"`
-	CacheReadInputTokenCostPriority     *float64 `json:"cache_read_input_token_cost_priority"`
-	CacheReadInputTokenCostFlex         *float64 `json:"cache_read_input_token_cost_flex"`
-	LongContextInputTokenThreshold      *int     `json:"long_context_input_token_threshold,omitempty"`
-	LongContextInputCostMultiplier      *float64 `json:"long_context_input_cost_multiplier,omitempty"`
-	LongContextOutputCostMultiplier     *float64 `json:"long_context_output_cost_multiplier,omitempty"`
-	SupportsServiceTier                 bool     `json:"supports_service_tier"`
-	LiteLLMProvider                     string   `json:"litellm_provider"`
-	Mode                                string   `json:"mode"`
-	SupportsPromptCaching               bool     `json:"supports_prompt_caching"`
-	OutputCostPerImage                  *float64 `json:"output_cost_per_image"`
-	OutputCostPerImageToken             *float64 `json:"output_cost_per_image_token"`
+	InputCostPerToken                   *float64                  `json:"input_cost_per_token"`
+	InputCostPerTokenPriority           *float64                  `json:"input_cost_per_token_priority"`
+	InputCostPerTokenFlex               *float64                  `json:"input_cost_per_token_flex"`
+	OutputCostPerToken                  *float64                  `json:"output_cost_per_token"`
+	OutputCostPerTokenPriority          *float64                  `json:"output_cost_per_token_priority"`
+	OutputCostPerTokenFlex              *float64                  `json:"output_cost_per_token_flex"`
+	CacheCreationInputTokenCost         *float64                  `json:"cache_creation_input_token_cost"`
+	CacheCreationInputTokenCostAbove1hr *float64                  `json:"cache_creation_input_token_cost_above_1hr"`
+	CacheReadInputTokenCost             *float64                  `json:"cache_read_input_token_cost"`
+	CacheReadInputTokenCostPriority     *float64                  `json:"cache_read_input_token_cost_priority"`
+	CacheReadInputTokenCostFlex         *float64                  `json:"cache_read_input_token_cost_flex"`
+	LongContextInputTokenThreshold      *int                      `json:"long_context_input_token_threshold,omitempty"`
+	LongContextInputCostMultiplier      *float64                  `json:"long_context_input_cost_multiplier,omitempty"`
+	LongContextOutputCostMultiplier     *float64                  `json:"long_context_output_cost_multiplier,omitempty"`
+	SupportsServiceTier                 bool                      `json:"supports_service_tier"`
+	LiteLLMProvider                     string                    `json:"litellm_provider"`
+	Mode                                string                    `json:"mode"`
+	SupportsPromptCaching               bool                      `json:"supports_prompt_caching"`
+	OutputCostPerImage                  *float64                  `json:"output_cost_per_image"`
+	OutputCostPerImageToken             *float64                  `json:"output_cost_per_image_token"`
+	TokenPricingTiers                   []LiteLLMTokenPricingTier `json:"token_pricing_tiers,omitempty"`
 }
 
 // PricingService 动态价格服务
@@ -486,6 +500,9 @@ func (s *PricingService) parsePricingData(body []byte) (map[string]*LiteLLMModel
 		}
 		if entry.OutputCostPerImageToken != nil {
 			pricing.OutputCostPerImageToken = *entry.OutputCostPerImageToken
+		}
+		if len(entry.TokenPricingTiers) > 0 {
+			pricing.TokenPricingTiers = append([]LiteLLMTokenPricingTier(nil), entry.TokenPricingTiers...)
 		}
 
 		result[modelName] = pricing
