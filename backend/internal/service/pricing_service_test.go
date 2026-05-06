@@ -414,8 +414,8 @@ func TestBundledPricing_Qwen36UsesOfficialListPrices(t *testing.T) {
 
 	maxPreview := pricingData["qwen3.6-max-preview"]
 	require.NotNil(t, maxPreview)
-	require.InDelta(t, 9e-6, maxPreview.InputCostPerToken, 1e-12)    // ¥9 / 1M tokens
-	require.InDelta(t, 54e-6, maxPreview.OutputCostPerToken, 1e-12)  // ¥54 / 1M tokens
+	require.InDelta(t, 9e-6, maxPreview.InputCostPerToken, 1e-12)   // ¥9 / 1M tokens
+	require.InDelta(t, 54e-6, maxPreview.OutputCostPerToken, 1e-12) // ¥54 / 1M tokens
 	require.InDelta(t, 1.8e-6, maxPreview.CacheReadInputTokenCost, 1e-12)
 	require.Len(t, maxPreview.TokenPricingTiers, 2)
 	require.InDelta(t, 15e-6, maxPreview.TokenPricingTiers[1].InputCostPerToken, 1e-12)  // ¥15 / 1M tokens
@@ -423,8 +423,8 @@ func TestBundledPricing_Qwen36UsesOfficialListPrices(t *testing.T) {
 
 	plus := pricingData["qwen3.6-plus"]
 	require.NotNil(t, plus)
-	require.InDelta(t, 2e-6, plus.InputCostPerToken, 1e-12)    // ¥2 / 1M tokens
-	require.InDelta(t, 12e-6, plus.OutputCostPerToken, 1e-12)  // ¥12 / 1M tokens
+	require.InDelta(t, 2e-6, plus.InputCostPerToken, 1e-12)   // ¥2 / 1M tokens
+	require.InDelta(t, 12e-6, plus.OutputCostPerToken, 1e-12) // ¥12 / 1M tokens
 	require.InDelta(t, 0.4e-6, plus.CacheReadInputTokenCost, 1e-12)
 	require.Len(t, plus.TokenPricingTiers, 2)
 	require.InDelta(t, 8e-6, plus.TokenPricingTiers[1].InputCostPerToken, 1e-12)   // ¥8 / 1M tokens
@@ -432,8 +432,8 @@ func TestBundledPricing_Qwen36UsesOfficialListPrices(t *testing.T) {
 
 	flash := pricingData["qwen3.6-flash"]
 	require.NotNil(t, flash)
-	require.InDelta(t, 1.2e-6, flash.InputCostPerToken, 1e-12)   // ¥1.2 / 1M tokens
-	require.InDelta(t, 7.2e-6, flash.OutputCostPerToken, 1e-12)  // ¥7.2 / 1M tokens
+	require.InDelta(t, 1.2e-6, flash.InputCostPerToken, 1e-12)  // ¥1.2 / 1M tokens
+	require.InDelta(t, 7.2e-6, flash.OutputCostPerToken, 1e-12) // ¥7.2 / 1M tokens
 	require.InDelta(t, 0.24e-6, flash.CacheReadInputTokenCost, 1e-12)
 	require.Len(t, flash.TokenPricingTiers, 2)
 	require.InDelta(t, 4.8e-6, flash.TokenPricingTiers[1].InputCostPerToken, 1e-12)   // ¥4.8 / 1M tokens
@@ -441,11 +441,11 @@ func TestBundledPricing_Qwen36UsesOfficialListPrices(t *testing.T) {
 
 	open35b := pricingData["qwen3.6-35b-a3b"]
 	require.NotNil(t, open35b)
-	require.InDelta(t, 1.8e-6, open35b.InputCostPerToken, 1e-12)  // ¥1.8 / 1M tokens
+	require.InDelta(t, 1.8e-6, open35b.InputCostPerToken, 1e-12)   // ¥1.8 / 1M tokens
 	require.InDelta(t, 10.8e-6, open35b.OutputCostPerToken, 1e-12) // ¥10.8 / 1M tokens
 
 	open27b := pricingData["qwen3.6-27b"]
 	require.NotNil(t, open27b)
-	require.InDelta(t, 3e-6, open27b.InputCostPerToken, 1e-12)  // ¥3 / 1M tokens
+	require.InDelta(t, 3e-6, open27b.InputCostPerToken, 1e-12)   // ¥3 / 1M tokens
 	require.InDelta(t, 18e-6, open27b.OutputCostPerToken, 1e-12) // ¥18 / 1M tokens
 }

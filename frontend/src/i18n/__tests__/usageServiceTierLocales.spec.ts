@@ -67,6 +67,10 @@ function collectInlineStyles(value: Record<string, unknown>): string[] {
     })
 }
 
+function isAscii(value: string): boolean {
+  return [...value].every((char) => char.charCodeAt(0) <= 0x7f)
+}
+
 describe('usage service tier locale keys', () => {
   it('contains zh labels for service tier tooltip', () => {
     expect(zh.usage.serviceTier).toBe('服务档位')
@@ -114,7 +118,7 @@ describe('usage service tier locale keys', () => {
 
     expect(styles.length).toBeGreaterThan(0)
     for (const style of styles) {
-      expect(style).not.toMatch(/[^\x00-\x7F]/)
+      expect(isAscii(style)).toBe(true)
       expect(style).not.toMatch(/nền|viền|bán kính|cỡ chữ|lề|背|backorder|forderfdf|<bgin|font-sizeGoogle/i)
     }
   })
