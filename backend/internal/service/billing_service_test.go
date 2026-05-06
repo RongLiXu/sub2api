@@ -286,6 +286,36 @@ func TestCalculateCost_OpenAIGPT54LongContextAppliesWholeSessionMultipliers(t *t
 	require.InDelta(t, expectedInput+expectedOutput, cost.ActualCost, 1e-10)
 }
 
+func TestCalculateCost_LongContextAppliesInputMultiplierToCacheRead(t *testing.T) {
+	pricingSvc := &PricingService{
+		pricingData: map[string]*LiteLLMModelPricing{
+			"mimo-v2.5-pro": {
+				InputCostPerToken:                   1e-6,
+				OutputCostPerToken:                  3e-6,
+				CacheReadInputTokenCost:             0.2e-6,
+				LongContextInputTokenThreshold:      262144,
+				LongContextInputCostMultiplier:      2.0,
+				LongContextOutputCostMultiplier:     2.0,
+				CacheCreationInputTokenCostAbove1hr: 0,
+			},
+		},
+	}
+	svc := NewBillingService(&config.Config{}, pricingSvc)
+
+	tokens := UsageTokens{
+		InputTokens:     2000,
+		OutputTokens:    1000,
+		CacheReadTokens: 262145,
+	}
+
+	cost, err := svc.CalculateCost("mimo-v2.5-pro", tokens, 1.0)
+	require.NoError(t, err)
+
+	require.InDelta(t, float64(tokens.InputTokens)*1e-6*2.0, cost.InputCost, 1e-10)
+	require.InDelta(t, float64(tokens.OutputTokens)*3e-6*2.0, cost.OutputCost, 1e-10)
+	require.InDelta(t, float64(tokens.CacheReadTokens)*0.2e-6*2.0, cost.CacheReadCost, 1e-10)
+}
+
 func TestGetFallbackPricing_FamilyMatching(t *testing.T) {
 	svc := newTestBillingService()
 

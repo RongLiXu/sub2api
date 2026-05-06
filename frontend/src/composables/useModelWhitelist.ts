@@ -15,7 +15,11 @@ const openaiModels = [
   'gpt-5.3-codex', 'gpt-5.3-codex-spark',
   'gpt-4o-audio-preview', 'gpt-4o-realtime-preview',
   // GPT Image 系列
-  'gpt-image-1', 'gpt-image-1.5', 'gpt-image-2'
+  'gpt-image-1', 'gpt-image-1.5', 'gpt-image-2',
+  // OpenAI 兼容上游常用模型（如 DeepSeek / MiMo）
+  'deepseek-v4-flash', 'deepseek-v4-pro',
+  // OpenAI 兼容上游常用模型（如 MiMo）
+  'mimo-v2.5-pro', 'mimo-v2.5', 'mimo-v2-pro'
 ]
 
 // Anthropic Claude
@@ -100,6 +104,7 @@ const qwenModels = [
 // DeepSeek
 const deepseekModels = [
   'deepseek-chat', 'deepseek-coder', 'deepseek-reasoner',
+  'deepseek-v4-flash', 'deepseek-v4-pro',
   'deepseek-v3', 'deepseek-v3-0324',
   'deepseek-r1', 'deepseek-r1-0528',
   'deepseek-r1-distill-qwen-32b', 'deepseek-r1-distill-qwen-14b', 'deepseek-r1-distill-qwen-7b',

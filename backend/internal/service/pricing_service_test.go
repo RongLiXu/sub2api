@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -256,4 +257,49 @@ func TestParsePricingData_PreservesServiceTierPriorityFields(t *testing.T) {
 	require.InDelta(t, 0.00000025, pricing.CacheReadInputTokenCost, 1e-12)
 	require.InDelta(t, 0.0000005, pricing.CacheReadInputTokenCostPriority, 1e-12)
 	require.True(t, pricing.SupportsServiceTier)
+}
+
+func TestParsePricingData_PreservesLongContextMultiplierFields(t *testing.T) {
+	svc := &PricingService{}
+	pricingData, err := svc.parsePricingData([]byte(`{
+		"mimo-v2.5-pro": {
+			"input_cost_per_token": 0.000001,
+			"output_cost_per_token": 0.000003,
+			"cache_read_input_token_cost": 0.0000002,
+			"long_context_input_token_threshold": 262144,
+			"long_context_input_cost_multiplier": 2,
+			"long_context_output_cost_multiplier": 2,
+			"supports_prompt_caching": true,
+			"litellm_provider": "openai",
+			"mode": "chat"
+		}
+	}`))
+	require.NoError(t, err)
+
+	pricing := pricingData["mimo-v2.5-pro"]
+	require.NotNil(t, pricing)
+	require.Equal(t, 262144, pricing.LongContextInputTokenThreshold)
+	require.InDelta(t, 2.0, pricing.LongContextInputCostMultiplier, 1e-12)
+	require.InDelta(t, 2.0, pricing.LongContextOutputCostMultiplier, 1e-12)
+}
+
+func TestBundledPricing_DeepSeekV4UsesOfficialListPrices(t *testing.T) {
+	body, err := os.ReadFile("../../resources/model-pricing/model_prices_and_context_window.json")
+	require.NoError(t, err)
+
+	svc := &PricingService{}
+	pricingData, err := svc.parsePricingData(body)
+	require.NoError(t, err)
+
+	flash := pricingData["deepseek-v4-flash"]
+	require.NotNil(t, flash)
+	require.InDelta(t, 2.8e-8, flash.CacheReadInputTokenCost, 1e-12) // $0.028 / 1M tokens launch list price
+	require.InDelta(t, 1.4e-7, flash.InputCostPerToken, 1e-12)       // $0.14 / 1M tokens
+	require.InDelta(t, 2.8e-7, flash.OutputCostPerToken, 1e-12)      // $0.28 / 1M tokens
+
+	pro := pricingData["deepseek-v4-pro"]
+	require.NotNil(t, pro)
+	require.InDelta(t, 1.45e-8, pro.CacheReadInputTokenCost, 1e-12) // $0.0145 / 1M tokens list price
+	require.InDelta(t, 1.74e-6, pro.InputCostPerToken, 1e-12)       // $1.74 / 1M tokens
+	require.InDelta(t, 3.48e-6, pro.OutputCostPerToken, 1e-12)      // $3.48 / 1M tokens
 }

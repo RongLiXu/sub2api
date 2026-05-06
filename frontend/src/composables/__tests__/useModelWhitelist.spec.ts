@@ -19,6 +19,28 @@ describe('useModelWhitelist', () => {
     expect(models.indexOf('gpt-5.5')).toBeLessThan(models.indexOf('gpt-5.4'))
   })
 
+  it('openai 模型列表包含 MiMo OpenAI 兼容模型', () => {
+    const models = getModelsByPlatform('openai')
+
+    expect(models).toContain('mimo-v2.5-pro')
+    expect(models).toContain('mimo-v2.5')
+    expect(models).toContain('mimo-v2-pro')
+  })
+
+  it('openai 模型列表包含 DeepSeek V4 OpenAI 兼容模型', () => {
+    const models = getModelsByPlatform('openai')
+
+    expect(models).toContain('deepseek-v4-flash')
+    expect(models).toContain('deepseek-v4-pro')
+  })
+
+  it('deepseek 模型列表包含 DeepSeek V4 模型', () => {
+    const models = getModelsByPlatform('deepseek')
+
+    expect(models).toContain('deepseek-v4-flash')
+    expect(models).toContain('deepseek-v4-pro')
+  })
+
   it('openai 模型列表不再暴露已下线的 ChatGPT 登录 Codex 模型', () => {
     const models = getModelsByPlatform('openai')
 
