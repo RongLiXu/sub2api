@@ -24,16 +24,17 @@ const openaiModels = [
 
 // Anthropic Claude
 export const claudeModels = [
+  'claude-opus-4-7',
+  'claude-opus-4-6',
+  'claude-sonnet-4-6',
+  'claude-haiku-4-5', 'claude-haiku-4-5-20251001',
   'claude-3-5-sonnet-20241022', 'claude-3-5-sonnet-20240620',
   'claude-3-5-haiku-20241022',
   'claude-3-7-sonnet-20250219',
   'claude-sonnet-4-20250514', 'claude-opus-4-20250514',
   'claude-opus-4-1-20250805',
-  'claude-sonnet-4-5-20250929', 'claude-haiku-4-5-20251001',
+  'claude-sonnet-4-5-20250929',
   'claude-opus-4-5-20251101',
-  'claude-opus-4-6',
-  'claude-opus-4-7',
-  'claude-sonnet-4-6'
 ]
 
 // Google Gemini
@@ -82,6 +83,9 @@ const antigravityModels = [
 
 // 智谱 GLM
 const zhipuModels = [
+  'glm-5.1', 'glm-5', 'glm-5-turbo', 'glm-5v-turbo',
+  'glm-4.7', 'glm-4.7-flashx', 'glm-4.7-flash',
+  'glm-4.6v', 'glm-4.6v-flashx', 'glm-4.6v-flash',
   'glm-4', 'glm-4v', 'glm-4-plus', 'glm-4-0520',
   'glm-4-air', 'glm-4-airx', 'glm-4-long', 'glm-4-flash',
   'glm-4v-plus', 'glm-4.5', 'glm-4.6',
@@ -92,6 +96,10 @@ const zhipuModels = [
 
 // 阿里 通义千问
 const qwenModels = [
+  'qwen3.6-max-preview',
+  'qwen3.6-plus', 'qwen3.6-plus-2026-04-02',
+  'qwen3.6-flash', 'qwen3.6-flash-2026-04-16',
+  'qwen3.6-35b-a3b', 'qwen3.6-27b',
   'qwen-turbo', 'qwen-plus', 'qwen-max', 'qwen-max-longcontext', 'qwen-long',
   'qwen2-72b-instruct', 'qwen2-57b-a14b-instruct', 'qwen2-7b-instruct',
   'qwen2.5-72b-instruct', 'qwen2.5-32b-instruct', 'qwen2.5-14b-instruct',

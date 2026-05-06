@@ -316,6 +316,60 @@ func TestCalculateCost_LongContextAppliesInputMultiplierToCacheRead(t *testing.T
 	require.InDelta(t, float64(tokens.CacheReadTokens)*0.2e-6*2.0, cost.CacheReadCost, 1e-10)
 }
 
+func TestCalculateCost_TokenPricingTiers(t *testing.T) {
+	pricingSvc := &PricingService{
+		pricingData: map[string]*LiteLLMModelPricing{
+			"glm-4.7": {
+				InputCostPerToken:       2e-6,
+				OutputCostPerToken:      8e-6,
+				CacheReadInputTokenCost: 4e-7,
+				TokenPricingTiers: []LiteLLMTokenPricingTier{
+					{
+						MaxInputTokens:          32000,
+						MaxOutputTokens:         200,
+						InputCostPerToken:       2e-6,
+						OutputCostPerToken:      8e-6,
+						CacheReadInputTokenCost: 4e-7,
+					},
+					{
+						MaxInputTokens:          32000,
+						MinOutputTokens:         200,
+						InputCostPerToken:       3e-6,
+						OutputCostPerToken:      14e-6,
+						CacheReadInputTokenCost: 6e-7,
+					},
+					{
+						MinInputTokens:          32000,
+						MaxInputTokens:          200000,
+						InputCostPerToken:       4e-6,
+						OutputCostPerToken:      16e-6,
+						CacheReadInputTokenCost: 8e-7,
+					},
+				},
+			},
+		},
+	}
+	svc := NewBillingService(&config.Config{}, pricingSvc)
+
+	shortOutputCost, err := svc.CalculateCost("glm-4.7", UsageTokens{InputTokens: 1000, OutputTokens: 199, CacheReadTokens: 100}, 1.0)
+	require.NoError(t, err)
+	require.InDelta(t, 1000*2e-6, shortOutputCost.InputCost, 1e-12)
+	require.InDelta(t, 199*8e-6, shortOutputCost.OutputCost, 1e-12)
+	require.InDelta(t, 100*4e-7, shortOutputCost.CacheReadCost, 1e-12)
+
+	longOutputCost, err := svc.CalculateCost("glm-4.7", UsageTokens{InputTokens: 1000, OutputTokens: 200, CacheReadTokens: 100}, 1.0)
+	require.NoError(t, err)
+	require.InDelta(t, 1000*3e-6, longOutputCost.InputCost, 1e-12)
+	require.InDelta(t, 200*14e-6, longOutputCost.OutputCost, 1e-12)
+	require.InDelta(t, 100*6e-7, longOutputCost.CacheReadCost, 1e-12)
+
+	longInputCost, err := svc.CalculateCost("glm-4.7", UsageTokens{InputTokens: 32000, OutputTokens: 100, CacheReadTokens: 1}, 1.0)
+	require.NoError(t, err)
+	require.InDelta(t, 32000*4e-6, longInputCost.InputCost, 1e-12)
+	require.InDelta(t, 100*16e-6, longInputCost.OutputCost, 1e-12)
+	require.InDelta(t, 1*8e-7, longInputCost.CacheReadCost, 1e-12)
+}
+
 func TestGetFallbackPricing_FamilyMatching(t *testing.T) {
 	svc := newTestBillingService()
 

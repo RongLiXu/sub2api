@@ -482,6 +482,37 @@
     "supports_vision": true,
     "tool_use_system_prompt_tokens": 159
   },
+  "claude-opus-4-7": {
+    "cache_creation_input_token_cost": 6.25e-06,
+    "cache_creation_input_token_cost_above_1hr": 1e-05,
+    "cache_read_input_token_cost": 5e-07,
+    "input_cost_per_token": 5e-06,
+    "litellm_provider": "anthropic",
+    "max_input_tokens": 1000000,
+    "max_output_tokens": 128000,
+    "max_tokens": 128000,
+    "mode": "chat",
+    "output_cost_per_token": 2.5e-05,
+    "provider_specific_entry": {
+      "us": 1.1
+    },
+    "search_context_cost_per_query": {
+      "search_context_size_high": 0.01,
+      "search_context_size_low": 0.01,
+      "search_context_size_medium": 0.01
+    },
+    "source": "https://docs.anthropic.com/en/docs/about-claude/pricing",
+    "supports_assistant_prefill": false,
+    "supports_computer_use": true,
+    "supports_function_calling": true,
+    "supports_pdf_input": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_tool_choice": true,
+    "supports_vision": true,
+    "tool_use_system_prompt_tokens": 346
+  },
   "claude-opus-4-6": {
     "cache_creation_input_token_cost": 6.25e-06,
     "cache_creation_input_token_cost_above_1hr": 1e-05,
@@ -707,18 +738,14 @@
   },
   "claude-sonnet-4-6": {
     "cache_creation_input_token_cost": 3.75e-06,
-    "cache_creation_input_token_cost_above_200k_tokens": 7.5e-06,
     "cache_read_input_token_cost": 3e-07,
-    "cache_read_input_token_cost_above_200k_tokens": 6e-07,
     "input_cost_per_token": 3e-06,
-    "input_cost_per_token_above_200k_tokens": 6e-06,
     "litellm_provider": "anthropic",
-    "max_input_tokens": 200000,
+    "max_input_tokens": 1000000,
     "max_output_tokens": 64000,
     "max_tokens": 64000,
     "mode": "chat",
     "output_cost_per_token": 1.5e-05,
-    "output_cost_per_token_above_200k_tokens": 2.25e-05,
     "search_context_cost_per_query": {
       "search_context_size_high": 0.01,
       "search_context_size_low": 0.01,
@@ -819,6 +846,379 @@
     "supports_response_schema": true,
     "supports_system_messages": true,
     "supports_tool_choice": false
+  },
+  "glm-5.1": {
+    "cache_read_input_token_cost": 1.3e-06,
+    "currency": "CNY",
+    "input_cost_per_token": 6e-06,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 200000,
+    "max_output_tokens": 128000,
+    "max_tokens": 128000,
+    "mode": "chat",
+    "output_cost_per_token": 2.4e-05,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 1.3e-06,
+        "input_cost_per_token": 6e-06,
+        "max_input_tokens": 32000,
+        "output_cost_per_token": 2.4e-05
+      },
+      {
+        "cache_read_input_token_cost": 2e-06,
+        "input_cost_per_token": 8e-06,
+        "min_input_tokens": 32000,
+        "output_cost_per_token": 2.8e-05
+      }
+    ]
+  },
+  "glm-5": {
+    "cache_read_input_token_cost": 1e-06,
+    "currency": "CNY",
+    "input_cost_per_token": 4e-06,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 200000,
+    "max_output_tokens": 128000,
+    "max_tokens": 128000,
+    "mode": "chat",
+    "output_cost_per_token": 1.8e-05,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 1e-06,
+        "input_cost_per_token": 4e-06,
+        "max_input_tokens": 32000,
+        "output_cost_per_token": 1.8e-05
+      },
+      {
+        "cache_read_input_token_cost": 1.5e-06,
+        "input_cost_per_token": 6e-06,
+        "min_input_tokens": 32000,
+        "output_cost_per_token": 2.2e-05
+      }
+    ]
+  },
+  "glm-5-turbo": {
+    "cache_read_input_token_cost": 1.2e-06,
+    "currency": "CNY",
+    "input_cost_per_token": 5e-06,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 200000,
+    "max_output_tokens": 128000,
+    "max_tokens": 128000,
+    "mode": "chat",
+    "output_cost_per_token": 2.2e-05,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 1.2e-06,
+        "input_cost_per_token": 5e-06,
+        "max_input_tokens": 32000,
+        "output_cost_per_token": 2.2e-05
+      },
+      {
+        "cache_read_input_token_cost": 1.8e-06,
+        "input_cost_per_token": 7e-06,
+        "min_input_tokens": 32000,
+        "output_cost_per_token": 2.6e-05
+      }
+    ]
+  },
+  "glm-4.7": {
+    "cache_read_input_token_cost": 4e-07,
+    "currency": "CNY",
+    "input_cost_per_token": 2e-06,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 200000,
+    "max_output_tokens": 128000,
+    "max_tokens": 128000,
+    "mode": "chat",
+    "output_cost_per_token": 8e-06,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 4e-07,
+        "input_cost_per_token": 2e-06,
+        "max_input_tokens": 32000,
+        "max_output_tokens": 200,
+        "output_cost_per_token": 8e-06
+      },
+      {
+        "cache_read_input_token_cost": 6e-07,
+        "input_cost_per_token": 3e-06,
+        "max_input_tokens": 32000,
+        "min_output_tokens": 200,
+        "output_cost_per_token": 1.4e-05
+      },
+      {
+        "cache_read_input_token_cost": 8e-07,
+        "input_cost_per_token": 4e-06,
+        "min_input_tokens": 32000,
+        "max_input_tokens": 200000,
+        "output_cost_per_token": 1.6e-05
+      }
+    ]
+  },
+  "glm-4.7-flashx": {
+    "cache_read_input_token_cost": 1e-07,
+    "currency": "CNY",
+    "input_cost_per_token": 5e-07,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 200000,
+    "max_output_tokens": 128000,
+    "max_tokens": 128000,
+    "mode": "chat",
+    "output_cost_per_token": 3e-06,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true
+  },
+  "glm-4.7-flash": {
+    "cache_read_input_token_cost": 0.0,
+    "currency": "CNY",
+    "input_cost_per_token": 0.0,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 200000,
+    "max_output_tokens": 128000,
+    "max_tokens": 128000,
+    "mode": "chat",
+    "output_cost_per_token": 0.0,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true
+  },
+  "glm-5v-turbo": {
+    "cache_read_input_token_cost": 1.2e-06,
+    "currency": "CNY",
+    "input_cost_per_token": 5e-06,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 200000,
+    "max_output_tokens": 128000,
+    "max_tokens": 128000,
+    "mode": "chat",
+    "output_cost_per_token": 2.2e-05,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supported_modalities": [
+      "text",
+      "image",
+      "video"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_pdf_input": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "supports_video_input": true,
+    "supports_vision": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 1.2e-06,
+        "input_cost_per_token": 5e-06,
+        "max_input_tokens": 32000,
+        "output_cost_per_token": 2.2e-05
+      },
+      {
+        "cache_read_input_token_cost": 1.8e-06,
+        "input_cost_per_token": 7e-06,
+        "min_input_tokens": 32000,
+        "output_cost_per_token": 2.6e-05
+      }
+    ]
+  },
+  "glm-4.6v": {
+    "cache_read_input_token_cost": 2e-07,
+    "currency": "CNY",
+    "input_cost_per_token": 1e-06,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 128000,
+    "max_output_tokens": 32000,
+    "max_tokens": 32000,
+    "mode": "chat",
+    "output_cost_per_token": 3e-06,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supported_modalities": [
+      "text",
+      "image",
+      "video"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_pdf_input": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "supports_video_input": true,
+    "supports_vision": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 2e-07,
+        "input_cost_per_token": 1e-06,
+        "max_input_tokens": 32000,
+        "output_cost_per_token": 3e-06
+      },
+      {
+        "cache_read_input_token_cost": 4e-07,
+        "input_cost_per_token": 2e-06,
+        "min_input_tokens": 32000,
+        "max_input_tokens": 128000,
+        "output_cost_per_token": 6e-06
+      }
+    ]
+  },
+  "glm-4.6v-flashx": {
+    "cache_read_input_token_cost": 3e-08,
+    "currency": "CNY",
+    "input_cost_per_token": 1.5e-07,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 128000,
+    "max_output_tokens": 32000,
+    "max_tokens": 32000,
+    "mode": "chat",
+    "output_cost_per_token": 1.5e-06,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supported_modalities": [
+      "text",
+      "image",
+      "video"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_pdf_input": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "supports_video_input": true,
+    "supports_vision": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 3e-08,
+        "input_cost_per_token": 1.5e-07,
+        "max_input_tokens": 32000,
+        "output_cost_per_token": 1.5e-06
+      },
+      {
+        "cache_read_input_token_cost": 3e-08,
+        "input_cost_per_token": 3e-07,
+        "min_input_tokens": 32000,
+        "max_input_tokens": 128000,
+        "output_cost_per_token": 3e-06
+      }
+    ]
+  },
+  "glm-4.6v-flash": {
+    "cache_read_input_token_cost": 0.0,
+    "currency": "CNY",
+    "input_cost_per_token": 0.0,
+    "litellm_provider": "zhipu",
+    "max_input_tokens": 128000,
+    "max_output_tokens": 32000,
+    "max_tokens": 32000,
+    "mode": "chat",
+    "output_cost_per_token": 0.0,
+    "source": "https://open.bigmodel.cn/pricing",
+    "supported_endpoints": [
+      "/api/paas/v4/chat/completions"
+    ],
+    "supported_modalities": [
+      "text",
+      "image",
+      "video"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_pdf_input": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "supports_video_input": true,
+    "supports_vision": true
   },
   "deepseek-v3-2-251201": {
     "input_cost_per_token": 0.0,
@@ -6295,5 +6695,278 @@
     "supports_system_messages": true,
     "supports_tool_choice": true,
     "supports_vision": true
+  },
+  "qwen3.6-max-preview": {
+    "cache_read_input_token_cost": 1.8e-06,
+    "currency": "CNY",
+    "input_cost_per_token": 9e-06,
+    "litellm_provider": "dashscope",
+    "max_input_tokens": 262144,
+    "max_output_tokens": 65536,
+    "max_tokens": 65536,
+    "mode": "chat",
+    "output_cost_per_token": 5.4e-05,
+    "source": "https://help.aliyun.com/zh/model-studio/billing/",
+    "supported_endpoints": [
+      "/compatible-mode/v1/chat/completions"
+    ],
+    "supported_modalities": [
+      "text"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 1.8e-06,
+        "input_cost_per_token": 9e-06,
+        "max_input_tokens": 128000,
+        "output_cost_per_token": 5.4e-05
+      },
+      {
+        "cache_read_input_token_cost": 3e-06,
+        "input_cost_per_token": 1.5e-05,
+        "min_input_tokens": 128000,
+        "max_input_tokens": 256000,
+        "output_cost_per_token": 9e-05
+      }
+    ]
+  },
+  "qwen3.6-plus": {
+    "cache_read_input_token_cost": 4e-07,
+    "currency": "CNY",
+    "input_cost_per_token": 2e-06,
+    "litellm_provider": "dashscope",
+    "max_input_tokens": 1000000,
+    "max_output_tokens": 65536,
+    "max_tokens": 65536,
+    "mode": "chat",
+    "output_cost_per_token": 1.2e-05,
+    "source": "https://help.aliyun.com/zh/model-studio/billing-for-model-studio",
+    "supported_endpoints": [
+      "/compatible-mode/v1/chat/completions"
+    ],
+    "supported_modalities": [
+      "text",
+      "image",
+      "video"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "supports_video_input": true,
+    "supports_vision": true,
+    "supports_web_search": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 4e-07,
+        "input_cost_per_token": 2e-06,
+        "max_input_tokens": 256000,
+        "output_cost_per_token": 1.2e-05
+      },
+      {
+        "cache_read_input_token_cost": 1.6e-06,
+        "input_cost_per_token": 8e-06,
+        "min_input_tokens": 256000,
+        "max_input_tokens": 1000000,
+        "output_cost_per_token": 4.8e-05
+      }
+    ]
+  },
+  "qwen3.6-plus-2026-04-02": {
+    "cache_read_input_token_cost": 4e-07,
+    "currency": "CNY",
+    "input_cost_per_token": 2e-06,
+    "litellm_provider": "dashscope",
+    "max_input_tokens": 1000000,
+    "max_output_tokens": 65536,
+    "max_tokens": 65536,
+    "mode": "chat",
+    "output_cost_per_token": 1.2e-05,
+    "source": "https://help.aliyun.com/zh/model-studio/billing-for-model-studio",
+    "supported_endpoints": [
+      "/compatible-mode/v1/chat/completions"
+    ],
+    "supported_modalities": [
+      "text",
+      "image",
+      "video"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "supports_video_input": true,
+    "supports_vision": true,
+    "supports_web_search": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 4e-07,
+        "input_cost_per_token": 2e-06,
+        "max_input_tokens": 256000,
+        "output_cost_per_token": 1.2e-05
+      },
+      {
+        "cache_read_input_token_cost": 1.6e-06,
+        "input_cost_per_token": 8e-06,
+        "min_input_tokens": 256000,
+        "max_input_tokens": 1000000,
+        "output_cost_per_token": 4.8e-05
+      }
+    ]
+  },
+  "qwen3.6-flash": {
+    "cache_read_input_token_cost": 2.4e-07,
+    "currency": "CNY",
+    "input_cost_per_token": 1.2e-06,
+    "litellm_provider": "dashscope",
+    "max_input_tokens": 1000000,
+    "max_output_tokens": 65536,
+    "max_tokens": 65536,
+    "mode": "chat",
+    "output_cost_per_token": 7.2e-06,
+    "source": "https://help.aliyun.com/zh/model-studio/billing/",
+    "supported_endpoints": [
+      "/compatible-mode/v1/chat/completions"
+    ],
+    "supported_modalities": [
+      "text"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "supports_web_search": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 2.4e-07,
+        "input_cost_per_token": 1.2e-06,
+        "max_input_tokens": 256000,
+        "output_cost_per_token": 7.2e-06
+      },
+      {
+        "cache_read_input_token_cost": 9.6e-07,
+        "input_cost_per_token": 4.8e-06,
+        "min_input_tokens": 256000,
+        "max_input_tokens": 1000000,
+        "output_cost_per_token": 2.88e-05
+      }
+    ]
+  },
+  "qwen3.6-flash-2026-04-16": {
+    "cache_read_input_token_cost": 2.4e-07,
+    "currency": "CNY",
+    "input_cost_per_token": 1.2e-06,
+    "litellm_provider": "dashscope",
+    "max_input_tokens": 1000000,
+    "max_output_tokens": 65536,
+    "max_tokens": 65536,
+    "mode": "chat",
+    "output_cost_per_token": 7.2e-06,
+    "source": "https://help.aliyun.com/zh/model-studio/billing/",
+    "supported_endpoints": [
+      "/compatible-mode/v1/chat/completions"
+    ],
+    "supported_modalities": [
+      "text"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_function_calling": true,
+    "supports_native_streaming": true,
+    "supports_prompt_caching": true,
+    "supports_reasoning": true,
+    "supports_response_schema": true,
+    "supports_system_messages": true,
+    "supports_tool_choice": true,
+    "supports_web_search": true,
+    "token_pricing_tiers": [
+      {
+        "cache_read_input_token_cost": 2.4e-07,
+        "input_cost_per_token": 1.2e-06,
+        "max_input_tokens": 256000,
+        "output_cost_per_token": 7.2e-06
+      },
+      {
+        "cache_read_input_token_cost": 9.6e-07,
+        "input_cost_per_token": 4.8e-06,
+        "min_input_tokens": 256000,
+        "max_input_tokens": 1000000,
+        "output_cost_per_token": 2.88e-05
+      }
+    ]
+  },
+  "qwen3.6-35b-a3b": {
+    "currency": "CNY",
+    "input_cost_per_token": 1.8e-06,
+    "litellm_provider": "dashscope",
+    "max_input_tokens": 256000,
+    "max_output_tokens": 65536,
+    "max_tokens": 65536,
+    "mode": "chat",
+    "output_cost_per_token": 1.08e-05,
+    "source": "https://help.aliyun.com/zh/model-studio/billing/",
+    "supported_endpoints": [
+      "/compatible-mode/v1/chat/completions"
+    ],
+    "supported_modalities": [
+      "text"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_native_streaming": true,
+    "supports_reasoning": true,
+    "supports_system_messages": true
+  },
+  "qwen3.6-27b": {
+    "currency": "CNY",
+    "input_cost_per_token": 3e-06,
+    "litellm_provider": "dashscope",
+    "max_input_tokens": 256000,
+    "max_output_tokens": 65536,
+    "max_tokens": 65536,
+    "mode": "chat",
+    "output_cost_per_token": 1.8e-05,
+    "source": "https://help.aliyun.com/zh/model-studio/billing/",
+    "supported_endpoints": [
+      "/compatible-mode/v1/chat/completions"
+    ],
+    "supported_modalities": [
+      "text"
+    ],
+    "supported_output_modalities": [
+      "text"
+    ],
+    "supports_native_streaming": true,
+    "supports_reasoning": true,
+    "supports_system_messages": true
   }
 }

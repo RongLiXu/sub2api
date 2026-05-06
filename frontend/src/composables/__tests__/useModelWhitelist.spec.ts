@@ -41,6 +41,46 @@ describe('useModelWhitelist', () => {
     expect(models).toContain('deepseek-v4-pro')
   })
 
+  it('anthropic 模型列表包含最新 Claude 官方模型', () => {
+    const models = getModelsByPlatform('anthropic')
+
+    expect(models).toContain('claude-opus-4-7')
+    expect(models).toContain('claude-opus-4-6')
+    expect(models).toContain('claude-sonnet-4-6')
+    expect(models).toContain('claude-haiku-4-5')
+    expect(models).toContain('claude-haiku-4-5-20251001')
+    expect(models.indexOf('claude-opus-4-7')).toBeLessThan(models.indexOf('claude-3-5-sonnet-20241022'))
+  })
+
+  it('zhipu 模型列表包含最新 GLM 旗舰模型', () => {
+    const models = getModelsByPlatform('zhipu')
+
+    expect(models).toContain('glm-5.1')
+    expect(models).toContain('glm-5')
+    expect(models).toContain('glm-5-turbo')
+    expect(models).toContain('glm-5v-turbo')
+    expect(models).toContain('glm-4.7')
+    expect(models).toContain('glm-4.7-flashx')
+    expect(models).toContain('glm-4.7-flash')
+    expect(models).toContain('glm-4.6v')
+    expect(models).toContain('glm-4.6v-flashx')
+    expect(models).toContain('glm-4.6v-flash')
+    expect(models.indexOf('glm-5.1')).toBeLessThan(models.indexOf('glm-4'))
+  })
+
+  it('qwen 模型列表包含最新 Qwen3.6 模型', () => {
+    const models = getModelsByPlatform('qwen')
+
+    expect(models).toContain('qwen3.6-max-preview')
+    expect(models).toContain('qwen3.6-plus')
+    expect(models).toContain('qwen3.6-plus-2026-04-02')
+    expect(models).toContain('qwen3.6-flash')
+    expect(models).toContain('qwen3.6-flash-2026-04-16')
+    expect(models).toContain('qwen3.6-35b-a3b')
+    expect(models).toContain('qwen3.6-27b')
+    expect(models.indexOf('qwen3.6-max-preview')).toBeLessThan(models.indexOf('qwen-turbo'))
+  })
+
   it('openai 模型列表不再暴露已下线的 ChatGPT 登录 Codex 模型', () => {
     const models = getModelsByPlatform('openai')
 
