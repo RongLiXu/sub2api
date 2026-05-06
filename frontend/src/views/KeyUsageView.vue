@@ -363,6 +363,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { toIntlLocale } from '@/i18n'
 import { useAppStore } from '@/stores'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
@@ -748,12 +749,7 @@ function isChineseLocale(): boolean {
 }
 
 function getDateLocale(): string {
-  const current = String(locale.value || '').toLowerCase()
-  if (current === 'zh-tw') return 'zh-TW'
-  if (current.startsWith('zh')) return 'zh-CN'
-  if (current.startsWith('ja')) return 'ja-JP'
-  if (current.startsWith('vi')) return 'vi-VN'
-  return 'en-US'
+  return toIntlLocale(locale.value)
 }
 
 function formatDate(iso: string | null | undefined): string {

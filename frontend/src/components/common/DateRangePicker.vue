@@ -78,6 +78,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { toIntlLocale } from '@/i18n'
 import Icon from '@/components/icons/Icon.vue'
 
 interface DatePreset {
@@ -236,16 +237,7 @@ const displayValue = computed(() => {
 
 const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr + 'T00:00:00')
-  const currentLocale = String(locale.value || '').toLowerCase()
-  const dateLocale = currentLocale === 'zh-tw'
-    ? 'zh-TW'
-    : currentLocale.startsWith('zh')
-      ? 'zh-CN'
-      : currentLocale.startsWith('ja')
-        ? 'ja-JP'
-        : currentLocale.startsWith('vi')
-          ? 'vi-VN'
-          : 'en-US'
+  const dateLocale = toIntlLocale(locale.value)
   return date.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })
 }
 
