@@ -485,6 +485,23 @@ const messages = {
     "invitationCodeValidating": "Đang xác thực mã lời mời...",
     "invitationCodeInvalidCannotRegister": "Mã mời không hợp lệ. Vui lòng kiểm tra và thử lại",
     "oauthOrContinue": "hoặc tiếp tục với email",
+    "loginAgreement": {
+      "checkboxPrefix": "Tôi đã đọc và đồng ý với ",
+      "separator": ", ",
+      "noticeTitle": "Bạn cần đồng ý với điều khoản mới nhất trước khi tiếp tục.",
+      "noticeDescription": "Cho đến khi đồng ý, ô email / mật khẩu và đăng nhập nhanh sẽ vẫn bị vô hiệu hóa.",
+      "openButton": "Xem điều khoản",
+      "dialogTitle": "Thông báo cập nhật điều khoản",
+      "dialogDescriptionWithDate": "Điều khoản dịch vụ của chúng tôi đã được cập nhật vào {date}. Vui lòng đọc và đồng ý với các tài liệu bên dưới trước khi tiếp tục sử dụng dịch vụ.",
+      "dialogDescriptionRecent": "Điều khoản dịch vụ của chúng tôi đã được cập nhật gần đây. Vui lòng đọc và đồng ý với các tài liệu bên dưới trước khi tiếp tục sử dụng dịch vụ.",
+      "relatedDocuments": "Tài liệu liên quan",
+      "reject": "Từ chối",
+      "accept": "Đồng ý và tiếp tục",
+      "rejectedLoginWarning": "Bạn phải đồng ý với điều khoản mới nhất trước khi dùng email / mật khẩu hoặc đăng nhập nhanh.",
+      "blockedLoginWarning": "Vui lòng đọc và đồng ý với điều khoản mới nhất trước khi đăng nhập.",
+      "rejectedRegisterWarning": "Bạn phải đồng ý với điều khoản mới nhất trước khi đăng ký hoặc dùng đăng nhập nhanh.",
+      "blockedRegisterWarning": "Vui lòng đọc và đồng ý với điều khoản mới nhất trước khi đăng ký."
+    },
     "linuxdo": {
       "signIn": "Tiếp tục với Linux.do",
       "orContinue": "hoặc tiếp tục với email",
@@ -588,6 +605,18 @@ const messages = {
     "invalidResetLinkHint": "Liên kết đặt lại mật khẩu này không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu một cái mới.",
     "requestNewResetLink": "Yêu cầu liên kết đặt lại mới",
     "invalidOrExpiredToken": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu một cái mới."
+  },
+  "public": {
+    "legalDocument": {
+      "login": "Đăng nhập",
+      "loadFailedTitle": "Tải tài liệu thất bại",
+      "loadFailedDescription": "Vui lòng làm mới trang và thử lại sau.",
+      "notFoundTitle": "Không tìm thấy tài liệu",
+      "notFoundDescription": "Tài liệu điều khoản này không tồn tại hoặc đã bị quản trị viên xóa.",
+      "sectionLabel": "Điều khoản đăng nhập",
+      "updatedAt": "Ngày cập nhật: {date}",
+      "emptyContent": "Chưa có nội dung"
+    }
   },
   "dashboard": {
     "title": "Trang tổng quan",
@@ -4974,6 +5003,35 @@ const messages = {
             "clearHint": "Gửi trống sẽ xóa tỷ lệ độc quyền cho người dùng được chọn."
           }
         }
+      },
+      "loginAgreement": {
+        "title": "Xác nhận điều khoản đăng nhập",
+        "description": "Kiểm soát việc trang đăng nhập có bắt buộc người dùng đọc và đồng ý với điều khoản dịch vụ, chính sách quyền riêng tư hoặc tài liệu Markdown khác trước hay không.",
+        "enabledStatus": "Đã bật",
+        "disabledStatus": "Chưa bật",
+        "displayMode": "Kiểu hiển thị",
+        "modal": "Hộp thoại",
+        "checkbox": "Hộp kiểm",
+        "checkboxHint": "Hộp kiểm sẽ xuất hiện bên dưới nút đăng nhập và chặn mọi thao tác đăng nhập cho đến khi được chọn.",
+        "modalHint": "Hộp thoại sẽ mở trên trang đăng nhập và chặn mọi thao tác đăng nhập cho đến khi người dùng đồng ý.",
+        "updatedDate": "Ngày cập nhật điều khoản",
+        "updatedDateHint": "Khi ngày hoặc nội dung tài liệu thay đổi, người dùng sẽ phải đồng ý lại.",
+        "documentsTitle": "Tài liệu điều khoản",
+        "documentsHint": "Tên tài liệu có thể tùy chỉnh và nội dung được lưu dưới dạng Markdown. Gợi ý mặc định: Điều khoản dịch vụ, Chính sách sử dụng, Quốc gia và khu vực được hỗ trợ, Điều khoản riêng cho dịch vụ.",
+        "addDocument": "Thêm tài liệu",
+        "untitledDocument": "Tài liệu chưa đặt tên",
+        "documentTitle": "Tên tài liệu",
+        "documentTitlePlaceholder": "Ví dụ: Điều khoản dịch vụ",
+        "routeSlug": "Slug đường dẫn",
+        "markdownContent": "Nội dung Markdown",
+        "markdownPlaceholder": "Viết nội dung Markdown chính thức tại đây.",
+        "defaultTermsTitle": "Điều khoản dịch vụ",
+        "defaultUsagePolicyTitle": "Chính sách sử dụng",
+        "defaultSupportedRegionsTitle": "Quốc gia và khu vực được hỗ trợ",
+        "defaultServiceSpecificTermsTitle": "Điều khoản riêng cho dịch vụ",
+        "validationMinOne": "Cần giữ lại ít nhất một tài liệu khi bật xác nhận điều khoản đăng nhập.",
+        "validationTitleRequired": "Tên tài liệu điều khoản đăng nhập không được để trống.",
+        "validationDuplicateRoute": "Đường dẫn tài liệu điều khoản đăng nhập không được trùng lặp: {path}"
       },
       "emailTabDisabledTitle": "Xác minh email chưa được bật",
       "emailTabDisabledHint": "Bật xác minh email trong tab Bảo mật để định cấu hình cài đặt SMTP.",

@@ -485,6 +485,23 @@ const messages = {
     "invitationCodeValidating": "招待コードを検証しています...",
     "invitationCodeInvalidCannotRegister": "招待コードが無効です。確認してもう一度お試しください",
     "oauthOrContinue": "またはメールで続行してください",
+    "loginAgreement": {
+      "checkboxPrefix": "私は次の内容を読み、同意します：",
+      "separator": "、",
+      "noticeTitle": "続行する前に最新の規約へ同意する必要があります。",
+      "noticeDescription": "同意するまで、メール / パスワード入力とクイックログインは無効のままです。",
+      "openButton": "規約を見る",
+      "dialogTitle": "規約更新のお知らせ",
+      "dialogDescriptionWithDate": "当社の利用規約は {date} に更新されました。サービスを続ける前に、以下の文書を確認し同意してください。",
+      "dialogDescriptionRecent": "当社の利用規約は最近更新されました。サービスを続ける前に、以下の文書を確認し同意してください。",
+      "relatedDocuments": "関連文書",
+      "reject": "同意しない",
+      "accept": "同意して続行",
+      "rejectedLoginWarning": "最新の規約に同意するまで、メール / パスワード入力やクイックログインは利用できません。",
+      "blockedLoginWarning": "ログインする前に、最新の規約を確認して同意してください。",
+      "rejectedRegisterWarning": "最新の規約に同意するまで、登録やクイックログインは利用できません。",
+      "blockedRegisterWarning": "登録する前に、最新の規約を確認して同意してください。"
+    },
     "linuxdo": {
       "signIn": "Linux.do を続行する",
       "orContinue": "またはメールで続行してください",
@@ -588,6 +605,18 @@ const messages = {
     "invalidResetLinkHint": "このパスワード リセット リンクは無効であるか、有効期限が切れています。新しいものをリクエストしてください。",
     "requestNewResetLink": "新しいリセットリンクをリクエストする",
     "invalidOrExpiredToken": "パスワード リセット リンクが無効であるか、有効期限が切れています。新しいものをリクエストしてください。"
+  },
+  "public": {
+    "legalDocument": {
+      "login": "ログイン",
+      "loadFailedTitle": "文書の読み込みに失敗しました",
+      "loadFailedDescription": "しばらくしてからページを更新してもう一度お試しください。",
+      "notFoundTitle": "文書が見つかりません",
+      "notFoundDescription": "この規約文書は存在しないか、管理者によって削除されました。",
+      "sectionLabel": "ログイン規約",
+      "updatedAt": "更新日: {date}",
+      "emptyContent": "本文はまだありません"
+    }
   },
   "dashboard": {
     "title": "ダッシュボード",
@@ -4974,6 +5003,35 @@ const messages = {
             "clearHint": "空のまま送信すると、選択したユーザーの限定レートがクリアされます。"
           }
         }
+      },
+      "loginAgreement": {
+        "title": "ログイン規約確認",
+        "description": "ログインページで、利用規約、プライバシーポリシー、その他の Markdown 文書への同意を必須にするかを設定します。",
+        "enabledStatus": "有効",
+        "disabledStatus": "無効",
+        "displayMode": "表示形式",
+        "modal": "モーダル",
+        "checkbox": "チェックボックス",
+        "checkboxHint": "チェックボックスはログインボタンの下に表示され、チェックするまで全てのログイン操作が無効になります。",
+        "modalHint": "モーダルはログインページで開き、同意するまで全てのログイン操作が無効になります。",
+        "updatedDate": "規約更新日",
+        "updatedDateHint": "日付または文書内容が変わると、ユーザーは再度同意する必要があります。",
+        "documentsTitle": "規約文書",
+        "documentsHint": "文書タイトルは自由に設定でき、内容は Markdown で保存されます。例: 利用規約、利用ポリシー、対応国と地域、サービス固有規約。",
+        "addDocument": "文書を追加",
+        "untitledDocument": "無題の文書",
+        "documentTitle": "文書タイトル",
+        "documentTitlePlaceholder": "例: 利用規約",
+        "routeSlug": "ルートスラッグ",
+        "markdownContent": "Markdown 内容",
+        "markdownPlaceholder": "ここに正式な Markdown 内容を入力してください。",
+        "defaultTermsTitle": "利用規約",
+        "defaultUsagePolicyTitle": "利用ポリシー",
+        "defaultSupportedRegionsTitle": "対応国と地域",
+        "defaultServiceSpecificTermsTitle": "サービス固有規約",
+        "validationMinOne": "ログイン規約確認を有効にする場合、少なくとも 1 つの文書が必要です。",
+        "validationTitleRequired": "ログイン規約文書のタイトルは空にできません。",
+        "validationDuplicateRoute": "ログイン規約文書のルートは重複できません: {path}"
       },
       "emailTabDisabledTitle": "電子メール検証が有効になっていません",
       "emailTabDisabledHint": "SMTP 設定を構成するには、[セキュリティ] タブで電子メール検証を有効にします。",

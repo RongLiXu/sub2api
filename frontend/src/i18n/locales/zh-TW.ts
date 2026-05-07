@@ -485,6 +485,23 @@ const messages = {
     "invitationCodeValidating": "正在驗證邀請碼...",
     "invitationCodeInvalidCannotRegister": "邀請碼無效，請檢查後重試",
     "oauthOrContinue": "或使用郵箱密碼繼續",
+    "loginAgreement": {
+      "checkboxPrefix": "我已閱讀並同意",
+      "separator": "、",
+      "noticeTitle": "繼續登入前需要先同意最新條款。",
+      "noticeDescription": "未同意前，帳號密碼輸入與快捷登入會保持禁用。",
+      "openButton": "查看條款",
+      "dialogTitle": "條款更新通知",
+      "dialogDescriptionWithDate": "我們的服務條款已於 {date} 更新。在繼續使用服務之前，請仔細閱讀並同意以下條款。",
+      "dialogDescriptionRecent": "我們的服務條款近期已更新。在繼續使用服務之前，請仔細閱讀並同意以下條款。",
+      "relatedDocuments": "相關文件",
+      "reject": "拒絕",
+      "accept": "同意並繼續",
+      "rejectedLoginWarning": "未同意最新條款前，無法輸入帳號密碼或使用快捷登入。",
+      "blockedLoginWarning": "請先閱讀並同意最新條款後再登入。",
+      "rejectedRegisterWarning": "未同意最新條款前，無法註冊或使用快捷登入。",
+      "blockedRegisterWarning": "請先閱讀並同意最新條款後再註冊。"
+    },
     "linuxdo": {
       "signIn": "使用 Linux.do 登入",
       "orContinue": "或使用郵箱密碼繼續",
@@ -588,6 +605,18 @@ const messages = {
     "invalidResetLinkHint": "此密碼重設連結無效或已過期。請重新請求一個新連結。",
     "requestNewResetLink": "請求新的重置鏈接",
     "invalidOrExpiredToken": "密碼重置連結無效或已過期。請重新請求一個新連結。"
+  },
+  "public": {
+    "legalDocument": {
+      "login": "登入",
+      "loadFailedTitle": "文件載入失敗",
+      "loadFailedDescription": "請稍後重新整理頁面再試。",
+      "notFoundTitle": "文件不存在",
+      "notFoundDescription": "目前條款文件不存在，或已被管理員移除。",
+      "sectionLabel": "登入條款",
+      "updatedAt": "更新日期：{date}",
+      "emptyContent": "暫無正文內容"
+    }
   },
   "dashboard": {
     "title": "儀表板",
@@ -5170,6 +5199,35 @@ const messages = {
             "clearHint": "留空提交將清除所選用戶的專屬比例。"
           }
         }
+      },
+      "loginAgreement": {
+        "title": "登入條款確認",
+        "description": "控制登入頁是否要求使用者先閱讀並同意服務條款、隱私政策或其他 Markdown 文件。",
+        "enabledStatus": "已啟用",
+        "disabledStatus": "未啟用",
+        "displayMode": "展示形式",
+        "modal": "彈窗",
+        "checkbox": "核取方塊",
+        "checkboxHint": "核取方塊會顯示在登入按鈕下方，未勾選前所有登入入口禁用。",
+        "modalHint": "彈窗會在登入頁開啟，使用者拒絕後所有登入入口保持禁用。",
+        "updatedDate": "條款更新日期",
+        "updatedDateHint": "日期或文件內容變更後，使用者需要重新同意。",
+        "documentsTitle": "協議文件",
+        "documentsHint": "文件名稱可自訂，內容以 Markdown 儲存。可參考：服務條款、使用政策、支援的國家和地區、服務特定條款。",
+        "addDocument": "新增文件",
+        "untitledDocument": "未命名文件",
+        "documentTitle": "文件名稱",
+        "documentTitlePlaceholder": "例如：服務條款",
+        "routeSlug": "路由標識",
+        "markdownContent": "Markdown 內容",
+        "markdownPlaceholder": "在這裡填寫正式 Markdown 內容。",
+        "defaultTermsTitle": "服務條款",
+        "defaultUsagePolicyTitle": "使用政策",
+        "defaultSupportedRegionsTitle": "支援的國家和地區",
+        "defaultServiceSpecificTermsTitle": "服務特定條款",
+        "validationMinOne": "啟用登入條款確認時，至少需要保留一份文件。",
+        "validationTitleRequired": "登入條款文件名稱不能為空。",
+        "validationDuplicateRoute": "登入條款文件路由不能重複：{path}"
       },
       "emailTabDisabledTitle": "郵箱驗證未啟用",
       "emailTabDisabledHint": "請在「安全與認證」標籤中啟用郵箱驗證後，再設定 SMTP 設定。",
