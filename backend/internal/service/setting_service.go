@@ -249,16 +249,16 @@ func normalizeLoginAgreementDocumentID(raw string) string {
 	lastSeparator := false
 	for _, r := range raw {
 		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
-			_, _ = b.WriteRune(r)
+			_ = b.WriteByte(byte(r))
 			lastSeparator = false
 			continue
 		}
 		if r == '-' || r == '_' || r == ' ' || r == '.' || r == '/' {
 			if !lastSeparator && b.Len() > 0 {
 				if r == '_' {
-					_, _ = b.WriteRune('_')
+					_ = b.WriteByte('_')
 				} else {
-					_, _ = b.WriteRune('-')
+					_ = b.WriteByte('-')
 				}
 				lastSeparator = true
 			}
