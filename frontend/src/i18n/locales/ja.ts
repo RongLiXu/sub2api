@@ -1,4 +1,7 @@
-export default {
+import en from './en'
+import { mergeLocaleMessages } from './mergeLocaleMessages'
+
+const messages = {
   "home": {
     "viewOnGithub": "GitHub で見る",
     "viewDocs": "ドキュメントを見る",
@@ -6226,3 +6229,5 @@ export default {
     }
   }
 }
+
+export default mergeLocaleMessages(en, messages)

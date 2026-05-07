@@ -1,4 +1,7 @@
-export default {
+import en from './en'
+import { mergeLocaleMessages } from './mergeLocaleMessages'
+
+const messages = {
   "home": {
     "viewOnGithub": "Xem trên GitHub",
     "viewDocs": "Xem tài liệu",
@@ -6226,3 +6229,5 @@ export default {
     }
   }
 }
+
+export default mergeLocaleMessages(en, messages)

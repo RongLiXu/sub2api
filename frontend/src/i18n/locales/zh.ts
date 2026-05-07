@@ -294,6 +294,11 @@ export default {
     copiedToClipboard: '已复制到剪贴板',
     copied: '已复制',
     copyFailed: '复制失败',
+    upload: '上传',
+    remove: '移除',
+    fileTooLarge: '文件过大（{size} KB），最大允许 {max} KB',
+    invalidImageFile: '请选择图片文件',
+    fileReadFailed: '读取文件失败',
     verifying: '验证中...',
     processing: '处理中...',
     contactSupport: '联系客服',
@@ -1331,6 +1336,8 @@ export default {
   errors: {
     somethingWentWrong: '出错了',
     pageNotFound: '页面未找到',
+    pageNotFoundDescription: '你访问的页面不存在，或已被移动。',
+    needHelp: '需要帮助？',
     unauthorized: '未授权',
     forbidden: '禁止访问',
     serverError: '服务器错误',
@@ -2043,6 +2050,14 @@ export default {
       sortOrderHint: '拖拽分组调整显示顺序，排在前面的分组会优先显示',
       sortOrderUpdated: '排序已更新',
       failedToUpdateSortOrder: '更新排序失败',
+      accountFilter: {
+        title: '账号过滤控制',
+        oauthOnly: '仅允许 OAuth 账号',
+        oauthOnlyEnabled: '已启用 — 排除 API Key 类型账号',
+        privacyOnly: '仅允许隐私保护已设置的账号',
+        privacyOnlyEnabled: '已启用 — Privacy 未设置的账号将被排除',
+        disabled: '未启用'
+      },
       deleteConfirm: "确定要删除分组 '{name}' 吗？所有关联的 API 密钥将不再属于任何分组。",
       deleteConfirmSubscription:
         "确定要删除订阅分组 '{name}' 吗？此操作会让所有绑定此订阅的用户的 API Key 失效，并删除所有相关的订阅记录。此操作无法撤销。",
@@ -3967,6 +3982,11 @@ export default {
       createSuccess: '计划创建成功',
       updateSuccess: '计划更新成功',
       deleteSuccess: '计划删除成功',
+      failedToLoadPlans: '加载计划失败',
+      failedToCreatePlan: '创建计划失败',
+      failedToUpdatePlan: '更新计划失败',
+      failedToDeletePlan: '删除计划失败',
+      failedToLoadResults: '加载结果失败',
       results: '测试结果',
       noResults: '暂无测试结果',
       responseText: '响应',
@@ -4490,6 +4510,7 @@ export default {
     ops: {
       title: '运维监控',
       description: '运维监控与排障',
+      autoRefreshRemaining: '剩余 {seconds}s',
       // Dashboard
       systemHealth: '系统健康',
       overview: '概览',
@@ -4607,6 +4628,57 @@ export default {
           totalOutputTokens: '输出 Token 总数',
           avgDurationMs: '平均时长(ms)',
           requestsWithFirstToken: '首 Token 样本数'
+        }
+      },
+      systemLogs: {
+        title: '系统日志',
+        description: '默认按最新时间倒序，支持筛选搜索与按条件清理。',
+        loadFailed: '系统日志加载失败',
+        empty: '暂无系统日志',
+        cleanupConfirm: '确认按当前筛选条件清理系统日志？该操作不可撤销。',
+        cleanupSuccess: '清理完成，删除 {count} 条日志',
+        cleanupFailed: '清理系统日志失败',
+        cleanupFiltered: '按当前筛选清理',
+        refreshHealth: '刷新健康指标',
+        health: {
+          queue: '队列 {depth}/{capacity}',
+          written: '写入 {count}',
+          dropped: '丢弃 {count}',
+          failed: '失败 {count}'
+        },
+        runtime: {
+          title: '运行时日志配置（实时生效）',
+          stacktraceLevel: '堆栈阈值',
+          samplingInitial: '采样初始',
+          samplingThereafter: '采样后续',
+          retentionDays: '保留天数',
+          caller: 'caller',
+          sampling: 'sampling',
+          saveAndApply: '保存并生效',
+          saveSuccess: '日志运行时配置已生效',
+          saveFailed: '保存日志配置失败',
+          reset: '回滚默认值',
+          resetConfirm: '确认回滚为启动配置（env/yaml）并立即生效？',
+          resetSuccess: '已回滚到启动日志配置',
+          resetFailed: '回滚日志配置失败',
+          lastError: '最近写入错误：{error}'
+        },
+        filters: {
+          timeRange: '时间范围',
+          startTime: '开始时间（可选）',
+          endTime: '结束时间（可选）',
+          level: '级别',
+          component: '组件',
+          componentPlaceholder: '如 http.access',
+          platform: '平台',
+          model: '模型',
+          keyword: '关键词',
+          keywordPlaceholder: '消息/request_id'
+        },
+        table: {
+          time: '时间',
+          level: '级别',
+          details: '日志详细信息'
         }
       },
       customTimeRange: {
@@ -6375,6 +6447,7 @@ export default {
     notFoundDesc: '该自定义页面不存在或已被删除。',
     notConfiguredTitle: '页面链接未配置',
     notConfiguredDesc: '该自定义页面的 URL 未正确配置。',
+    loadFailed: '页面加载失败',
   },
 
   // Announcements Page

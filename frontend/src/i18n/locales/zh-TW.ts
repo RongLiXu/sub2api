@@ -1,4 +1,7 @@
-export default {
+import zh from './zh'
+import { mergeLocaleMessages } from './mergeLocaleMessages'
+
+const messages = {
   "home": {
     "viewOnGithub": "在 GitHub 上查看",
     "viewDocs": "查看文件",
@@ -6422,3 +6425,5 @@ export default {
     }
   }
 }
+
+export default mergeLocaleMessages(zh, messages)

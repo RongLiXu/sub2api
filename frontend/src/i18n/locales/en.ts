@@ -294,6 +294,11 @@ export default {
     copiedToClipboard: 'Copied to clipboard',
     copied: 'Copied',
     copyFailed: 'Failed to copy',
+    upload: 'Upload',
+    remove: 'Remove',
+    fileTooLarge: 'File too large ({size} KB), max {max} KB',
+    invalidImageFile: 'Please select an image file',
+    fileReadFailed: 'Failed to read file',
     verifying: 'Verifying...',
     processing: 'Processing...',
     contactSupport: 'Contact Support',
@@ -1327,6 +1332,8 @@ export default {
   errors: {
     somethingWentWrong: 'Something went wrong',
     pageNotFound: 'Page not found',
+    pageNotFoundDescription: 'The page you are looking for does not exist or has been moved.',
+    needHelp: 'Need help?',
     unauthorized: 'Unauthorized',
     forbidden: 'Forbidden',
     serverError: 'Server error',
@@ -1984,6 +1991,14 @@ export default {
       sortOrderHint: 'Drag groups to adjust display order, groups at the top will be displayed first',
       sortOrderUpdated: 'Sort order updated',
       failedToUpdateSortOrder: 'Failed to update sort order',
+      accountFilter: {
+        title: 'Account Filter Controls',
+        oauthOnly: 'Allow OAuth accounts only',
+        oauthOnlyEnabled: 'Enabled: API key accounts will be excluded',
+        privacyOnly: 'Allow only accounts with privacy protection configured',
+        privacyOnlyEnabled: 'Enabled: accounts without privacy settings will be excluded',
+        disabled: 'Disabled'
+      },
       allPlatforms: 'All Platforms',
       allStatus: 'All Status',
       allGroups: 'All Groups',
@@ -3858,6 +3873,11 @@ export default {
       createSuccess: 'Plan created successfully',
       updateSuccess: 'Plan updated successfully',
       deleteSuccess: 'Plan deleted successfully',
+      failedToLoadPlans: 'Failed to load plans',
+      failedToCreatePlan: 'Failed to create plan',
+      failedToUpdatePlan: 'Failed to update plan',
+      failedToDeletePlan: 'Failed to delete plan',
+      failedToLoadResults: 'Failed to load results',
       results: 'Test Results',
       noResults: 'No test results yet',
       responseText: 'Response',
@@ -4320,6 +4340,7 @@ export default {
     ops: {
       title: 'Ops Monitoring',
       description: 'Operational monitoring and troubleshooting',
+      autoRefreshRemaining: '{seconds}s remaining',
       // Dashboard
       systemHealth: 'System Health',
       overview: 'Overview',
@@ -4435,6 +4456,57 @@ export default {
           totalOutputTokens: 'Total Output Tokens',
           avgDurationMs: 'Avg Duration (ms)',
           requestsWithFirstToken: 'Requests With First Token'
+        }
+      },
+      systemLogs: {
+        title: 'System Logs',
+        description: 'Newest-first logs with filtering, search, and filtered cleanup.',
+        loadFailed: 'Failed to load system logs',
+        empty: 'No system logs yet',
+        cleanupConfirm: 'Clean up system logs matching the current filters? This action cannot be undone.',
+        cleanupSuccess: 'Cleanup completed, deleted {count} logs',
+        cleanupFailed: 'Failed to clean up system logs',
+        cleanupFiltered: 'Clean Matching Logs',
+        refreshHealth: 'Refresh Health',
+        health: {
+          queue: 'Queue {depth}/{capacity}',
+          written: 'Written {count}',
+          dropped: 'Dropped {count}',
+          failed: 'Failed {count}'
+        },
+        runtime: {
+          title: 'Runtime Log Config (applies immediately)',
+          stacktraceLevel: 'Stacktrace Level',
+          samplingInitial: 'Sampling Initial',
+          samplingThereafter: 'Sampling Thereafter',
+          retentionDays: 'Retention Days',
+          caller: 'Caller',
+          sampling: 'Sampling',
+          saveAndApply: 'Save and Apply',
+          saveSuccess: 'Runtime log configuration applied',
+          saveFailed: 'Failed to save log configuration',
+          reset: 'Reset to Startup Defaults',
+          resetConfirm: 'Revert to startup config (env/yaml) and apply immediately?',
+          resetSuccess: 'Reverted to startup log configuration',
+          resetFailed: 'Failed to revert log configuration',
+          lastError: 'Last write error: {error}'
+        },
+        filters: {
+          timeRange: 'Time Range',
+          startTime: 'Start Time (optional)',
+          endTime: 'End Time (optional)',
+          level: 'Level',
+          component: 'Component',
+          componentPlaceholder: 'e.g. http.access',
+          platform: 'Platform',
+          model: 'Model',
+          keyword: 'Keyword',
+          keywordPlaceholder: 'message/request_id'
+        },
+        table: {
+          time: 'Time',
+          level: 'Level',
+          details: 'Log Details'
         }
       },
       fullscreen: {
@@ -6202,6 +6274,7 @@ export default {
     notFoundDesc: 'This custom page does not exist or has been removed.',
     notConfiguredTitle: 'Page URL not configured',
     notConfiguredDesc: 'The URL for this custom page has not been properly configured.',
+    loadFailed: 'Failed to load page',
   },
 
   // Announcements Page
