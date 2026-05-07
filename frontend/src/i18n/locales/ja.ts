@@ -322,6 +322,7 @@ export default {
   },
   "nav": {
     "dashboard": "ダッシュボード",
+    "models": "モデル広場",
     "announcements": "お知らせ",
     "apiKeys": "APIキー",
     "usage": "使用法",
@@ -362,6 +363,52 @@ export default {
     "channelPricing": "チャンネルの価格設定",
     "channelMonitor": "チャンネルモニター",
     "channelStatus": "チャンネルステータス"
+  },
+  "modelsPage": {
+    "headerEyebrow": "公開モデル広場",
+    "navHome": "ホーム",
+    "title": "モデル広場",
+    "subtitle": "標準料金カタログをモデル単位で公開表示し、検索、プロバイダ絞り込み、コンテキスト上限、能力タグを確認できます。",
+    "backHome": "ホームへ戻る",
+    "refresh": "更新",
+    "searchPlaceholder": "モデル名、プロバイダ、能力で検索",
+    "providerFilter": "プロバイダ絞り込み",
+    "allProviders": "すべてのプロバイダ",
+    "capabilityFilter": "能力フィルタ",
+    "emptyTitle": "現在の条件に一致するモデルがありません",
+    "emptyDescription": "プロバイダまたは能力フィルタを解除して再度お試しください。",
+    "contextWindow": "コンテキスト",
+    "outputLimit": "出力上限",
+    "inputPrice": "入力価格",
+    "outputPrice": "出力価格",
+    "cacheWritePrice": "キャッシュ書き込み",
+    "cacheReadPrice": "キャッシュ読み取り",
+    "imageTokenPrice": "画像 Token",
+    "imagePrice": "画像価格",
+    "perImageUnit": "枚",
+    "stats": {
+      "totalModels": "モデル数",
+      "totalModelsHint": "現在の標準価格カタログから読み込まれた全モデル数です。",
+      "providers": "プロバイダ数",
+      "providersHint": "この価格カタログに含まれる上流プロバイダ数です。",
+      "visionReady": "Vision 対応",
+      "visionReadyHint": "画像または視覚理解をサポートすると宣言しているモデル数です。",
+      "functionCallingReady": "Function Calling 対応",
+      "functionCallingReadyHint": "関数またはツール呼び出しに対応しているモデル数です。"
+    },
+    "modes": {
+      "chat": "チャット",
+      "imageGeneration": "画像",
+      "embedding": "埋め込み",
+      "completion": "補完"
+    },
+    "capabilities": {
+      "vision": "Vision",
+      "functionCalling": "Function Calling",
+      "promptCaching": "Prompt Caching",
+      "serviceTier": "Service Tier",
+      "tieredPricing": "Tiered Pricing"
+    }
   },
   "auth": {
     "welcomeBack": "おかえりなさい",

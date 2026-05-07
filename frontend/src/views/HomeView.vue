@@ -48,6 +48,13 @@
 
         <!-- Nav Actions -->
         <div class="flex items-center gap-3">
+          <router-link
+            to="/models"
+            class="hidden rounded-full border border-gray-200/70 bg-white/80 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-dark-700/70 dark:bg-dark-800/80 dark:text-dark-200 dark:hover:border-dark-500 dark:hover:text-white md:inline-flex"
+          >
+            {{ t('nav.models') }}
+          </router-link>
+
           <!-- Language Switcher -->
           <LocaleSwitcher />
 
@@ -134,6 +141,12 @@
               >
                 {{ isAuthenticated ? t('home.goToDashboard') : t('home.getStarted') }}
                 <Icon name="arrowRight" size="md" class="ml-2" :stroke-width="2" />
+              </router-link>
+              <router-link
+                to="/models"
+                class="ml-3 inline-flex items-center rounded-full border border-gray-200/80 bg-white/85 px-5 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-dark-700/70 dark:bg-dark-800/85 dark:text-dark-100 dark:hover:border-dark-500 dark:hover:text-white"
+              >
+                {{ t('nav.models') }}
               </router-link>
             </div>
           </div>

@@ -322,6 +322,7 @@ export default {
   },
   "nav": {
     "dashboard": "Trang tổng quan",
+    "models": "Chợ mô hình",
     "announcements": "Thông báo",
     "apiKeys": "Khóa API",
     "usage": "Cách sử dụng",
@@ -362,6 +363,52 @@ export default {
     "channelPricing": "Định giá kênh",
     "channelMonitor": "Giám sát kênh",
     "channelStatus": "Trạng thái kênh"
+  },
+  "modelsPage": {
+    "headerEyebrow": "Chợ mô hình công khai",
+    "navHome": "Trang chủ",
+    "title": "Chợ mô hình",
+    "subtitle": "Hiển thị danh mục giá chuẩn theo từng mô hình, kèm tìm kiếm, lọc nhà cung cấp, cửa sổ ngữ cảnh và nhãn năng lực.",
+    "backHome": "Về trang chủ",
+    "refresh": "Làm mới",
+    "searchPlaceholder": "Tìm theo tên mô hình, nhà cung cấp hoặc năng lực",
+    "providerFilter": "Lọc nhà cung cấp",
+    "allProviders": "Tất cả nhà cung cấp",
+    "capabilityFilter": "Năng lực",
+    "emptyTitle": "Không có mô hình nào khớp với bộ lọc hiện tại",
+    "emptyDescription": "Hãy xóa bộ lọc nhà cung cấp hoặc năng lực rồi thử lại.",
+    "contextWindow": "Ngữ cảnh",
+    "outputLimit": "Giới hạn đầu ra",
+    "inputPrice": "Giá đầu vào",
+    "outputPrice": "Giá đầu ra",
+    "cacheWritePrice": "Ghi bộ nhớ đệm",
+    "cacheReadPrice": "Đọc bộ nhớ đệm",
+    "imageTokenPrice": "Token hình ảnh",
+    "imagePrice": "Giá hình ảnh",
+    "perImageUnit": "ảnh",
+    "stats": {
+      "totalModels": "Mô hình",
+      "totalModelsHint": "Tổng số mô hình chuẩn hiện được tải từ danh mục giá.",
+      "providers": "Nhà cung cấp",
+      "providersHint": "Số lượng nhà cung cấp thượng nguồn có trong danh mục hiện tại.",
+      "visionReady": "Hỗ trợ thị giác",
+      "visionReadyHint": "Số mô hình khai báo hỗ trợ hình ảnh hoặc hiểu thị giác.",
+      "functionCallingReady": "Hỗ trợ gọi hàm",
+      "functionCallingReadyHint": "Số mô hình khai báo hỗ trợ function/tool calling."
+    },
+    "modes": {
+      "chat": "Chat",
+      "imageGeneration": "Hình ảnh",
+      "embedding": "Embedding",
+      "completion": "Hoàn thành"
+    },
+    "capabilities": {
+      "vision": "Thị giác",
+      "functionCalling": "Gọi hàm",
+      "promptCaching": "Bộ nhớ đệm prompt",
+      "serviceTier": "Tầng dịch vụ",
+      "tieredPricing": "Giá theo bậc"
+    }
   },
   "auth": {
     "welcomeBack": "Chào mừng trở lại",

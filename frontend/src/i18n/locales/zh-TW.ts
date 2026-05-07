@@ -322,6 +322,7 @@ export default {
   },
   "nav": {
     "dashboard": "儀表板",
+    "models": "模型廣場",
     "announcements": "公告",
     "apiKeys": "API 金鑰",
     "usage": "使用記錄",
@@ -362,6 +363,52 @@ export default {
     "channelPricing": "通路定價",
     "channelMonitor": "通路監控",
     "channelStatus": "頻道狀態"
+  },
+  "modelsPage": {
+    "headerEyebrow": "公開模型廣場",
+    "navHome": "首頁",
+    "title": "模型廣場",
+    "subtitle": "按照平台標準計費展示目前模型目錄，支援搜尋、供應商篩選、上下文視窗與能力標籤。",
+    "backHome": "返回首頁",
+    "refresh": "重新整理",
+    "searchPlaceholder": "搜尋模型名稱、供應商或能力",
+    "providerFilter": "供應商篩選",
+    "allProviders": "全部供應商",
+    "capabilityFilter": "能力篩選",
+    "emptyTitle": "目前篩選條件下沒有符合的模型",
+    "emptyDescription": "可以清除供應商或能力篩選後再試一次。",
+    "contextWindow": "上下文",
+    "outputLimit": "輸出上限",
+    "inputPrice": "輸入價格",
+    "outputPrice": "輸出價格",
+    "cacheWritePrice": "快取寫入",
+    "cacheReadPrice": "快取讀取",
+    "imageTokenPrice": "圖片 Token",
+    "imagePrice": "圖片價格",
+    "perImageUnit": "張",
+    "stats": {
+      "totalModels": "模型數",
+      "totalModelsHint": "目前從標準價格目錄載入的全部模型。",
+      "providers": "供應商",
+      "providersHint": "目前價格目錄中涵蓋的上游供應商數量。",
+      "visionReady": "視覺能力",
+      "visionReadyHint": "宣告支援圖片或視覺理解能力的模型數量。",
+      "functionCallingReady": "函式呼叫",
+      "functionCallingReadyHint": "宣告支援函式或工具呼叫的模型數量。"
+    },
+    "modes": {
+      "chat": "對話",
+      "imageGeneration": "圖片",
+      "embedding": "向量",
+      "completion": "補全"
+    },
+    "capabilities": {
+      "vision": "視覺",
+      "functionCalling": "函式呼叫",
+      "promptCaching": "提示快取",
+      "serviceTier": "服務層級",
+      "tieredPricing": "階梯定價"
+    }
   },
   "auth": {
     "welcomeBack": "歡迎回來",

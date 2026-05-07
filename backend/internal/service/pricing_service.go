@@ -120,6 +120,11 @@ type LiteLLMModelPricing struct {
 	LiteLLMProvider                     string                    `json:"litellm_provider"`
 	Mode                                string                    `json:"mode"`
 	SupportsPromptCaching               bool                      `json:"supports_prompt_caching"`
+	MaxInputTokens                      int                       `json:"max_input_tokens,omitempty"`
+	MaxOutputTokens                     int                       `json:"max_output_tokens,omitempty"`
+	MaxTokens                           int                       `json:"max_tokens,omitempty"`
+	SupportsFunctionCalling             bool                      `json:"supports_function_calling"`
+	SupportsVision                      bool                      `json:"supports_vision"`
 	OutputCostPerImage                  float64                   `json:"output_cost_per_image"`       // 图片生成模型每张图片价格
 	OutputCostPerImageToken             float64                   `json:"output_cost_per_image_token"` // 图片输出 token 价格
 	TokenPricingTiers                   []LiteLLMTokenPricingTier `json:"token_pricing_tiers,omitempty"`
@@ -163,6 +168,11 @@ type LiteLLMRawEntry struct {
 	LiteLLMProvider                     string                    `json:"litellm_provider"`
 	Mode                                string                    `json:"mode"`
 	SupportsPromptCaching               bool                      `json:"supports_prompt_caching"`
+	MaxInputTokens                      *int                      `json:"max_input_tokens,omitempty"`
+	MaxOutputTokens                     *int                      `json:"max_output_tokens,omitempty"`
+	MaxTokens                           *int                      `json:"max_tokens,omitempty"`
+	SupportsFunctionCalling             bool                      `json:"supports_function_calling"`
+	SupportsVision                      bool                      `json:"supports_vision"`
 	OutputCostPerImage                  *float64                  `json:"output_cost_per_image"`
 	OutputCostPerImageToken             *float64                  `json:"output_cost_per_image_token"`
 	TokenPricingTiers                   []LiteLLMTokenPricingTier `json:"token_pricing_tiers,omitempty"`
@@ -441,16 +451,20 @@ func (s *PricingService) parsePricingData(body []byte) (map[string]*LiteLLMModel
 			continue
 		}
 
-		// 只保留有有效价格的条目
-		if entry.InputCostPerToken == nil && entry.OutputCostPerToken == nil {
+		// 只保留有有效价格的条目；图片模型可能只有按张价格，无 token 单价。
+		hasTokenPricing := entry.InputCostPerToken != nil || entry.OutputCostPerToken != nil
+		hasImagePricing := entry.OutputCostPerImage != nil || entry.OutputCostPerImageToken != nil
+		if !hasTokenPricing && !hasImagePricing {
 			continue
 		}
 
 		pricing := &LiteLLMModelPricing{
-			LiteLLMProvider:       entry.LiteLLMProvider,
-			Mode:                  entry.Mode,
-			SupportsPromptCaching: entry.SupportsPromptCaching,
-			SupportsServiceTier:   entry.SupportsServiceTier,
+			LiteLLMProvider:         entry.LiteLLMProvider,
+			Mode:                    entry.Mode,
+			SupportsPromptCaching:   entry.SupportsPromptCaching,
+			SupportsServiceTier:     entry.SupportsServiceTier,
+			SupportsFunctionCalling: entry.SupportsFunctionCalling,
+			SupportsVision:          entry.SupportsVision,
 		}
 
 		if entry.InputCostPerToken != nil {
@@ -494,6 +508,15 @@ func (s *PricingService) parsePricingData(body []byte) (map[string]*LiteLLMModel
 		}
 		if entry.LongContextOutputCostMultiplier != nil {
 			pricing.LongContextOutputCostMultiplier = *entry.LongContextOutputCostMultiplier
+		}
+		if entry.MaxInputTokens != nil {
+			pricing.MaxInputTokens = *entry.MaxInputTokens
+		}
+		if entry.MaxOutputTokens != nil {
+			pricing.MaxOutputTokens = *entry.MaxOutputTokens
+		}
+		if entry.MaxTokens != nil {
+			pricing.MaxTokens = *entry.MaxTokens
 		}
 		if entry.OutputCostPerImage != nil {
 			pricing.OutputCostPerImage = *entry.OutputCostPerImage
