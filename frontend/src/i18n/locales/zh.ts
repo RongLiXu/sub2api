@@ -294,6 +294,11 @@ export default {
     copiedToClipboard: '已复制到剪贴板',
     copied: '已复制',
     copyFailed: '复制失败',
+    upload: '上传',
+    remove: '移除',
+    fileTooLarge: '文件过大（{size} KB），最大允许 {max} KB',
+    invalidImageFile: '请选择图片文件',
+    fileReadFailed: '读取文件失败',
     verifying: '验证中...',
     processing: '处理中...',
     contactSupport: '联系客服',
@@ -342,6 +347,7 @@ export default {
   // Navigation
   nav: {
     dashboard: '仪表盘',
+    models: '模型广场',
     announcements: '公告',
     apiKeys: 'API 密钥',
     usage: '使用记录',
@@ -383,6 +389,53 @@ export default {
     channelMonitor: '渠道监控',
     channelStatus: '渠道状态',
     riskControl: '风控中心',
+  },
+
+  modelsPage: {
+    headerEyebrow: '公开模型广场',
+    navHome: '首页',
+    title: '模型广场',
+    subtitle: '按平台标准计费展示当前模型目录，支持搜索、供应商筛选、上下文窗口与能力标签查看。',
+    backHome: '返回首页',
+    refresh: '刷新',
+    searchPlaceholder: '搜索模型名、供应商或能力',
+    providerFilter: '供应商筛选',
+    allProviders: '全部供应商',
+    capabilityFilter: '能力筛选',
+    emptyTitle: '当前筛选条件下没有匹配模型',
+    emptyDescription: '可以清空供应商或能力筛选后重试。',
+    contextWindow: '上下文',
+    outputLimit: '输出上限',
+    inputPrice: '输入价格',
+    outputPrice: '输出价格',
+    cacheWritePrice: '缓存写入',
+    cacheReadPrice: '缓存读取',
+    imageTokenPrice: '图片 Token',
+    imagePrice: '图片价格',
+    perImageUnit: '张',
+    stats: {
+      totalModels: '模型数',
+      totalModelsHint: '当前从标准价格目录加载的全部模型。',
+      providers: '供应商',
+      providersHint: '当前价格目录中覆盖的上游供应商数量。',
+      visionReady: '视觉能力',
+      visionReadyHint: '声明支持图片或视觉理解能力的模型数。',
+      functionCallingReady: '函数调用',
+      functionCallingReadyHint: '声明支持函数或工具调用的模型数。',
+    },
+    modes: {
+      chat: '对话',
+      imageGeneration: '图片',
+      embedding: '向量',
+      completion: '补全',
+    },
+    capabilities: {
+      vision: '视觉',
+      functionCalling: '函数调用',
+      promptCaching: '提示缓存',
+      serviceTier: '服务层级',
+      tieredPricing: '阶梯定价',
+    },
   },
 
   // Auth
@@ -1283,6 +1336,8 @@ export default {
   errors: {
     somethingWentWrong: '出错了',
     pageNotFound: '页面未找到',
+    pageNotFoundDescription: '你访问的页面不存在，或已被移动。',
+    needHelp: '需要帮助？',
     unauthorized: '未授权',
     forbidden: '禁止访问',
     serverError: '服务器错误',
@@ -1995,6 +2050,14 @@ export default {
       sortOrderHint: '拖拽分组调整显示顺序，排在前面的分组会优先显示',
       sortOrderUpdated: '排序已更新',
       failedToUpdateSortOrder: '更新排序失败',
+      accountFilter: {
+        title: '账号过滤控制',
+        oauthOnly: '仅允许 OAuth 账号',
+        oauthOnlyEnabled: '已启用 — 排除 API Key 类型账号',
+        privacyOnly: '仅允许隐私保护已设置的账号',
+        privacyOnlyEnabled: '已启用 — Privacy 未设置的账号将被排除',
+        disabled: '未启用'
+      },
       deleteConfirm: "确定要删除分组 '{name}' 吗？所有关联的 API 密钥将不再属于任何分组。",
       deleteConfirmSubscription:
         "确定要删除订阅分组 '{name}' 吗？此操作会让所有绑定此订阅的用户的 API Key 失效，并删除所有相关的订阅记录。此操作无法撤销。",
@@ -3919,6 +3982,11 @@ export default {
       createSuccess: '计划创建成功',
       updateSuccess: '计划更新成功',
       deleteSuccess: '计划删除成功',
+      failedToLoadPlans: '加载计划失败',
+      failedToCreatePlan: '创建计划失败',
+      failedToUpdatePlan: '更新计划失败',
+      failedToDeletePlan: '删除计划失败',
+      failedToLoadResults: '加载结果失败',
       results: '测试结果',
       noResults: '暂无测试结果',
       responseText: '响应',
@@ -4442,6 +4510,7 @@ export default {
     ops: {
       title: '运维监控',
       description: '运维监控与排障',
+      autoRefreshRemaining: '剩余 {seconds}s',
       // Dashboard
       systemHealth: '系统健康',
       overview: '概览',
@@ -4559,6 +4628,57 @@ export default {
           totalOutputTokens: '输出 Token 总数',
           avgDurationMs: '平均时长(ms)',
           requestsWithFirstToken: '首 Token 样本数'
+        }
+      },
+      systemLogs: {
+        title: '系统日志',
+        description: '默认按最新时间倒序，支持筛选搜索与按条件清理。',
+        loadFailed: '系统日志加载失败',
+        empty: '暂无系统日志',
+        cleanupConfirm: '确认按当前筛选条件清理系统日志？该操作不可撤销。',
+        cleanupSuccess: '清理完成，删除 {count} 条日志',
+        cleanupFailed: '清理系统日志失败',
+        cleanupFiltered: '按当前筛选清理',
+        refreshHealth: '刷新健康指标',
+        health: {
+          queue: '队列 {depth}/{capacity}',
+          written: '写入 {count}',
+          dropped: '丢弃 {count}',
+          failed: '失败 {count}'
+        },
+        runtime: {
+          title: '运行时日志配置（实时生效）',
+          stacktraceLevel: '堆栈阈值',
+          samplingInitial: '采样初始',
+          samplingThereafter: '采样后续',
+          retentionDays: '保留天数',
+          caller: 'caller',
+          sampling: 'sampling',
+          saveAndApply: '保存并生效',
+          saveSuccess: '日志运行时配置已生效',
+          saveFailed: '保存日志配置失败',
+          reset: '回滚默认值',
+          resetConfirm: '确认回滚为启动配置（env/yaml）并立即生效？',
+          resetSuccess: '已回滚到启动日志配置',
+          resetFailed: '回滚日志配置失败',
+          lastError: '最近写入错误：{error}'
+        },
+        filters: {
+          timeRange: '时间范围',
+          startTime: '开始时间（可选）',
+          endTime: '结束时间（可选）',
+          level: '级别',
+          component: '组件',
+          componentPlaceholder: '如 http.access',
+          platform: '平台',
+          model: '模型',
+          keyword: '关键词',
+          keywordPlaceholder: '消息/request_id'
+        },
+        table: {
+          time: '时间',
+          level: '级别',
+          details: '日志详细信息'
         }
       },
       customTimeRange: {
@@ -6327,6 +6447,7 @@ export default {
     notFoundDesc: '该自定义页面不存在或已被删除。',
     notConfiguredTitle: '页面链接未配置',
     notConfiguredDesc: '该自定义页面的 URL 未正确配置。',
+    loadFailed: '页面加载失败',
   },
 
   // Announcements Page
