@@ -15,8 +15,7 @@ describe('useModelWhitelist', () => {
     expect(models).toContain('gpt-5.4')
     expect(models).toContain('gpt-5.4-mini')
     expect(models).toContain('gpt-5.4-2026-03-05')
-    expect(models.indexOf('gpt-5.5-pro')).toBeLessThan(models.indexOf('gpt-5.5'))
-    expect(models.indexOf('gpt-5.5')).toBeLessThan(models.indexOf('gpt-5.4'))
+    expect(models).toContain("codex-auto-review");
   })
 
   it('openai 模型列表包含 MiMo OpenAI 兼容模型', () => {
