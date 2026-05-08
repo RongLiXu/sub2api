@@ -4,7 +4,7 @@ vi.mock('@/api/admin/accounts', () => ({
   getAntigravityDefaultModelMapping: vi.fn()
 }))
 
-import { buildModelMappingObject, getModelsByPlatform } from '../useModelWhitelist'
+import { allModels, buildModelMappingObject, getModelsByPlatform } from '../useModelWhitelist'
 
 describe('useModelWhitelist', () => {
   it('openai 模型列表包含 GPT-5.5 和 GPT-5.4 官方快照', () => {
@@ -38,6 +38,14 @@ describe('useModelWhitelist', () => {
 
     expect(models).toContain('deepseek-v4-flash')
     expect(models).toContain('deepseek-v4-pro')
+  })
+
+  it('allModels 会对跨平台重复模型去重，避免 DeepSeek V4 重复出现', () => {
+    const deepseekV4Models = allModels
+      .map(model => model.value)
+      .filter(model => model === 'deepseek-v4-flash' || model === 'deepseek-v4-pro')
+
+    expect(deepseekV4Models).toEqual(['deepseek-v4-flash', 'deepseek-v4-pro'])
   })
 
   it('anthropic 模型列表包含最新 Claude 官方模型', () => {
