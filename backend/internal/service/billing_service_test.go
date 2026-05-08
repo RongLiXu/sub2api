@@ -278,6 +278,46 @@ func TestGetModelPricing_OpenAICompactAliasesFallback(t *testing.T) {
 	}
 }
 
+func TestGetModelPricing_DeepSeekCompatibilityAliases(t *testing.T) {
+	pricingSvc := &PricingService{
+		pricingData: map[string]*LiteLLMModelPricing{
+			"deepseek-chat": {
+				InputCostPerToken:       2.8e-7,
+				OutputCostPerToken:      4.2e-7,
+				CacheReadInputTokenCost: 2.8e-8,
+			},
+			"deepseek-reasoner": {
+				InputCostPerToken:       3.2e-7,
+				OutputCostPerToken:      5.6e-7,
+				CacheReadInputTokenCost: 3.2e-8,
+			},
+		},
+	}
+	svc := NewBillingService(&config.Config{}, pricingSvc)
+
+	tests := []struct {
+		model       string
+		inputPrice  float64
+		outputPrice float64
+		cacheRead   float64
+	}{
+		{model: "deepseek-coder", inputPrice: 2.8e-7, outputPrice: 4.2e-7, cacheRead: 2.8e-8},
+		{model: "deepseek-v3-0324", inputPrice: 2.8e-7, outputPrice: 4.2e-7, cacheRead: 2.8e-8},
+		{model: "deepseek-r1-0528", inputPrice: 3.2e-7, outputPrice: 5.6e-7, cacheRead: 3.2e-8},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.model, func(t *testing.T) {
+			pricing, err := svc.GetModelPricing(tt.model)
+			require.NoError(t, err)
+			require.NotNil(t, pricing)
+			require.InDelta(t, tt.inputPrice, pricing.InputPricePerToken, 1e-12)
+			require.InDelta(t, tt.outputPrice, pricing.OutputPricePerToken, 1e-12)
+			require.InDelta(t, tt.cacheRead, pricing.CacheReadPricePerToken, 1e-12)
+		})
+	}
+}
+
 func TestGetModelPricing_OpenAIGPT54MiniFallback(t *testing.T) {
 	svc := newTestBillingService()
 

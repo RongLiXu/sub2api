@@ -876,6 +876,120 @@ func TestOpenAIGatewayServiceRecordUsage_ServiceTierFlexHalvesCost(t *testing.T)
 	require.InDelta(t, baseCost.TotalCost*0.5, usageRepo.lastLog.TotalCost, 1e-10)
 }
 
+func TestOpenAIGatewayServiceRecordUsage_DeepSeekPromptCacheHitTokensBillAsCacheRead(t *testing.T) {
+	usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
+	userRepo := &openAIRecordUsageUserRepoStub{}
+	subRepo := &openAIRecordUsageSubRepoStub{}
+	svc := newOpenAIRecordUsageServiceForTest(usageRepo, userRepo, subRepo, nil)
+	svc.billingService = NewBillingService(svc.cfg, &PricingService{
+		pricingData: map[string]*LiteLLMModelPricing{
+			"deepseek-chat": {
+				InputCostPerToken:       1.4e-7,
+				OutputCostPerToken:      2.8e-7,
+				CacheReadInputTokenCost: 2.8e-8,
+			},
+		},
+	})
+
+	usage := OpenAIUsage{
+		InputTokens:          120,
+		OutputTokens:         30,
+		CacheReadInputTokens: 40,
+	}
+
+	err := svc.RecordUsage(context.Background(), &OpenAIRecordUsageInput{
+		Result: &OpenAIForwardResult{
+			RequestID: "resp_deepseek_cache_hit_usage",
+			Usage:     usage,
+			Model:     "deepseek-chat",
+			Duration:  time.Second,
+		},
+		APIKey:  &APIKey{ID: 1100},
+		User:    &User{ID: 2100},
+		Account: &Account{ID: 3100},
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, usageRepo.lastLog)
+	require.Equal(t, 80, usageRepo.lastLog.InputTokens)
+	require.Equal(t, 40, usageRepo.lastLog.CacheReadTokens)
+
+	expectedCost, calcErr := svc.billingService.CalculateCost("deepseek-chat", UsageTokens{
+		InputTokens:     80,
+		OutputTokens:    30,
+		CacheReadTokens: 40,
+	}, 1.1)
+	require.NoError(t, calcErr)
+	require.InDelta(t, expectedCost.TotalCost, usageRepo.lastLog.TotalCost, 1e-12)
+	require.InDelta(t, expectedCost.ActualCost, usageRepo.lastLog.ActualCost, 1e-12)
+	require.InDelta(t, expectedCost.ActualCost, userRepo.lastAmount, 1e-12)
+}
+
+func TestOpenAIGatewayServiceRecordUsage_GLM47TieredBillingAndCacheRead(t *testing.T) {
+	usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
+	userRepo := &openAIRecordUsageUserRepoStub{}
+	subRepo := &openAIRecordUsageSubRepoStub{}
+	svc := newOpenAIRecordUsageServiceForTest(usageRepo, userRepo, subRepo, nil)
+	svc.billingService = NewBillingService(svc.cfg, &PricingService{
+		pricingData: map[string]*LiteLLMModelPricing{
+			"glm-4.7": {
+				InputCostPerToken:       2e-6,
+				OutputCostPerToken:      8e-6,
+				CacheReadInputTokenCost: 4e-7,
+				TokenPricingTiers: []LiteLLMTokenPricingTier{
+					{
+						MaxInputTokens:          32000,
+						MaxOutputTokens:         200,
+						InputCostPerToken:       2e-6,
+						OutputCostPerToken:      8e-6,
+						CacheReadInputTokenCost: 4e-7,
+					},
+					{
+						MaxInputTokens:          32000,
+						MinOutputTokens:         200,
+						InputCostPerToken:       3e-6,
+						OutputCostPerToken:      14e-6,
+						CacheReadInputTokenCost: 6e-7,
+					},
+				},
+			},
+		},
+	})
+
+	usage := OpenAIUsage{
+		InputTokens:          1100,
+		OutputTokens:         200,
+		CacheReadInputTokens: 100,
+	}
+
+	err := svc.RecordUsage(context.Background(), &OpenAIRecordUsageInput{
+		Result: &OpenAIForwardResult{
+			RequestID: "resp_glm47_tiered_usage",
+			Usage:     usage,
+			Model:     "glm-4.7",
+			Duration:  time.Second,
+		},
+		APIKey:  &APIKey{ID: 1200},
+		User:    &User{ID: 2200},
+		Account: &Account{ID: 3200},
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, usageRepo.lastLog)
+	require.Equal(t, 1000, usageRepo.lastLog.InputTokens)
+	require.Equal(t, 100, usageRepo.lastLog.CacheReadTokens)
+
+	expectedCost, calcErr := svc.billingService.CalculateCost("glm-4.7", UsageTokens{
+		InputTokens:     1000,
+		OutputTokens:    200,
+		CacheReadTokens: 100,
+	}, 1.1)
+	require.NoError(t, calcErr)
+	require.InDelta(t, expectedCost.TotalCost, usageRepo.lastLog.TotalCost, 1e-12)
+	require.InDelta(t, expectedCost.ActualCost, usageRepo.lastLog.ActualCost, 1e-12)
+	require.InDelta(t, expectedCost.ActualCost, userRepo.lastAmount, 1e-12)
+}
+
 func TestNormalizeOpenAIServiceTier(t *testing.T) {
 	t.Run("fast maps to priority", func(t *testing.T) {
 		got := normalizeOpenAIServiceTier(" fast ")

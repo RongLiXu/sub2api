@@ -704,21 +704,40 @@ func (s *PricingService) buildModelLookupCandidates(modelLower string) []string 
 
 	seen := make(map[string]struct{}, len(candidates))
 	out := make([]string, 0, len(candidates))
+	appendCandidate := func(candidate string) {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "" {
+			return
+		}
+		if _, ok := seen[candidate]; ok {
+			return
+		}
+		seen[candidate] = struct{}{}
+		out = append(out, candidate)
+	}
 	for _, c := range candidates {
 		c = strings.TrimSpace(c)
 		if c == "" {
 			continue
 		}
-		if _, ok := seen[c]; ok {
-			continue
-		}
-		seen[c] = struct{}{}
-		out = append(out, c)
+		appendCandidate(c)
+		appendCandidate(canonicalizeDeepSeekPricingAlias(c))
 	}
 	if len(out) == 0 {
 		return []string{modelLower}
 	}
 	return out
+}
+
+func canonicalizeDeepSeekPricingAlias(model string) string {
+	switch strings.TrimSpace(strings.ToLower(model)) {
+	case "deepseek-coder", "deepseek-v3", "deepseek-v3-0324":
+		return "deepseek-chat"
+	case "deepseek-r1", "deepseek-r1-0528":
+		return "deepseek-reasoner"
+	default:
+		return ""
+	}
 }
 
 func normalizeModelNameForPricing(model string) string {

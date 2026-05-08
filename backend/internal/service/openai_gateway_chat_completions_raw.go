@@ -351,14 +351,41 @@ func extractCCStreamUsage(payload string) *OpenAIUsage {
 	if !usageResult.Exists() || !usageResult.IsObject() {
 		return nil
 	}
-	u := OpenAIUsage{
-		InputTokens:  int(gjson.Get(payload, "usage.prompt_tokens").Int()),
-		OutputTokens: int(gjson.Get(payload, "usage.completion_tokens").Int()),
-	}
-	if cached := gjson.Get(payload, "usage.prompt_tokens_details.cached_tokens"); cached.Exists() {
-		u.CacheReadInputTokens = int(cached.Int())
-	}
+	u := extractRawChatCompletionsUsage(payload)
 	return &u
+}
+
+func extractRawChatCompletionsUsage(payload string) OpenAIUsage {
+	inputTokens := int(gjson.Get(payload, "usage.prompt_tokens").Int())
+	if inputTokens == 0 && !gjson.Get(payload, "usage.prompt_tokens").Exists() {
+		inputTokens = int(gjson.Get(payload, "usage.input_tokens").Int())
+	}
+
+	outputTokens := int(gjson.Get(payload, "usage.completion_tokens").Int())
+	if outputTokens == 0 && !gjson.Get(payload, "usage.completion_tokens").Exists() {
+		outputTokens = int(gjson.Get(payload, "usage.output_tokens").Int())
+	}
+
+	cacheReadTokens := 0
+	if cached := gjson.Get(payload, "usage.prompt_tokens_details.cached_tokens"); cached.Exists() {
+		cacheReadTokens = int(cached.Int())
+	} else if cached := gjson.Get(payload, "usage.prompt_cache_hit_tokens"); cached.Exists() {
+		cacheReadTokens = int(cached.Int())
+	} else if cached := gjson.Get(payload, "usage.input_tokens_details.cached_tokens"); cached.Exists() {
+		cacheReadTokens = int(cached.Int())
+	}
+
+	imageOutputTokens := 0
+	if imageTokens := gjson.Get(payload, "usage.output_tokens_details.image_tokens"); imageTokens.Exists() {
+		imageOutputTokens = int(imageTokens.Int())
+	}
+
+	return OpenAIUsage{
+		InputTokens:          inputTokens,
+		OutputTokens:         outputTokens,
+		CacheReadInputTokens: cacheReadTokens,
+		ImageOutputTokens:    imageOutputTokens,
+	}
 }
 
 // bufferRawChatCompletions 透传上游 CC 非流式 JSON 响应。
@@ -385,13 +412,9 @@ func (s *OpenAIGatewayService) bufferRawChatCompletions(
 	var ccResp apicompat.ChatCompletionsResponse
 	var usage OpenAIUsage
 	if err := json.Unmarshal(respBody, &ccResp); err == nil && ccResp.Usage != nil {
-		usage = OpenAIUsage{
-			InputTokens:  ccResp.Usage.PromptTokens,
-			OutputTokens: ccResp.Usage.CompletionTokens,
-		}
-		if ccResp.Usage.PromptTokensDetails != nil {
-			usage.CacheReadInputTokens = ccResp.Usage.PromptTokensDetails.CachedTokens
-		}
+		usage = extractRawChatCompletionsUsage(string(respBody))
+	} else if gjson.GetBytes(respBody, "usage").Exists() {
+		usage = extractRawChatCompletionsUsage(string(respBody))
 	}
 
 	if s.responseHeaderFilter != nil {
