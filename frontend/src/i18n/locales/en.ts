@@ -110,6 +110,11 @@ export default {
     }
   },
 
+  layout: {
+    siteSubtitle: 'Subscription to API Conversion Platform',
+    copyright: 'All rights reserved.'
+  },
+
   // Key Usage Query Page
   keyUsage: {
     title: 'API Key Usage',
@@ -323,6 +328,21 @@ export default {
     settings: 'Settings',
     chooseFile: 'Choose File',
     copy: 'Copy',
+    logoAlt: 'Logo',
+    closeModal: 'Close modal',
+    closeNotification: 'Close notification',
+    toggleMenu: 'Toggle menu',
+    userMenu: 'User menu',
+    selectOptionAria: 'Select option',
+    paginationNav: 'Pagination',
+    clearUserFilter: 'Clear user filter',
+    clearApiKeyFilter: 'Clear API key filter',
+    clearAccountFilter: 'Clear account filter',
+    copyUrl: 'Copy URL',
+    refreshToken: 'Refresh Token',
+    projectId: 'Project ID',
+    location: 'Location',
+    tableOfContents: 'Table of contents',
     notAvailable: 'N/A',
     now: 'Now',
     today: 'Today',
@@ -3194,6 +3214,9 @@ export default {
       bedrockDesc: 'SigV4 / API Key',
       vertexLabel: 'Vertex',
       vertexDesc: 'Service Account',
+      vertexProjectIdLabel: 'Project ID',
+      vertexLocationLabel: 'Location',
+      vertexClientEmailLabel: 'Client Email',
       vertexAnthropicHint: 'Use a Google Cloud Service Account JSON to call Anthropic Claude via Vertex AI. It is recommended to configure model mapping to map client Claude model names to Vertex model IDs.',
       vertexGeminiHint: 'Use a Google Cloud Service Account JSON to access Vertex AI Gemini. It is recommended to place Vertex accounts in a separate group to avoid mixing with AI Studio/Gemini OAuth on the same models.',
       vertexSaJsonLabel: 'Service Account JSON',
@@ -3716,6 +3739,16 @@ export default {
           quotaLink: 'Quota guide'
         },
         oauthType: {
+          googleOneDesc: 'Personal account with Google One subscription quota.',
+          recommendedPersonal: 'Recommended for personal users',
+          noGcpRequired: 'No GCP required',
+          codeAssistTitle: 'GCP Code Assist',
+          codeAssistDesc: 'For enterprises, requires a GCP project.',
+          codeAssistRequirement: 'You need to activate a GCP project and attach a credit card.',
+          enterpriseUsers: 'Enterprise users',
+          highConcurrency: 'High concurrency',
+          advancedHide: 'Hide advanced options (custom OAuth client)',
+          advancedShow: 'Show advanced options (custom OAuth client)',
           builtInTitle: 'Built-in OAuth (Gemini CLI / Code Assist)',
           builtInDesc: 'Uses Google built-in client ID. No admin configuration required.',
           builtInRequirement: 'Requires a GCP project and Project ID.',
@@ -6094,6 +6127,37 @@ export default {
         fallbackErrorMessagePlaceholder: 'Custom error message when non-whitelisted models are blocked'
       },
       wechatConnect: {
+        emailOAuthTitle: 'Email OAuth Sign-in',
+        emailOAuthDescription: 'After GitHub or Google email OAuth is enabled, the system reads a verified email, signs in matching users, and auto-registers missing users.',
+        githubOAuthHint: 'GitHub OAuth App needs read:user user:email scopes. Use the backend callback URL below.',
+        githubOAuthGuide: 'Setup guide: GitHub Settings → Developer settings → OAuth Apps → New OAuth App. Use your site origin as Homepage URL and the backend callback URL below as Authorization callback URL.',
+        googleOAuthHint: 'Google OAuth client needs openid email profile scopes and the backend callback URL registered in credentials.',
+        googleOAuthGuide: 'Setup guide: Google Cloud Console → APIs & Services → OAuth consent screen, then Credentials → Create Credentials → OAuth client ID, choose Web application, and add the URL below to Authorized redirect URIs.',
+        secretConfiguredKeepHint: 'Secret configured. Leave empty to keep the current value.',
+        backendCallbackUrl: 'Backend Callback URL',
+        frontendCallbackUrl: 'Frontend Callback URL',
+        browserRedirectUrl: 'Browser Redirect URL',
+        browserRedirectUrlHint: 'Used by PC App and Official Account browser callbacks. Native mobile SDK flows do not start from this browser callback directly.',
+        pcAppTitle: 'PC App',
+        pcAppHint: 'Desktop browsers sign in through WeChat Open Platform QR login. This can coexist with Official Account or Mobile App.',
+        pcAppIdLabel: 'PC App ID',
+        pcAppIdPlaceholder: 'WeChat Open Platform PC App ID',
+        pcAppSecretLabel: 'PC App Secret',
+        pcAppSecretPlaceholder: 'WeChat Open Platform PC App Secret',
+        officialAccountTitle: 'Official Account',
+        officialAccountHint: 'Only available inside the WeChat browser. It is shown as unavailable outside WeChat.',
+        officialAccountAppIdLabel: 'Official Account App ID',
+        officialAccountAppIdPlaceholder: 'Official Account App ID',
+        officialAccountAppSecretLabel: 'Official Account App Secret',
+        officialAccountAppSecretPlaceholder: 'Official Account App Secret',
+        mobileAppTitle: 'Mobile App',
+        mobileAppHint: 'Native mobile clients start authorization through the WeChat SDK. The web UI does not launch this flow directly.',
+        mobileAppIdLabel: 'Mobile App ID',
+        mobileAppIdPlaceholder: 'Mobile App ID',
+        mobileAppSecretLabel: 'Mobile App Secret',
+        mobileAppSecretPlaceholder: 'Mobile App Secret',
+        unionIdHint: 'When PC App is enabled together with Official Account or Mobile App, they should belong to the same WeChat Open Platform account so UnionID can merge identities reliably.',
+        mobileOfficialConflict: 'Official Account and Mobile App cannot be enabled at the same time.',
         title: 'WeChat Connect',
         description: 'Third-party login configuration for WeChat Open Platform or Official Account / Mini Program.',
         enabledLabel: 'Enable WeChat Connect',
@@ -6140,6 +6204,14 @@ export default {
           wechat: {
             title: 'WeChat signup',
             description: 'Default quota grants for WeChat signups.'
+          },
+          github: {
+            title: 'GitHub signup',
+            description: 'Applied on first signup or first bind through a verified GitHub email.'
+          },
+          google: {
+            title: 'Google signup',
+            description: 'Applied on first signup or first bind through a verified Google email.'
           }
         },
         grantOnFirstBindLabel: 'Grant on first bind',
@@ -6360,6 +6432,7 @@ export default {
   // Custom Page (iframe embed)
   customPage: {
     title: 'Custom Page',
+    tableOfContents: 'Table of contents',
     openInNewTab: 'Open in new tab',
     notFoundTitle: 'Page not found',
     notFoundDesc: 'This custom page does not exist or has been removed.',

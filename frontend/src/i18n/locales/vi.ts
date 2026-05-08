@@ -5751,6 +5751,37 @@ const messages = {
         "fallbackErrorMessagePlaceholder": "Thông báo lỗi tùy chỉnh khi các mẫu không có trong danh sách trắng bị chặn"
       },
       "wechatConnect": {
+        "emailOAuthTitle": "Đăng nhập Email OAuth",
+        "emailOAuthDescription": "Sau khi bật đăng nhập GitHub hoặc Google bằng email, hệ thống sẽ đọc email đã xác minh, đăng nhập người dùng đã tồn tại và tự động đăng ký người dùng mới.",
+        "githubOAuthHint": "GitHub OAuth App cần quyền read:user và user:email. Hãy dùng URL callback backend bên dưới.",
+        "githubOAuthGuide": "Hướng dẫn: GitHub Settings → Developer settings → OAuth Apps → New OAuth App. Dùng origin trang web của bạn làm Homepage URL và URL callback backend bên dưới làm Authorization callback URL.",
+        "googleOAuthHint": "Google OAuth client cần phạm vi openid email profile và phải đăng ký URL callback backend trong phần credentials.",
+        "googleOAuthGuide": "Hướng dẫn: Google Cloud Console → APIs & Services → OAuth consent screen, sau đó vào Credentials → Create Credentials → OAuth client ID, chọn Web application và thêm URL bên dưới vào Authorized redirect URIs.",
+        "secretConfiguredKeepHint": "Secret đã được cấu hình. Để trống để giữ nguyên giá trị hiện tại.",
+        "backendCallbackUrl": "Backend Callback URL",
+        "frontendCallbackUrl": "Frontend Callback URL",
+        "browserRedirectUrl": "Browser Redirect URL",
+        "browserRedirectUrlHint": "Dùng cho callback trình duyệt của PC App và Official Account. Luồng SDK mobile gốc không khởi động trực tiếp từ callback trình duyệt này.",
+        "pcAppTitle": "PC App",
+        "pcAppHint": "Trình duyệt desktop đăng nhập bằng mã QR của WeChat Open Platform. Có thể dùng cùng với Official Account hoặc Mobile App.",
+        "pcAppIdLabel": "PC App ID",
+        "pcAppIdPlaceholder": "WeChat Open Platform PC App ID",
+        "pcAppSecretLabel": "PC App Secret",
+        "pcAppSecretPlaceholder": "WeChat Open Platform PC App Secret",
+        "officialAccountTitle": "Official Account",
+        "officialAccountHint": "Chỉ dùng được trong trình duyệt WeChat; ngoài WeChat sẽ hiển thị là không khả dụng.",
+        "officialAccountAppIdLabel": "Official Account App ID",
+        "officialAccountAppIdPlaceholder": "Official Account App ID",
+        "officialAccountAppSecretLabel": "Official Account App Secret",
+        "officialAccountAppSecretPlaceholder": "Official Account App Secret",
+        "mobileAppTitle": "Mobile App",
+        "mobileAppHint": "Ứng dụng di động gốc khởi động xác thực qua WeChat SDK. Giao diện web không khởi chạy trực tiếp luồng này.",
+        "mobileAppIdLabel": "Mobile App ID",
+        "mobileAppIdPlaceholder": "Mobile App ID",
+        "mobileAppSecretLabel": "Mobile App Secret",
+        "mobileAppSecretPlaceholder": "Mobile App Secret",
+        "unionIdHint": "Khi bật PC App cùng với Official Account hoặc Mobile App, chúng nên thuộc cùng một tài khoản WeChat Open Platform để UnionID có thể hợp nhất danh tính ổn định.",
+        "mobileOfficialConflict": "Không thể bật Official Account và Mobile App cùng lúc.",
         "title": "Kết nối WeChat",
         "description": "Cấu hình đăng nhập của bên thứ ba cho Nền tảng mở WeChat hoặc Tài khoản chính thức / Chương trình nhỏ.",
         "enabledLabel": "Kích hoạt kết nối WeChat",
@@ -5797,6 +5828,14 @@ const messages = {
           "wechat": {
             "title": "đăng ký WeChat",
             "description": "Cấp hạn ngạch mặc định cho đăng ký WeChat."
+          },
+          "github": {
+            "title": "Đăng nhập GitHub",
+            "description": "Áp dụng khi đăng ký lần đầu hoặc liên kết lần đầu thông qua email GitHub đã xác minh."
+          },
+          "google": {
+            "title": "Đăng nhập Google",
+            "description": "Áp dụng khi đăng ký lần đầu hoặc liên kết lần đầu thông qua email Google đã xác minh."
           }
         },
         "grantOnFirstBindLabel": "Cấp cho liên kết đầu tiên",

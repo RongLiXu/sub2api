@@ -1,4 +1,5 @@
 import { createI18n } from 'vue-i18n'
+import { mergeLocaleMessages } from './locales/mergeLocaleMessages'
 
 type LocaleCode = 'en' | 'zh' | 'hk' | 'ja' | 'vn' | 'fr' | 'ru' | 'ko' | 'th'
 
@@ -18,6 +19,13 @@ const localeLoaders: Record<LocaleCode, () => Promise<{ default: LocaleMessages 
   ru: () => import('./locales/ru'),
   ko: () => import('./locales/ko'),
   th: () => import('./locales/th')
+}
+
+const localePatchLoaders: Partial<Record<LocaleCode, () => Promise<{ default: LocaleMessages }>>> = {
+  fr: () => import('./locales/fr.extra'),
+  ru: () => import('./locales/ru.extra'),
+  ko: () => import('./locales/ko.extra'),
+  th: () => import('./locales/th.extra')
 }
 
 function isLocaleCode(value: string): value is LocaleCode {
@@ -147,7 +155,13 @@ export async function loadLocaleMessages(locale: LocaleCode): Promise<void> {
 
   const loader = localeLoaders[locale]
   const module = await loader()
-  i18n.global.setLocaleMessage(locale, module.default)
+  const patchLoader = localePatchLoaders[locale]
+  if (patchLoader) {
+    const patchModule = await patchLoader()
+    i18n.global.setLocaleMessage(locale, mergeLocaleMessages(module.default, patchModule.default))
+  } else {
+    i18n.global.setLocaleMessage(locale, module.default)
+  }
   loadedLocales.add(locale)
 }
 

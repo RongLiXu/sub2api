@@ -13,7 +13,7 @@
         <div class="flex items-center gap-4">
           <router-link to="/home" class="flex items-center gap-3">
             <div class="h-10 w-10 overflow-hidden rounded-2xl bg-white shadow-md shadow-black/5 dark:bg-dark-800">
-              <img :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
+              <img :src="siteLogo || '/logo.png'" :alt="t('common.logoAlt')" class="h-full w-full object-contain" />
             </div>
             <div>
               <div class="text-sm font-semibold tracking-wide text-gray-900 dark:text-white">

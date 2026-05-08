@@ -323,6 +323,21 @@ export default {
     settings: '设置',
     chooseFile: '选择文件',
     copy: '复制',
+    logoAlt: 'Logo',
+    closeModal: '关闭弹窗',
+    closeNotification: '关闭通知',
+    toggleMenu: '切换菜单',
+    userMenu: '用户菜单',
+    selectOptionAria: '选择选项',
+    paginationNav: '分页导航',
+    clearUserFilter: '清除用户筛选',
+    clearApiKeyFilter: '清除 API Key 筛选',
+    clearAccountFilter: '清除账号筛选',
+    copyUrl: '复制 URL',
+    refreshToken: 'Refresh Token',
+    projectId: 'Project ID',
+    location: 'Location',
+    tableOfContents: '目录',
     notAvailable: '不可用',
     now: '现在',
     today: '今天',
@@ -1342,6 +1357,11 @@ export default {
   table: {
     expandActions: '展开更多操作',
     collapseActions: '收起操作'
+  },
+
+  layout: {
+    siteSubtitle: '订阅转 API 平台',
+    copyright: '版权所有。'
   },
 
   // Pagination
@@ -3359,6 +3379,9 @@ export default {
       vertexAnthropicHint: '使用 Google Cloud Service Account JSON 通过 Vertex AI 调用 Anthropic Claude。建议配置模型映射，将客户端 Claude 模型名映射到 Vertex 模型 ID。',
       vertexGeminiHint: '使用 Google Cloud Service Account JSON 访问 Vertex AI Gemini。建议将 Vertex 账号放入独立分组，避免和 AI Studio/Gemini OAuth 同模型混调。',
       vertexSaJsonLabel: 'Service Account JSON',
+      vertexProjectIdLabel: 'Project ID',
+      vertexLocationLabel: 'Location',
+      vertexClientEmailLabel: 'Client Email',
       vertexSaJsonLoaded: '已读取 Service Account JSON',
       vertexSaJsonDrop: '拖入 Service Account JSON',
       vertexSaJsonKeyHidden: '密钥内容不会在表单中显示。',
@@ -3860,6 +3883,16 @@ export default {
           quotaLink: '配额说明'
         },
         oauthType: {
+          googleOneDesc: '个人账号，享受 Google One 订阅配额',
+          recommendedPersonal: '推荐个人用户',
+          noGcpRequired: '无需 GCP',
+          codeAssistTitle: 'GCP Code Assist',
+          codeAssistDesc: '企业级，需要 GCP 项目',
+          codeAssistRequirement: '需要激活 GCP 项目并绑定信用卡',
+          enterpriseUsers: '企业用户',
+          highConcurrency: '高并发',
+          advancedHide: '隐藏高级选项（自建 OAuth Client）',
+          advancedShow: '显示高级选项（自建 OAuth Client）',
           builtInTitle: '内置授权（Gemini CLI / Code Assist）',
           builtInDesc: '使用 Google 内置客户端 ID，无需管理员配置。',
           builtInRequirement: '需要 GCP 项目并填写 Project ID。',
@@ -6268,6 +6301,37 @@ export default {
         fallbackErrorMessagePlaceholder: '未匹配模型被拦截时返回的自定义错误消息'
       },
       wechatConnect: {
+        emailOAuthTitle: '邮箱快捷登录',
+        emailOAuthDescription: '开启 GitHub 或 Google 邮箱授权登录后，系统会读取已验证邮箱，存在则直接登录，不存在则自动注册。',
+        githubOAuthHint: 'GitHub OAuth App 需要 read:user user:email 权限，回调地址填写下方后端地址。',
+        githubOAuthGuide: '开通引导：GitHub Settings → Developer settings → OAuth Apps → New OAuth App；Homepage URL 填站点域名，Authorization callback URL 填下面的后端回调地址。',
+        googleOAuthHint: 'Google OAuth 客户端需要 openid email profile 范围，并在凭据里登记后端回调地址。',
+        googleOAuthGuide: '开通引导：Google Cloud Console → APIs & Services → OAuth consent screen 完成同意屏幕；Credentials → Create Credentials → OAuth client ID，类型选择 Web application，并把下面地址加入 Authorized redirect URIs。',
+        secretConfiguredKeepHint: '密钥已配置，留空以保留当前值。',
+        backendCallbackUrl: '后端回调地址',
+        frontendCallbackUrl: '前端回跳地址',
+        browserRedirectUrl: '浏览器回调地址',
+        browserRedirectUrlHint: '用于 PC 应用和公众号的网页回调。移动应用走原生 SDK 时不直接使用这个浏览器回调。',
+        pcAppTitle: 'PC 应用',
+        pcAppHint: '桌面浏览器通过微信开放平台扫码登录。可与公众号或移动应用同时存在。',
+        pcAppIdLabel: 'PC AppID',
+        pcAppIdPlaceholder: '微信开放平台 PC 应用 AppID',
+        pcAppSecretLabel: 'PC AppSecret',
+        pcAppSecretPlaceholder: '微信开放平台 PC 应用 AppSecret',
+        officialAccountTitle: '公众号',
+        officialAccountHint: '仅在微信内浏览器可用；非微信环境下会显示不可用。',
+        officialAccountAppIdLabel: '公众号 AppID',
+        officialAccountAppIdPlaceholder: '公众号 AppID',
+        officialAccountAppSecretLabel: '公众号 AppSecret',
+        officialAccountAppSecretPlaceholder: '公众号 AppSecret',
+        mobileAppTitle: '移动应用',
+        mobileAppHint: '原生移动端通过微信 SDK 唤起授权，网页端不会直接发起该流程。',
+        mobileAppIdLabel: '移动应用 AppID',
+        mobileAppIdPlaceholder: '移动应用 AppID',
+        mobileAppSecretLabel: '移动应用 AppSecret',
+        mobileAppSecretPlaceholder: '移动应用 AppSecret',
+        unionIdHint: '如果同时启用 PC 应用和公众号/移动应用，这些应用需要挂在同一个微信开放平台主体下，否则 UnionID 无法稳定归并账号。',
+        mobileOfficialConflict: '公众号和移动应用不能同时启用。',
         title: '微信登录',
         description: '用于微信开放平台或公众号/小程序的第三方登录配置。',
         enabledLabel: '启用微信登录',
@@ -6314,6 +6378,14 @@ export default {
           wechat: {
             title: '微信登录',
             description: '适用于微信第三方注册的新用户默认配额。'
+          },
+          github: {
+            title: 'GitHub 登录',
+            description: '通过 GitHub 已验证邮箱首次注册或首次绑定时应用。'
+          },
+          google: {
+            title: 'Google 登录',
+            description: '通过 Google 已验证邮箱首次注册或首次绑定时应用。'
           }
         },
         grantOnFirstBindLabel: '首次绑定时授权',
@@ -6533,6 +6605,7 @@ export default {
   // Custom Page (iframe embed)
   customPage: {
     title: '自定义页面',
+    tableOfContents: '目录',
     openInNewTab: '新窗口打开',
     notFoundTitle: '页面不存在',
     notFoundDesc: '该自定义页面不存在或已被删除。',

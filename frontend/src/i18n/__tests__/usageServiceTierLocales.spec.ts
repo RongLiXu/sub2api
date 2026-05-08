@@ -107,6 +107,24 @@ describe('usage service tier locale keys', () => {
     expect(zhTW.nav.riskControl).toBe('風控中心')
   })
 
+  it('keeps key page titles localized in fr, ru, ko, and th', () => {
+    expect(fr.auth.createAccount).not.toBe(en.auth.createAccount)
+    expect(fr.dashboard.title).not.toBe(en.dashboard.title)
+    expect(fr.profile.title).not.toBe(en.profile.title)
+
+    expect(ru.auth.createAccount).not.toBe(en.auth.createAccount)
+    expect(ru.dashboard.title).not.toBe(en.dashboard.title)
+    expect(ru.profile.title).not.toBe(en.profile.title)
+
+    expect(ko.auth.createAccount).not.toBe(en.auth.createAccount)
+    expect(ko.dashboard.title).not.toBe(en.dashboard.title)
+    expect(ko.profile.title).not.toBe(en.profile.title)
+
+    expect(th.auth.createAccount).not.toBe(en.auth.createAccount)
+    expect(th.dashboard.title).not.toBe(en.dashboard.title)
+    expect(th.profile.title).not.toBe(en.profile.title)
+  })
+
   it('keeps added locale key structure complete', () => {
     expect(flattenKeys(ja).sort()).toEqual(flattenKeys(en).sort())
     expect(flattenKeys(vi).sort()).toEqual(flattenKeys(en).sort())
