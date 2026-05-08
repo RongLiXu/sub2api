@@ -365,7 +365,8 @@ const messages = {
     "channelManagement": "通路管理",
     "channelPricing": "通路定價",
     "channelMonitor": "通路監控",
-    "channelStatus": "頻道狀態"
+    "channelStatus": "頻道狀態",
+    "riskControl": "風控中心"
   },
   "modelsPage": {
     "headerEyebrow": "公開模型廣場",

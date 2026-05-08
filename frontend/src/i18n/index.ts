@@ -1,19 +1,23 @@
 import { createI18n } from 'vue-i18n'
 
-type LocaleCode = 'en' | 'zh' | 'hk' | 'ja' | 'vn'
+type LocaleCode = 'en' | 'zh' | 'hk' | 'ja' | 'vn' | 'fr' | 'ru' | 'ko' | 'th'
 
 type LocaleMessages = Record<string, any>
 
 const LOCALE_KEY = 'sub2api_locale'
 const DEFAULT_LOCALE: LocaleCode = 'en'
-const LOCALE_CODES: readonly LocaleCode[] = ['en', 'zh', 'hk', 'ja', 'vn']
+const LOCALE_CODES: readonly LocaleCode[] = ['en', 'zh', 'hk', 'ja', 'vn', 'fr', 'ru', 'ko', 'th']
 
 const localeLoaders: Record<LocaleCode, () => Promise<{ default: LocaleMessages }>> = {
   en: () => import('./locales/en'),
   zh: () => import('./locales/zh'),
   hk: () => import('./locales/zh-TW'),
   ja: () => import('./locales/ja'),
-  vn: () => import('./locales/vi')
+  vn: () => import('./locales/vi'),
+  fr: () => import('./locales/fr'),
+  ru: () => import('./locales/ru'),
+  ko: () => import('./locales/ko'),
+  th: () => import('./locales/th')
 }
 
 function isLocaleCode(value: string): value is LocaleCode {
@@ -39,6 +43,22 @@ export function normalizeLocaleCode(value: string | null | undefined): LocaleCod
     return 'vn'
   }
 
+  if (lowercase === 'fr' || lowercase === 'fr-fr') {
+    return 'fr'
+  }
+
+  if (lowercase === 'ru' || lowercase === 'ru-ru') {
+    return 'ru'
+  }
+
+  if (lowercase === 'ko' || lowercase === 'ko-kr') {
+    return 'ko'
+  }
+
+  if (lowercase === 'th' || lowercase === 'th-th') {
+    return 'th'
+  }
+
   return null
 }
 
@@ -52,6 +72,14 @@ export function toIntlLocale(locale: string | null | undefined): string {
       return 'ja-JP'
     case 'vn':
       return 'vi-VN'
+    case 'fr':
+      return 'fr-FR'
+    case 'ru':
+      return 'ru-RU'
+    case 'ko':
+      return 'ko-KR'
+    case 'th':
+      return 'th-TH'
     case 'en':
     default:
       return 'en-US'
@@ -79,6 +107,22 @@ function getDefaultLocale(): LocaleCode {
 
   if (browserLang.startsWith('vi')) {
     return 'vn'
+  }
+
+  if (browserLang.startsWith('fr')) {
+    return 'fr'
+  }
+
+  if (browserLang.startsWith('ru')) {
+    return 'ru'
+  }
+
+  if (browserLang.startsWith('ko')) {
+    return 'ko'
+  }
+
+  if (browserLang.startsWith('th')) {
+    return 'th'
   }
 
   return DEFAULT_LOCALE
@@ -143,7 +187,11 @@ export const availableLocales = [
   { code: 'zh', name: '简体中文', flag: '🇨🇳' },
   { code: 'hk', name: '繁體中文', flag: '🇭🇰' },
   { code: 'ja', name: '日本語', flag: '🇯🇵' },
-  { code: 'vn', name: 'Tiếng Việt', flag: '🇻🇳' }
+  { code: 'vn', name: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+  { code: 'ko', name: '한국어', flag: '🇰🇷' },
+  { code: 'th', name: 'ไทย', flag: '🇹🇭' }
 ] as const
 
 export default i18n

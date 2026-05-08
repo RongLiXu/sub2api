@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import en from '../locales/en'
+import fr from '../locales/fr'
 import ja from '../locales/ja'
+import ko from '../locales/ko'
+import ru from '../locales/ru'
+import th from '../locales/th'
 import vi from '../locales/vi'
 import zh from '../locales/zh'
 import zhTW from '../locales/zh-TW'
@@ -97,15 +101,29 @@ describe('usage service tier locale keys', () => {
     expect(zhTW.usage.serviceTierStandard).toBe('Standard')
   })
 
+  it('keeps risk control navigation localized in ja, vi, and zh-TW', () => {
+    expect(ja.nav.riskControl).toBe('風控センター')
+    expect(vi.nav.riskControl).toBe('Trung tâm kiểm soát rủi ro')
+    expect(zhTW.nav.riskControl).toBe('風控中心')
+  })
+
   it('keeps added locale key structure complete', () => {
     expect(flattenKeys(ja).sort()).toEqual(flattenKeys(en).sort())
     expect(flattenKeys(vi).sort()).toEqual(flattenKeys(en).sort())
+    expect(flattenKeys(fr).sort()).toEqual(flattenKeys(en).sort())
+    expect(flattenKeys(ru).sort()).toEqual(flattenKeys(en).sort())
+    expect(flattenKeys(ko).sort()).toEqual(flattenKeys(en).sort())
+    expect(flattenKeys(th).sort()).toEqual(flattenKeys(en).sort())
     expect(flattenKeys(zhTW).sort()).toEqual(flattenKeys(zh).sort())
   })
 
   it('keeps runtime placeholders unchanged in added locales', () => {
     expectMatchingPlaceholders(en, ja)
     expectMatchingPlaceholders(en, vi)
+    expectMatchingPlaceholders(en, fr)
+    expectMatchingPlaceholders(en, ru)
+    expectMatchingPlaceholders(en, ko)
+    expectMatchingPlaceholders(en, th)
     expectMatchingPlaceholders(zh, zhTW)
   })
 
@@ -113,6 +131,10 @@ describe('usage service tier locale keys', () => {
     const styles = [
       ...collectInlineStyles(ja),
       ...collectInlineStyles(vi),
+      ...collectInlineStyles(fr),
+      ...collectInlineStyles(ru),
+      ...collectInlineStyles(ko),
+      ...collectInlineStyles(th),
       ...collectInlineStyles(zhTW)
     ]
 

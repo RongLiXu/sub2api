@@ -365,7 +365,8 @@ const messages = {
     "channelManagement": "Kênh",
     "channelPricing": "Định giá kênh",
     "channelMonitor": "Giám sát kênh",
-    "channelStatus": "Trạng thái kênh"
+    "channelStatus": "Trạng thái kênh",
+    "riskControl": "Trung tâm kiểm soát rủi ro"
   },
   "modelsPage": {
     "headerEyebrow": "Chợ mô hình công khai",

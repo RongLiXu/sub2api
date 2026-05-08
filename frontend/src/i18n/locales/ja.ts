@@ -365,7 +365,8 @@ const messages = {
     "channelManagement": "チャンネル",
     "channelPricing": "チャンネルの価格設定",
     "channelMonitor": "チャンネルモニター",
-    "channelStatus": "チャンネルステータス"
+    "channelStatus": "チャンネルステータス",
+    "riskControl": "風控センター"
   },
   "modelsPage": {
     "headerEyebrow": "公開モデル広場",
