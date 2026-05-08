@@ -121,6 +121,7 @@ vi.mock("vue-i18n", async () => {
     "admin.settings.wechatConnect.appSecretConfiguredPlaceholder": "密钥已配置，留空以保留当前值。",
     "admin.settings.wechatConnect.appSecretPlaceholder": "微信开放平台 AppSecret",
     "admin.settings.wechatConnect.appSecretConfiguredHint": "密钥已配置，留空以保留当前值。",
+    "admin.settings.wechatConnect.secretConfiguredKeepHint": "密钥已配置，留空以保留当前值。",
     "admin.settings.wechatConnect.appSecretHint": "填写后会覆盖当前微信密钥。",
     "admin.settings.wechatConnect.modeLabel": "模式",
     "admin.settings.wechatConnect.openModeLabel": "非微信环境使用开放平台",
