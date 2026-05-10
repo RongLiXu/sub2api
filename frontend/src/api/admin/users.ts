@@ -4,7 +4,7 @@
  */
 
 import { apiClient } from '../client'
-import type { AdminUser, UpdateUserRequest, PaginatedResponse, ApiKey } from '@/types'
+import type { AdminUser, UpdateUserRequest, PaginatedResponse, ApiKey, AdminCreditLedgerItem } from '@/types'
 
 export interface AdminBindAuthIdentityChannelRequest {
   channel: string
@@ -166,6 +166,20 @@ export async function updateBalance(
   return data
 }
 
+export async function updateCreditBalance(
+  id: number,
+  amount: number,
+  operation: 'set' | 'add' | 'subtract' = 'set',
+  notes?: string
+): Promise<AdminUser> {
+  const { data } = await apiClient.post<AdminUser>(`/admin/users/${id}/credit-balance`, {
+    amount,
+    operation,
+    notes: notes || ''
+  })
+  return data
+}
+
 /**
  * Update user concurrency
  * @param id - User ID
@@ -267,6 +281,23 @@ export async function getUserBalanceHistory(
   return data
 }
 
+export async function getUserCreditLedger(
+  id: number,
+  page: number = 1,
+  pageSize: number = 20,
+  entryType?: string,
+  source?: string
+): Promise<PaginatedResponse<AdminCreditLedgerItem>> {
+  const params: Record<string, any> = { page, page_size: pageSize }
+  if (entryType) params.entry_type = entryType
+  if (source) params.source = source
+  const { data } = await apiClient.get<PaginatedResponse<AdminCreditLedgerItem>>(
+    `/admin/users/${id}/credit-ledger`,
+    { params }
+  )
+  return data
+}
+
 /**
  * Replace user's exclusive group
  * @param userId - User ID
@@ -304,11 +335,13 @@ export const usersAPI = {
   update,
   delete: deleteUser,
   updateBalance,
+  updateCreditBalance,
   updateConcurrency,
   toggleStatus,
   getUserApiKeys,
   getUserUsageStats,
   getUserBalanceHistory,
+  getUserCreditLedger,
   replaceGroup,
   bindUserAuthIdentity
 }

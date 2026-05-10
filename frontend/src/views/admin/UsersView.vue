@@ -413,6 +413,12 @@
             </div>
           </template>
 
+          <template #cell-credit_balance="{ value }">
+            <span class="text-sm font-medium text-blue-600 dark:text-blue-400">
+              ${{ Number(value || 0).toFixed(2) }}
+            </span>
+          </template>
+
           <template #cell-usage="{ row }">
             <div class="text-sm">
               <div class="flex items-center gap-1.5">
@@ -589,6 +595,24 @@
                 {{ t('admin.users.balanceHistory') }}
               </button>
 
+              <!-- Credit Balance Adjust -->
+              <button
+                @click="handleCreditAdjust(user); closeActionMenu()"
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+              >
+                <Icon name="creditCard" size="sm" class="text-blue-500" :stroke-width="2" />
+                {{ t('admin.users.adjustCreditBalance') }}
+              </button>
+
+              <!-- Credit Ledger -->
+              <button
+                @click="handleCreditLedger(user); closeActionMenu()"
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+              >
+                <Icon name="clock" size="sm" class="text-blue-500" :stroke-width="2" />
+                {{ t('admin.users.creditLedgerTitle') }}
+              </button>
+
               <div class="my-1 border-t border-gray-100 dark:border-dark-700"></div>
 
               <!-- Delete (not for admin) -->
@@ -613,6 +637,8 @@
     <UserAllowedGroupsModal :show="showAllowedGroupsModal" :user="allowedGroupsUser" @close="closeAllowedGroupsModal" @success="loadUsers" />
     <UserBalanceModal :show="showBalanceModal" :user="balanceUser" :operation="balanceOperation" @close="closeBalanceModal" @success="loadUsers" />
     <UserBalanceHistoryModal :show="showBalanceHistoryModal" :user="balanceHistoryUser" @close="closeBalanceHistoryModal" @deposit="handleDepositFromHistory" @withdraw="handleWithdrawFromHistory" />
+    <UserCreditBalanceModal :show="showCreditBalanceModal" :user="creditBalanceUser" @close="closeCreditBalanceModal" @success="loadUsers" />
+    <UserCreditLedgerModal :show="showCreditLedgerModal" :user="creditLedgerUser" @close="closeCreditLedgerModal" />
     <GroupReplaceModal :show="showGroupReplaceModal" :user="groupReplaceUser" :old-group="groupReplaceOldGroup" :all-groups="allGroups" @close="closeGroupReplaceModal" @success="loadUsers" />
     <UserAttributesConfigModal :show="showAttributesModal" @close="handleAttributesModalClose" />
   </AppLayout>
@@ -647,6 +673,8 @@ import UserApiKeysModal from '@/components/admin/user/UserApiKeysModal.vue'
 import UserAllowedGroupsModal from '@/components/admin/user/UserAllowedGroupsModal.vue'
 import UserBalanceModal from '@/components/admin/user/UserBalanceModal.vue'
 import UserBalanceHistoryModal from '@/components/admin/user/UserBalanceHistoryModal.vue'
+import UserCreditBalanceModal from '@/components/admin/user/UserCreditBalanceModal.vue'
+import UserCreditLedgerModal from '@/components/admin/user/UserCreditLedgerModal.vue'
 import GroupReplaceModal from '@/components/admin/user/GroupReplaceModal.vue'
 
 const appStore = useAppStore()
@@ -709,6 +737,7 @@ const allColumns = computed<Column[]>(() => [
   { key: 'groups', label: t('admin.users.columns.groups'), sortable: false },
   { key: 'subscriptions', label: t('admin.users.columns.subscriptions'), sortable: false },
   { key: 'balance', label: t('admin.users.columns.balance'), sortable: true },
+  { key: 'credit_balance', label: t('admin.users.columns.creditBalance'), sortable: true },
   { key: 'usage', label: t('admin.users.columns.usage'), sortable: false },
   { key: 'concurrency', label: t('admin.users.columns.concurrency'), sortable: true },
   { key: 'status', label: t('admin.users.columns.status'), sortable: true },
@@ -805,7 +834,7 @@ const searchQuery = ref('')
 const USER_SORT_STORAGE_KEY = 'admin-users-table-sort'
 const loadInitialSortState = (): { sort_by: string; sort_order: 'asc' | 'desc' } => {
   const fallback = { sort_by: 'created_at', sort_order: 'desc' as 'asc' | 'desc' }
-  const sortable = new Set(['email', 'id', 'username', 'role', 'balance', 'concurrency', 'status', 'last_used_at', 'last_active_at', 'created_at'])
+  const sortable = new Set(['email', 'id', 'username', 'role', 'balance', 'credit_balance', 'concurrency', 'status', 'last_used_at', 'last_active_at', 'created_at'])
   try {
     const raw = localStorage.getItem(USER_SORT_STORAGE_KEY)
     if (!raw) return fallback
@@ -1124,6 +1153,10 @@ const balanceOperation = ref<'add' | 'subtract'>('add')
 // Balance History modal state
 const showBalanceHistoryModal = ref(false)
 const balanceHistoryUser = ref<AdminUser | null>(null)
+const showCreditBalanceModal = ref(false)
+const creditBalanceUser = ref<AdminUser | null>(null)
+const showCreditLedgerModal = ref(false)
+const creditLedgerUser = ref<AdminUser | null>(null)
 
 // 计算剩余天数
 const getDaysRemaining = (expiresAt: string): number => {
@@ -1388,6 +1421,26 @@ const handleBalanceHistory = (user: AdminUser) => {
 const closeBalanceHistoryModal = () => {
   showBalanceHistoryModal.value = false
   balanceHistoryUser.value = null
+}
+
+const handleCreditAdjust = (user: AdminUser) => {
+  creditBalanceUser.value = user
+  showCreditBalanceModal.value = true
+}
+
+const closeCreditBalanceModal = () => {
+  showCreditBalanceModal.value = false
+  creditBalanceUser.value = null
+}
+
+const handleCreditLedger = (user: AdminUser) => {
+  creditLedgerUser.value = user
+  showCreditLedgerModal.value = true
+}
+
+const closeCreditLedgerModal = () => {
+  showCreditLedgerModal.value = false
+  creditLedgerUser.value = null
 }
 
 // Handle deposit from balance history modal

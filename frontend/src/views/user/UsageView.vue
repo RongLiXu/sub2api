@@ -196,6 +196,12 @@
             </span>
           </template>
 
+          <template #cell-billing_source="{ row }">
+            <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+              {{ formatBillingSource(row.billing_source) }}
+            </span>
+          </template>
+
           <template #cell-tokens="{ row }">
             <!-- 图片生成请求（仅按次计费时显示图片格式） -->
             <div v-if="row.image_count > 0 && row.billing_mode === 'image'" class="flex items-center gap-1.5">
@@ -571,6 +577,7 @@ const columns = computed<Column[]>(() => [
   { key: 'endpoint', label: t('usage.endpoint'), sortable: false },
   { key: 'stream', label: t('usage.type'), sortable: false },
   { key: 'billing_mode', label: t('admin.usage.billingMode'), sortable: false },
+  { key: 'billing_source', label: t('usage.billingSource'), sortable: false },
   { key: 'tokens', label: t('usage.tokens'), sortable: false },
   { key: 'cost', label: t('usage.cost'), sortable: false },
   { key: 'first_token', label: t('usage.firstToken'), sortable: false },
@@ -654,6 +661,15 @@ const imageUnitPrice = (row: UsageLog | null): number => {
 
 const formatUserAgent = (ua: string): string => {
   return ua
+}
+
+const formatBillingSource = (value?: string | null): string => {
+  if (value === 'subscription') return t('usage.billingSourceSubscription')
+  if (value === 'credit_balance') return t('usage.billingSourceCreditBalance')
+  if (value === 'balance') return t('usage.billingSourceBalance')
+  if (value === 'mixed') return t('usage.billingSourceMixed')
+  if (value === 'subscription_credit_fallback') return t('usage.billingSourceSubscriptionCreditFallback')
+  return value || '-'
 }
 
 const getRequestTypeLabel = (log: UsageLog): string => {

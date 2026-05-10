@@ -3,6 +3,7 @@
  * Handles redeem code redemption for users
  */
 
+import type { CreditLedgerItem } from '@/types'
 import { apiClient } from './client'
 import type { RedeemCodeRequest } from '@/types'
 
@@ -35,6 +36,7 @@ export async function redeem(code: string): Promise<{
   type: string
   value: number
   new_balance?: number
+  new_credit_balance?: number
   new_concurrency?: number
 }> {
   const payload: RedeemCodeRequest = { code }
@@ -44,6 +46,7 @@ export async function redeem(code: string): Promise<{
     type: string
     value: number
     new_balance?: number
+    new_credit_balance?: number
     new_concurrency?: number
   }>('/redeem', payload)
 
@@ -59,9 +62,23 @@ export async function getHistory(): Promise<RedeemHistoryItem[]> {
   return data
 }
 
+export async function getCreditLedger(
+  page: number = 1,
+  pageSize: number = 20,
+  entryType?: string,
+  source?: string
+): Promise<{ items: CreditLedgerItem[]; total: number; page: number; page_size: number; pages: number }> {
+  const params: Record<string, any> = { page, page_size: pageSize }
+  if (entryType) params.entry_type = entryType
+  if (source) params.source = source
+  const { data } = await apiClient.get<{ items: CreditLedgerItem[]; total: number; page: number; page_size: number; pages: number }>('/user/credit-ledger', { params })
+  return data
+}
+
 export const redeemAPI = {
   redeem,
-  getHistory
+  getHistory,
+  getCreditLedger
 }
 
 export default redeemAPI

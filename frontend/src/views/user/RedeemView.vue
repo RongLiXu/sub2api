@@ -14,8 +14,16 @@
             ${{ user?.balance?.toFixed(2) || '0.00' }}
           </p>
           <p class="mt-2 text-sm text-primary-100">
+            {{ t('redeem.currentCreditBalance') }}: ${{ user?.credit_balance?.toFixed(2) || '0.00' }}
+          </p>
+          <p class="mt-2 text-sm text-primary-100">
             {{ t('redeem.concurrency') }}: {{ user?.concurrency || 0 }} {{ t('redeem.requests') }}
           </p>
+          <div class="mt-4">
+            <button class="btn btn-secondary btn-sm" @click="showCreditLedger = !showCreditLedger">
+              {{ t('redeem.viewCreditLedger') }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -101,6 +109,9 @@
                     <p v-if="redeemResult.type === 'balance'" class="font-medium">
                       {{ t('redeem.added') }}: ${{ redeemResult.value.toFixed(2) }}
                     </p>
+                    <p v-else-if="redeemResult.type === 'credit_balance'" class="font-medium">
+                      {{ t('redeem.added') }}: ${{ redeemResult.value.toFixed(2) }}
+                    </p>
                     <p v-else-if="redeemResult.type === 'concurrency'" class="font-medium">
                       {{ t('redeem.added') }}: {{ redeemResult.value }}
                       {{ t('redeem.concurrentRequests') }}
@@ -117,6 +128,10 @@
                     <p v-if="redeemResult.new_balance !== undefined">
                       {{ t('redeem.newBalance') }}:
                       <span class="font-semibold">${{ redeemResult.new_balance.toFixed(2) }}</span>
+                    </p>
+                    <p v-if="redeemResult.new_credit_balance !== undefined">
+                      {{ t('redeem.newCreditBalance') }}:
+                      <span class="font-semibold">${{ redeemResult.new_credit_balance.toFixed(2) }}</span>
                     </p>
                     <p v-if="redeemResult.new_concurrency !== undefined">
                       {{ t('redeem.newConcurrency') }}:
@@ -337,6 +352,35 @@
           </div>
         </div>
       </div>
+
+      <div v-if="showCreditLedger" class="card">
+        <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+            {{ t('redeem.creditLedgerTitle') }}
+          </h2>
+        </div>
+        <div class="p-6">
+          <div v-if="loadingCreditLedger" class="py-6 text-center text-gray-500">{{ t('common.loading') }}</div>
+          <div v-else-if="creditLedger.length === 0" class="py-6 text-center text-gray-500">{{ t('redeem.noCreditLedger') }}</div>
+          <div v-else class="space-y-3">
+            <div v-for="item in creditLedger" :key="item.id" class="flex items-center justify-between rounded-xl bg-gray-50 p-4 dark:bg-dark-800">
+              <div>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ item.entry_type }}</p>
+                <p class="text-xs text-gray-500 dark:text-dark-400">{{ item.source }}</p>
+                <p v-if="item.request_id" class="font-mono text-xs text-gray-400">{{ item.request_id }}</p>
+              </div>
+              <div class="text-right">
+                <p :class="['text-sm font-semibold', item.amount >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400']">
+                  {{ item.amount >= 0 ? '+' : '' }}${{ Math.abs(item.amount).toFixed(2) }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-dark-400">
+                  {{ t('redeem.balanceAfter') }}: ${{ item.balance_after.toFixed(2) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
@@ -348,6 +392,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { useSubscriptionStore } from '@/stores/subscriptions'
 import { redeemAPI, authAPI, type RedeemHistoryItem } from '@/api'
+import type { CreditLedgerItem } from '@/types'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { formatDateTime } from '@/utils/format'
@@ -366,6 +411,7 @@ const redeemResult = ref<{
   type: string
   value: number
   new_balance?: number
+  new_credit_balance?: number
   new_concurrency?: number
   group_name?: string
   validity_days?: number
@@ -375,6 +421,9 @@ const errorMessage = ref('')
 // History data
 const history = ref<RedeemHistoryItem[]>([])
 const loadingHistory = ref(false)
+const creditLedger = ref<CreditLedgerItem[]>([])
+const loadingCreditLedger = ref(false)
+const showCreditLedger = ref(false)
 const contactInfo = ref('')
 
 // Helper functions for history display
@@ -393,6 +442,8 @@ const isAdminAdjustment = (type: string) => {
 const getHistoryItemTitle = (item: RedeemHistoryItem) => {
   if (item.type === 'balance') {
     return t('redeem.balanceAddedRedeem')
+  } else if (item.type === 'credit_balance') {
+    return t('redeem.creditBalanceAddedRedeem')
   } else if (item.type === 'admin_balance') {
     return item.value >= 0 ? t('redeem.balanceAddedAdmin') : t('redeem.balanceDeductedAdmin')
   } else if (item.type === 'concurrency') {
@@ -407,6 +458,9 @@ const getHistoryItemTitle = (item: RedeemHistoryItem) => {
 
 const formatHistoryValue = (item: RedeemHistoryItem) => {
   if (isBalanceType(item.type)) {
+    const sign = item.value >= 0 ? '+' : ''
+    return `${sign}$${item.value.toFixed(2)}`
+  } else if (item.type === 'credit_balance') {
     const sign = item.value >= 0 ? '+' : ''
     return `${sign}$${item.value.toFixed(2)}`
   } else if (isSubscriptionType(item.type)) {
@@ -428,6 +482,18 @@ const fetchHistory = async () => {
     console.error('Failed to fetch history:', error)
   } finally {
     loadingHistory.value = false
+  }
+}
+
+const fetchCreditLedger = async () => {
+  loadingCreditLedger.value = true
+  try {
+    const res = await redeemAPI.getCreditLedger()
+    creditLedger.value = res.items || []
+  } catch (error) {
+    console.error('Failed to fetch credit ledger:', error)
+  } finally {
+    loadingCreditLedger.value = false
   }
 }
 
@@ -478,6 +544,7 @@ const handleRedeem = async () => {
 
 onMounted(async () => {
   fetchHistory()
+  fetchCreditLedger()
   try {
     const settings = await authAPI.getPublicSettings()
     contactInfo.value = settings.contact_info || ''

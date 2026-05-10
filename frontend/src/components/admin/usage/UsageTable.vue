@@ -91,6 +91,12 @@
           </span>
         </template>
 
+        <template #cell-billing_source="{ row }">
+          <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+            {{ formatBillingSource(row.billing_source) }}
+          </span>
+        </template>
+
         <template #cell-tokens="{ row }">
           <!-- 图片生成请求（仅按次计费时显示图片格式） -->
           <div v-if="row.image_count > 0 && row.billing_mode === BILLING_MODE_IMAGE" class="flex items-center gap-1.5">
@@ -436,6 +442,15 @@ const getRequestTypeBadgeClass = (row: AdminUsageLog): string => {
   if (requestType === 'stream') return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
   if (requestType === 'sync') return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
   return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+}
+
+const formatBillingSource = (value?: string | null): string => {
+  if (value === 'subscription') return t('usage.billingSourceSubscription')
+  if (value === 'credit_balance') return t('usage.billingSourceCreditBalance')
+  if (value === 'balance') return t('usage.billingSourceBalance')
+  if (value === 'mixed') return t('usage.billingSourceMixed')
+  if (value === 'subscription_credit_fallback') return t('usage.billingSourceSubscriptionCreditFallback')
+  return value || '-'
 }
 
 

@@ -86,6 +86,7 @@ export interface User {
   wechat_bound?: boolean
   role: 'admin' | 'user' // User role for authorization
   balance: number // User balance for API usage
+  credit_balance?: number // User credit balance
   concurrency: number // Allowed concurrent requests
   rpm_limit?: number // User-level RPM cap (0 = unlimited); effective as fallback when group has no rpm_limit
   status: 'active' | 'disabled' // Account status
@@ -507,6 +508,7 @@ export interface Group {
   daily_limit_usd: number | null
   weekly_limit_usd: number | null
   monthly_limit_usd: number | null
+  subscription_credit_fallback_enabled?: boolean | null
   // 图片生成计费配置
   allow_image_generation: boolean
   image_rate_independent: boolean
@@ -1152,7 +1154,7 @@ export interface CodexSessionImportResult {
 
 // ==================== Usage & Redeem Types ====================
 
-export type RedeemCodeType = 'balance' | 'concurrency' | 'subscription' | 'invitation'
+export type RedeemCodeType = 'balance' | 'credit_balance' | 'concurrency' | 'subscription' | 'invitation'
 export type UsageRequestType = 'unknown' | 'sync' | 'stream' | 'ws_v2'
 
 export interface UsageLog {
@@ -1186,6 +1188,7 @@ export interface UsageLog {
   actual_cost: number
   rate_multiplier: number
   billing_type: number
+  billing_source?: string | null
 
   request_type?: UsageRequestType
   stream: boolean
@@ -1237,6 +1240,30 @@ export interface AdminUsageLog extends UsageLog {
 
   // 最小账号信息（仅管理员接口返回）
   account?: UsageLogAccountSummary
+}
+
+export interface CreditLedgerItem {
+  id: number
+  user_id?: number
+  amount: number
+  balance_after: number
+  entry_type: string
+  source: string
+  request_id?: string | null
+  api_key_id?: number | null
+  usage_log_id?: number | null
+  created_at: string
+}
+
+export interface AdminCreditLedgerItem extends CreditLedgerItem {
+  balance_before: number
+  operator_user_id?: number | null
+  account_id?: number | null
+  group_id?: number | null
+  subscription_id?: number | null
+  idempotency_key?: string | null
+  notes?: string | null
+  metadata?: Record<string, unknown>
 }
 
 export interface UsageCleanupFilters {
@@ -1689,6 +1716,7 @@ export interface PromoCode {
   id: number
   code: string
   bonus_amount: number
+  credit_bonus_amount: number
   max_uses: number
   used_count: number
   status: 'active' | 'disabled'
@@ -1703,6 +1731,7 @@ export interface PromoCodeUsage {
   promo_code_id: number
   user_id: number
   bonus_amount: number
+  credit_bonus_amount: number
   used_at: string
   user?: User
 }
@@ -1710,6 +1739,7 @@ export interface PromoCodeUsage {
 export interface CreatePromoCodeRequest {
   code?: string
   bonus_amount: number
+  credit_bonus_amount?: number
   max_uses?: number
   expires_at?: number | null
   notes?: string
@@ -1718,6 +1748,7 @@ export interface CreatePromoCodeRequest {
 export interface UpdatePromoCodeRequest {
   code?: string
   bonus_amount?: number
+  credit_bonus_amount?: number
   max_uses?: number
   status?: 'active' | 'disabled'
   expires_at?: number | null
