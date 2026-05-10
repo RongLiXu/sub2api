@@ -383,12 +383,24 @@ func (s *billingCacheStub) GetUserBalance(ctx context.Context, userID int64) (fl
 	panic("unexpected GetUserBalance call")
 }
 
+func (s *billingCacheStub) GetUserCreditBalance(ctx context.Context, userID int64) (float64, error) {
+	panic("unexpected GetUserCreditBalance call")
+}
+
 func (s *billingCacheStub) SetUserBalance(ctx context.Context, userID int64, balance float64) error {
 	panic("unexpected SetUserBalance call")
 }
 
+func (s *billingCacheStub) SetUserCreditBalance(ctx context.Context, userID int64, balance float64) error {
+	panic("unexpected SetUserCreditBalance call")
+}
+
 func (s *billingCacheStub) DeductUserBalance(ctx context.Context, userID int64, amount float64) error {
 	panic("unexpected DeductUserBalance call")
+}
+
+func (s *billingCacheStub) DeductUserCreditBalance(ctx context.Context, userID int64, amount float64) error {
+	panic("unexpected DeductUserCreditBalance call")
 }
 
 func (s *billingCacheStub) InvalidateUserBalance(ctx context.Context, userID int64) error {

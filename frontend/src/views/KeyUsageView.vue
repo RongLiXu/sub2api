@@ -524,7 +524,7 @@ const statusInfo = computed(() => {
   }
 
   return {
-    label: data.planName || t('keyUsage.walletBalance'),
+    label: displayPlanName(data),
     statusText: 'Active',
     isActive: true,
   }
@@ -570,8 +570,13 @@ const ringItems = computed<RingItem[]>(() => {
         }
       }
     }
-    if (!data.subscription && data.balance != null) {
-      items.push({ title: t('keyUsage.walletBalance'), pct: 0, amount: usd(data.balance), isBalance: true, iconType: 'dollar' })
+    if (!data.subscription) {
+      if (data.credit_balance != null) {
+        items.push({ title: t('keyUsage.creditBalance'), pct: 0, amount: usd(data.credit_balance), isBalance: true, iconType: 'dollar' })
+      }
+      if (data.balance != null) {
+        items.push({ title: t('keyUsage.accountBalance'), pct: 0, amount: usd(data.balance), isBalance: true, iconType: 'dollar' })
+      }
     }
   }
 
@@ -651,7 +656,7 @@ const detailRows = computed<DetailRow[]>(() => {
   } else {
     rows.push({
       iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-500', iconSvg: ICON_CHECK,
-      label: t('keyUsage.subscriptionType'), value: data.planName || t('keyUsage.walletBalance'), valueClass: '',
+      label: t('keyUsage.subscriptionType'), value: displayPlanName(data), valueClass: '',
     })
 
     if (data.subscription) {
@@ -683,6 +688,16 @@ const detailRows = computed<DetailRow[]>(() => {
           label: t('keyUsage.subscriptionExpires'), value: formatDate(sub.expires_at), valueClass: '',
         })
       }
+      if (data.credit_balance != null) {
+        rows.push({
+          iconBg: 'bg-sky-500/10', iconColor: 'text-sky-500', iconSvg: ICON_DOLLAR,
+          label: t('keyUsage.creditBalance'), value: usd(data.credit_balance), valueClass: 'text-sky-500',
+        })
+        rows.push({
+          iconBg: 'bg-sky-500/10', iconColor: 'text-sky-500', iconSvg: ICON_SHIELD,
+          label: t('keyUsage.deductionOrder'), value: t('keyUsage.subscriptionDeductionOrder'), valueClass: '',
+        })
+      }
     }
 
     const remainColor = data.remaining != null
@@ -692,6 +707,20 @@ const detailRows = computed<DetailRow[]>(() => {
       iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-500', iconSvg: ICON_SHIELD,
       label: t('keyUsage.remainingQuota'), value: data.remaining != null ? usd(data.remaining) : '-', valueClass: remainColor,
     })
+    if (!data.subscription && data.credit_balance != null && data.balance != null) {
+      rows.push({
+        iconBg: 'bg-sky-500/10', iconColor: 'text-sky-500', iconSvg: ICON_DOLLAR,
+        label: t('keyUsage.creditBalance'), value: usd(data.credit_balance), valueClass: 'text-sky-500',
+      })
+      rows.push({
+        iconBg: 'bg-emerald-500/10', iconColor: 'text-emerald-500', iconSvg: ICON_DOLLAR,
+        label: t('keyUsage.accountBalance'), value: usd(data.balance), valueClass: 'text-emerald-500',
+      })
+      rows.push({
+        iconBg: 'bg-sky-500/10', iconColor: 'text-sky-500', iconSvg: ICON_SHIELD,
+        label: t('keyUsage.deductionOrder'), value: t('keyUsage.walletDeductionOrder'), valueClass: '',
+      })
+    }
   }
 
   return rows
@@ -737,6 +766,14 @@ const modelStats = computed<any[]>(() => resultData.value?.model_stats || [])
 function usd(value: number | null | undefined): string {
   if (value == null || value < 0) return '-'
   return '$' + Number(value).toFixed(2)
+}
+
+function displayPlanName(data: Record<string, unknown> | null | undefined): string {
+  const planName = typeof data?.planName === 'string' ? data.planName : ''
+  if (!planName || planName === '钱包余额') {
+    return t('keyUsage.walletBalance')
+  }
+  return planName
 }
 
 function fmtNum(val: number | null | undefined): string {

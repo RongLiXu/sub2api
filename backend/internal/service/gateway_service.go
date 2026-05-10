@@ -8156,26 +8156,40 @@ func notifyBalanceLow(p *postUsageBillingParams, deps *billingDeps, result *Usag
 		return
 	}
 
+	balanceDeducted := resolveBalanceDeducted(p, result)
+	if balanceDeducted <= 0 {
+		return
+	}
 	oldBalance := resolveOldBalance(p, result)
 	slog.Debug("notifyBalanceLow: calling CheckBalanceAfterDeduction",
 		"user_id", p.User.ID,
 		"old_balance", oldBalance,
-		"cost", p.Cost.ActualCost,
+		"cost", balanceDeducted,
 		"notify_enabled", p.User.BalanceNotifyEnabled,
 		"threshold", p.User.BalanceNotifyThreshold,
 		"result_has_new_balance", result != nil && result.NewBalance != nil,
 	)
-	deps.balanceNotifyService.CheckBalanceAfterDeduction(context.Background(), p.User, oldBalance, p.Cost.ActualCost)
+	deps.balanceNotifyService.CheckBalanceAfterDeduction(context.Background(), p.User, oldBalance, balanceDeducted)
 }
 
 // resolveOldBalance returns the pre-deduction balance.
-// Prefers the DB transaction result (newBalance + cost) over snapshot.
+// Prefers the DB transaction result (newBalance + balance deduction) over snapshot.
 func resolveOldBalance(p *postUsageBillingParams, result *UsageBillingApplyResult) float64 {
 	if result != nil && result.NewBalance != nil {
-		return *result.NewBalance + p.Cost.ActualCost
+		return *result.NewBalance + resolveBalanceDeducted(p, result)
 	}
 	// Legacy fallback: snapshot balance from request context
 	return p.User.Balance
+}
+
+func resolveBalanceDeducted(p *postUsageBillingParams, result *UsageBillingApplyResult) float64 {
+	if result != nil {
+		return result.BalanceDeducted
+	}
+	if p == nil || p.Cost == nil {
+		return 0
+	}
+	return p.Cost.ActualCost
 }
 
 // notifyAccountQuota sends account quota threshold notification after increment.
@@ -8485,7 +8499,7 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 	if billingErr != nil {
 		return billingErr
 	}
-	usageLog.BillingSource = resolveUsageLogBillingSource(isSubscriptionBilling, isSubscriptionCreditFallback, billingResult)
+	applyUsageLogBillingResult(usageLog, cost, isSubscriptionBilling, isSubscriptionCreditFallback, billingResult)
 	writeUsageLogBestEffort(ctx, s.usageLogRepo, usageLog, "service.gateway")
 
 	return nil
@@ -8502,6 +8516,41 @@ func resolveUsageLogBillingSource(isSubscriptionBilling bool, isSubscriptionCred
 		return source
 	}
 	return BillingSourceBalance
+}
+
+func applyUsageLogBillingResult(usageLog *UsageLog, cost *CostBreakdown, isSubscriptionBilling bool, isSubscriptionCreditFallback bool, result *UsageBillingApplyResult) {
+	if usageLog == nil {
+		return
+	}
+
+	usageLog.CreditCost = 0
+	usageLog.BalanceCost = 0
+	usageLog.SubscriptionCost = 0
+	usageLog.BillingSource = resolveUsageLogBillingSource(isSubscriptionBilling, isSubscriptionCreditFallback, result)
+
+	if isSubscriptionBilling {
+		if cost != nil {
+			usageLog.SubscriptionCost = cost.ActualCost
+		}
+		return
+	}
+
+	if isSubscriptionCreditFallback {
+		if cost != nil {
+			usageLog.CreditCost = cost.ActualCost
+		}
+		return
+	}
+
+	if result != nil {
+		usageLog.CreditCost = result.CreditBalanceDeducted
+		usageLog.BalanceCost = result.BalanceDeducted
+		return
+	}
+
+	if cost != nil {
+		usageLog.BalanceCost = cost.ActualCost
+	}
 }
 
 // calculateRecordUsageCost 根据请求类型和选项计算费用。

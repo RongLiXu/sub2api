@@ -34,7 +34,11 @@
             <div class="card p-5">
               <p class="text-xs font-medium text-gray-400 dark:text-gray-500">{{ t('payment.rechargeAccount') }}</p>
               <p class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ user?.username || '' }}</p>
-              <p class="mt-0.5 text-sm font-medium text-green-600 dark:text-green-400">{{ t('payment.currentBalance') }}: {{ user?.balance?.toFixed(2) || '0.00' }}</p>
+              <div class="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                <p class="font-medium text-green-600 dark:text-green-400">{{ t('payment.currentBalance') }}: ${{ user?.balance?.toFixed(2) || '0.00' }}</p>
+                <p class="font-medium text-sky-600 dark:text-sky-400">{{ t('payment.currentCreditBalance') }}: ${{ user?.credit_balance?.toFixed(2) || '0.00' }}</p>
+              </div>
+              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ t('payment.walletDeductionOrder') }}</p>
             </div>
             <div v-if="enabledMethods.length === 0" class="card py-16 text-center">
               <p class="text-gray-500 dark:text-gray-400">{{ t('payment.notAvailable') }}</p>
@@ -111,6 +115,9 @@
                 <!-- Description -->
                 <p v-if="selectedPlan.description" class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
                   {{ selectedPlan.description }}
+                </p>
+                <p class="mt-3 rounded-xl border border-sky-100 bg-sky-50 px-3 py-2 text-xs leading-relaxed text-sky-700 dark:border-sky-900/40 dark:bg-sky-950/30 dark:text-sky-300">
+                  {{ t('payment.subscriptionCreditFallbackHint') }}
                 </p>
                 <!-- Rate + Limits grid -->
                 <div class="mt-3 grid grid-cols-2 gap-3">

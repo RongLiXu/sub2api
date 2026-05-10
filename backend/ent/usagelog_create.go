@@ -337,6 +337,48 @@ func (_c *UsageLogCreate) SetNillableActualCost(v *float64) *UsageLogCreate {
 	return _c
 }
 
+// SetCreditCost sets the "credit_cost" field.
+func (_c *UsageLogCreate) SetCreditCost(v float64) *UsageLogCreate {
+	_c.mutation.SetCreditCost(v)
+	return _c
+}
+
+// SetNillableCreditCost sets the "credit_cost" field if the given value is not nil.
+func (_c *UsageLogCreate) SetNillableCreditCost(v *float64) *UsageLogCreate {
+	if v != nil {
+		_c.SetCreditCost(*v)
+	}
+	return _c
+}
+
+// SetBalanceCost sets the "balance_cost" field.
+func (_c *UsageLogCreate) SetBalanceCost(v float64) *UsageLogCreate {
+	_c.mutation.SetBalanceCost(v)
+	return _c
+}
+
+// SetNillableBalanceCost sets the "balance_cost" field if the given value is not nil.
+func (_c *UsageLogCreate) SetNillableBalanceCost(v *float64) *UsageLogCreate {
+	if v != nil {
+		_c.SetBalanceCost(*v)
+	}
+	return _c
+}
+
+// SetSubscriptionCost sets the "subscription_cost" field.
+func (_c *UsageLogCreate) SetSubscriptionCost(v float64) *UsageLogCreate {
+	_c.mutation.SetSubscriptionCost(v)
+	return _c
+}
+
+// SetNillableSubscriptionCost sets the "subscription_cost" field if the given value is not nil.
+func (_c *UsageLogCreate) SetNillableSubscriptionCost(v *float64) *UsageLogCreate {
+	if v != nil {
+		_c.SetSubscriptionCost(*v)
+	}
+	return _c
+}
+
 // SetRateMultiplier sets the "rate_multiplier" field.
 func (_c *UsageLogCreate) SetRateMultiplier(v float64) *UsageLogCreate {
 	_c.mutation.SetRateMultiplier(v)
@@ -627,6 +669,18 @@ func (_c *UsageLogCreate) defaults() {
 		v := usagelog.DefaultActualCost
 		_c.mutation.SetActualCost(v)
 	}
+	if _, ok := _c.mutation.CreditCost(); !ok {
+		v := usagelog.DefaultCreditCost
+		_c.mutation.SetCreditCost(v)
+	}
+	if _, ok := _c.mutation.BalanceCost(); !ok {
+		v := usagelog.DefaultBalanceCost
+		_c.mutation.SetBalanceCost(v)
+	}
+	if _, ok := _c.mutation.SubscriptionCost(); !ok {
+		v := usagelog.DefaultSubscriptionCost
+		_c.mutation.SetSubscriptionCost(v)
+	}
 	if _, ok := _c.mutation.RateMultiplier(); !ok {
 		v := usagelog.DefaultRateMultiplier
 		_c.mutation.SetRateMultiplier(v)
@@ -744,6 +798,15 @@ func (_c *UsageLogCreate) check() error {
 	}
 	if _, ok := _c.mutation.ActualCost(); !ok {
 		return &ValidationError{Name: "actual_cost", err: errors.New(`ent: missing required field "UsageLog.actual_cost"`)}
+	}
+	if _, ok := _c.mutation.CreditCost(); !ok {
+		return &ValidationError{Name: "credit_cost", err: errors.New(`ent: missing required field "UsageLog.credit_cost"`)}
+	}
+	if _, ok := _c.mutation.BalanceCost(); !ok {
+		return &ValidationError{Name: "balance_cost", err: errors.New(`ent: missing required field "UsageLog.balance_cost"`)}
+	}
+	if _, ok := _c.mutation.SubscriptionCost(); !ok {
+		return &ValidationError{Name: "subscription_cost", err: errors.New(`ent: missing required field "UsageLog.subscription_cost"`)}
 	}
 	if _, ok := _c.mutation.RateMultiplier(); !ok {
 		return &ValidationError{Name: "rate_multiplier", err: errors.New(`ent: missing required field "UsageLog.rate_multiplier"`)}
@@ -901,6 +964,18 @@ func (_c *UsageLogCreate) createSpec() (*UsageLog, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ActualCost(); ok {
 		_spec.SetField(usagelog.FieldActualCost, field.TypeFloat64, value)
 		_node.ActualCost = value
+	}
+	if value, ok := _c.mutation.CreditCost(); ok {
+		_spec.SetField(usagelog.FieldCreditCost, field.TypeFloat64, value)
+		_node.CreditCost = value
+	}
+	if value, ok := _c.mutation.BalanceCost(); ok {
+		_spec.SetField(usagelog.FieldBalanceCost, field.TypeFloat64, value)
+		_node.BalanceCost = value
+	}
+	if value, ok := _c.mutation.SubscriptionCost(); ok {
+		_spec.SetField(usagelog.FieldSubscriptionCost, field.TypeFloat64, value)
+		_node.SubscriptionCost = value
 	}
 	if value, ok := _c.mutation.RateMultiplier(); ok {
 		_spec.SetField(usagelog.FieldRateMultiplier, field.TypeFloat64, value)
@@ -1514,6 +1589,60 @@ func (u *UsageLogUpsert) UpdateActualCost() *UsageLogUpsert {
 // AddActualCost adds v to the "actual_cost" field.
 func (u *UsageLogUpsert) AddActualCost(v float64) *UsageLogUpsert {
 	u.Add(usagelog.FieldActualCost, v)
+	return u
+}
+
+// SetCreditCost sets the "credit_cost" field.
+func (u *UsageLogUpsert) SetCreditCost(v float64) *UsageLogUpsert {
+	u.Set(usagelog.FieldCreditCost, v)
+	return u
+}
+
+// UpdateCreditCost sets the "credit_cost" field to the value that was provided on create.
+func (u *UsageLogUpsert) UpdateCreditCost() *UsageLogUpsert {
+	u.SetExcluded(usagelog.FieldCreditCost)
+	return u
+}
+
+// AddCreditCost adds v to the "credit_cost" field.
+func (u *UsageLogUpsert) AddCreditCost(v float64) *UsageLogUpsert {
+	u.Add(usagelog.FieldCreditCost, v)
+	return u
+}
+
+// SetBalanceCost sets the "balance_cost" field.
+func (u *UsageLogUpsert) SetBalanceCost(v float64) *UsageLogUpsert {
+	u.Set(usagelog.FieldBalanceCost, v)
+	return u
+}
+
+// UpdateBalanceCost sets the "balance_cost" field to the value that was provided on create.
+func (u *UsageLogUpsert) UpdateBalanceCost() *UsageLogUpsert {
+	u.SetExcluded(usagelog.FieldBalanceCost)
+	return u
+}
+
+// AddBalanceCost adds v to the "balance_cost" field.
+func (u *UsageLogUpsert) AddBalanceCost(v float64) *UsageLogUpsert {
+	u.Add(usagelog.FieldBalanceCost, v)
+	return u
+}
+
+// SetSubscriptionCost sets the "subscription_cost" field.
+func (u *UsageLogUpsert) SetSubscriptionCost(v float64) *UsageLogUpsert {
+	u.Set(usagelog.FieldSubscriptionCost, v)
+	return u
+}
+
+// UpdateSubscriptionCost sets the "subscription_cost" field to the value that was provided on create.
+func (u *UsageLogUpsert) UpdateSubscriptionCost() *UsageLogUpsert {
+	u.SetExcluded(usagelog.FieldSubscriptionCost)
+	return u
+}
+
+// AddSubscriptionCost adds v to the "subscription_cost" field.
+func (u *UsageLogUpsert) AddSubscriptionCost(v float64) *UsageLogUpsert {
+	u.Add(usagelog.FieldSubscriptionCost, v)
 	return u
 }
 
@@ -2272,6 +2401,69 @@ func (u *UsageLogUpsertOne) AddActualCost(v float64) *UsageLogUpsertOne {
 func (u *UsageLogUpsertOne) UpdateActualCost() *UsageLogUpsertOne {
 	return u.Update(func(s *UsageLogUpsert) {
 		s.UpdateActualCost()
+	})
+}
+
+// SetCreditCost sets the "credit_cost" field.
+func (u *UsageLogUpsertOne) SetCreditCost(v float64) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetCreditCost(v)
+	})
+}
+
+// AddCreditCost adds v to the "credit_cost" field.
+func (u *UsageLogUpsertOne) AddCreditCost(v float64) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.AddCreditCost(v)
+	})
+}
+
+// UpdateCreditCost sets the "credit_cost" field to the value that was provided on create.
+func (u *UsageLogUpsertOne) UpdateCreditCost() *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateCreditCost()
+	})
+}
+
+// SetBalanceCost sets the "balance_cost" field.
+func (u *UsageLogUpsertOne) SetBalanceCost(v float64) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetBalanceCost(v)
+	})
+}
+
+// AddBalanceCost adds v to the "balance_cost" field.
+func (u *UsageLogUpsertOne) AddBalanceCost(v float64) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.AddBalanceCost(v)
+	})
+}
+
+// UpdateBalanceCost sets the "balance_cost" field to the value that was provided on create.
+func (u *UsageLogUpsertOne) UpdateBalanceCost() *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateBalanceCost()
+	})
+}
+
+// SetSubscriptionCost sets the "subscription_cost" field.
+func (u *UsageLogUpsertOne) SetSubscriptionCost(v float64) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetSubscriptionCost(v)
+	})
+}
+
+// AddSubscriptionCost adds v to the "subscription_cost" field.
+func (u *UsageLogUpsertOne) AddSubscriptionCost(v float64) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.AddSubscriptionCost(v)
+	})
+}
+
+// UpdateSubscriptionCost sets the "subscription_cost" field to the value that was provided on create.
+func (u *UsageLogUpsertOne) UpdateSubscriptionCost() *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateSubscriptionCost()
 	})
 }
 
@@ -3232,6 +3424,69 @@ func (u *UsageLogUpsertBulk) AddActualCost(v float64) *UsageLogUpsertBulk {
 func (u *UsageLogUpsertBulk) UpdateActualCost() *UsageLogUpsertBulk {
 	return u.Update(func(s *UsageLogUpsert) {
 		s.UpdateActualCost()
+	})
+}
+
+// SetCreditCost sets the "credit_cost" field.
+func (u *UsageLogUpsertBulk) SetCreditCost(v float64) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetCreditCost(v)
+	})
+}
+
+// AddCreditCost adds v to the "credit_cost" field.
+func (u *UsageLogUpsertBulk) AddCreditCost(v float64) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.AddCreditCost(v)
+	})
+}
+
+// UpdateCreditCost sets the "credit_cost" field to the value that was provided on create.
+func (u *UsageLogUpsertBulk) UpdateCreditCost() *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateCreditCost()
+	})
+}
+
+// SetBalanceCost sets the "balance_cost" field.
+func (u *UsageLogUpsertBulk) SetBalanceCost(v float64) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetBalanceCost(v)
+	})
+}
+
+// AddBalanceCost adds v to the "balance_cost" field.
+func (u *UsageLogUpsertBulk) AddBalanceCost(v float64) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.AddBalanceCost(v)
+	})
+}
+
+// UpdateBalanceCost sets the "balance_cost" field to the value that was provided on create.
+func (u *UsageLogUpsertBulk) UpdateBalanceCost() *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateBalanceCost()
+	})
+}
+
+// SetSubscriptionCost sets the "subscription_cost" field.
+func (u *UsageLogUpsertBulk) SetSubscriptionCost(v float64) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetSubscriptionCost(v)
+	})
+}
+
+// AddSubscriptionCost adds v to the "subscription_cost" field.
+func (u *UsageLogUpsertBulk) AddSubscriptionCost(v float64) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.AddSubscriptionCost(v)
+	})
+}
+
+// UpdateSubscriptionCost sets the "subscription_cost" field to the value that was provided on create.
+func (u *UsageLogUpsertBulk) UpdateSubscriptionCost() *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateSubscriptionCost()
 	})
 }
 

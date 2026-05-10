@@ -202,6 +202,24 @@
             </span>
           </template>
 
+          <template #cell-credit_cost="{ row }">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+              {{ row.credit_cost > 0 ? `$${row.credit_cost.toFixed(6)}` : '-' }}
+            </span>
+          </template>
+
+          <template #cell-balance_cost="{ row }">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+              {{ row.balance_cost > 0 ? `$${row.balance_cost.toFixed(6)}` : '-' }}
+            </span>
+          </template>
+
+          <template #cell-subscription_cost="{ row }">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+              {{ row.subscription_cost > 0 ? `$${row.subscription_cost.toFixed(6)}` : '-' }}
+            </span>
+          </template>
+
           <template #cell-tokens="{ row }">
             <!-- 图片生成请求（仅按次计费时显示图片格式） -->
             <div v-if="row.image_count > 0 && row.billing_mode === 'image'" class="flex items-center gap-1.5">
@@ -578,6 +596,9 @@ const columns = computed<Column[]>(() => [
   { key: 'stream', label: t('usage.type'), sortable: false },
   { key: 'billing_mode', label: t('admin.usage.billingMode'), sortable: false },
   { key: 'billing_source', label: t('usage.billingSource'), sortable: false },
+  { key: 'credit_cost', label: t('usage.creditCost'), sortable: false },
+  { key: 'balance_cost', label: t('usage.balanceCost'), sortable: false },
+  { key: 'subscription_cost', label: t('usage.subscriptionCost'), sortable: false },
   { key: 'tokens', label: t('usage.tokens'), sortable: false },
   { key: 'cost', label: t('usage.cost'), sortable: false },
   { key: 'first_token', label: t('usage.firstToken'), sortable: false },

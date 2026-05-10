@@ -202,7 +202,7 @@ func (m *mockUserRepo) RemoveGroupFromAllowedGroups(context.Context, int64) (int
 
 func (m *mockUserRepo) BatchSetConcurrency(context.Context, []int64, int) (int, error) { return 0, nil }
 func (m *mockUserRepo) BatchAddConcurrency(context.Context, []int64, int) (int, error) { return 0, nil }
-func (m *mockUserRepo) AddGroupToAllowedGroups(context.Context, int64, int64) error { return nil }
+func (m *mockUserRepo) AddGroupToAllowedGroups(context.Context, int64, int64) error    { return nil }
 func (m *mockUserRepo) ListUserAuthIdentities(context.Context, int64) ([]UserAuthIdentityRecord, error) {
 	out := make([]UserAuthIdentityRecord, len(m.identities))
 	copy(out, m.identities)
@@ -280,9 +280,18 @@ type mockBillingCache struct {
 	mu                  sync.Mutex
 }
 
-func (m *mockBillingCache) GetUserBalance(context.Context, int64) (float64, error)  { return 0, nil }
-func (m *mockBillingCache) SetUserBalance(context.Context, int64, float64) error    { return nil }
+func (m *mockBillingCache) GetUserBalance(context.Context, int64) (float64, error) { return 0, nil }
+func (m *mockBillingCache) GetUserCreditBalance(context.Context, int64) (float64, error) {
+	return 0, nil
+}
+func (m *mockBillingCache) SetUserBalance(context.Context, int64, float64) error { return nil }
+func (m *mockBillingCache) SetUserCreditBalance(context.Context, int64, float64) error {
+	return nil
+}
 func (m *mockBillingCache) DeductUserBalance(context.Context, int64, float64) error { return nil }
+func (m *mockBillingCache) DeductUserCreditBalance(context.Context, int64, float64) error {
+	return nil
+}
 func (m *mockBillingCache) InvalidateUserBalance(_ context.Context, userID int64) error {
 	m.invalidateCallCount.Add(1)
 	m.mu.Lock()

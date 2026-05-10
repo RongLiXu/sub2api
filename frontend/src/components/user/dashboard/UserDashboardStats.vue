@@ -1,7 +1,7 @@
 <template>
   <!-- Row 1: Core Stats -->
   <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-    <!-- Balance -->
+    <!-- Wallet -->
     <div v-if="!isSimple" class="card p-4">
       <div class="flex items-center gap-3">
         <div class="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/30">
@@ -10,9 +10,11 @@
           </svg>
         </div>
         <div>
-          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('dashboard.balance') }}</p>
-          <p class="text-xl font-bold text-emerald-600 dark:text-emerald-400">${{ formatBalance(balance) }}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('common.available') }}</p>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('dashboard.walletOverview') }}</p>
+          <p class="text-xl font-bold text-emerald-600 dark:text-emerald-400">${{ formatBalance(walletTotal) }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            {{ t('dashboard.creditBalance') }} ${{ formatBalance(creditBalance) }} · {{ t('dashboard.balance') }} ${{ formatBalance(balance) }}
+          </p>
         </div>
       </div>
     </div>
@@ -134,16 +136,20 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
 import type { UserDashboardStats as UserStatsType } from '@/api/usage'
 
-defineProps<{
+const props = defineProps<{
   stats: UserStatsType
   balance: number
+  creditBalance: number
   isSimple: boolean
 }>()
 const { t } = useI18n()
+
+const walletTotal = computed(() => props.balance + props.creditBalance)
 
 const formatBalance = (b: number) =>
   new Intl.NumberFormat('en-US', {

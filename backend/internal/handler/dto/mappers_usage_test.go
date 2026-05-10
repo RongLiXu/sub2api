@@ -154,6 +154,28 @@ func TestUsageLogFromService_FallsBackToLegacyModelWhenRequestedModelMissing(t *
 	require.Equal(t, "claude-3", adminDTO.Model)
 }
 
+func TestUsageLogFromService_IncludesBillingCostBreakdown(t *testing.T) {
+	t.Parallel()
+
+	log := &service.UsageLog{
+		RequestID:        "req_breakdown",
+		Model:            "gpt-5",
+		CreditCost:       1.25,
+		BalanceCost:      2.5,
+		SubscriptionCost: 3.75,
+	}
+
+	userDTO := UsageLogFromService(log)
+	adminDTO := UsageLogFromServiceAdmin(log)
+
+	require.InDelta(t, 1.25, userDTO.CreditCost, 1e-12)
+	require.InDelta(t, 2.5, userDTO.BalanceCost, 1e-12)
+	require.InDelta(t, 3.75, userDTO.SubscriptionCost, 1e-12)
+	require.InDelta(t, 1.25, adminDTO.CreditCost, 1e-12)
+	require.InDelta(t, 2.5, adminDTO.BalanceCost, 1e-12)
+	require.InDelta(t, 3.75, adminDTO.SubscriptionCost, 1e-12)
+}
+
 func f64Ptr(value float64) *float64 {
 	return &value
 }

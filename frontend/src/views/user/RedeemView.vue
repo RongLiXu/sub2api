@@ -365,8 +365,8 @@
           <div v-else class="space-y-3">
             <div v-for="item in creditLedger" :key="item.id" class="flex items-center justify-between rounded-xl bg-gray-50 p-4 dark:bg-dark-800">
               <div>
-                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ item.entry_type }}</p>
-                <p class="text-xs text-gray-500 dark:text-dark-400">{{ item.source }}</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ formatCreditEntryType(item.entry_type) }}</p>
+                <p class="text-xs text-gray-500 dark:text-dark-400">{{ formatCreditSource(item.source) }}</p>
                 <p v-if="item.request_id" class="font-mono text-xs text-gray-400">{{ item.request_id }}</p>
               </div>
               <div class="text-right">
@@ -472,6 +472,32 @@ const formatHistoryValue = (item: RedeemHistoryItem) => {
     const sign = item.value >= 0 ? '+' : ''
     return `${sign}${item.value} ${t('redeem.requests')}`
   }
+}
+
+const formatCreditEntryType = (value: string) => {
+  const map: Record<string, string> = {
+    admin_set: t('redeem.creditEntryTypes.admin_set'),
+    admin_add: t('redeem.creditEntryTypes.admin_add'),
+    admin_subtract: t('redeem.creditEntryTypes.admin_subtract'),
+    usage_deduct: t('redeem.creditEntryTypes.usage_deduct'),
+    redeem_grant: t('redeem.creditEntryTypes.redeem_grant'),
+    promo_grant: t('redeem.creditEntryTypes.promo_grant'),
+    refund_rollback: t('redeem.creditEntryTypes.refund_rollback'),
+    migration_adjustment: t('redeem.creditEntryTypes.migration_adjustment')
+  }
+  return map[value] || value
+}
+
+const formatCreditSource = (value: string) => {
+  const map: Record<string, string> = {
+    admin: t('redeem.creditSources.admin'),
+    usage_billing: t('redeem.creditSources.usage_billing'),
+    redeem: t('redeem.creditSources.redeem'),
+    promo: t('redeem.creditSources.promo'),
+    refund: t('redeem.creditSources.refund'),
+    system: t('redeem.creditSources.system')
+  }
+  return map[value] || value
 }
 
 const fetchHistory = async () => {

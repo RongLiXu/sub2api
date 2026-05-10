@@ -944,7 +944,18 @@ func (s *adminServiceImpl) UpdateUserCreditBalance(ctx context.Context, userID i
 		return nil, fmt.Errorf("credit_balance cannot be negative")
 	}
 
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	opCtx := ctx
+	var tx *dbent.Tx
+	if s.entClient != nil && s.creditLedgerRepo != nil && before != user.CreditBalance {
+		tx, err = s.entClient.Tx(ctx)
+		if err != nil {
+			return nil, err
+		}
+		defer func() { _ = tx.Rollback() }()
+		opCtx = dbent.NewTxContext(ctx, tx)
+	}
+
+	if err := s.userRepo.Update(opCtx, user); err != nil {
 		return nil, err
 	}
 	if s.creditLedgerRepo != nil && before != user.CreditBalance {
@@ -960,7 +971,7 @@ func (s *adminServiceImpl) UpdateUserCreditBalance(ctx context.Context, userID i
 			trimmed := strings.TrimSpace(notes)
 			notePtr = &trimmed
 		}
-		if _, err := s.creditLedgerRepo.Create(ctx, CreateCreditLedgerEntryInput{
+		if _, err := s.creditLedgerRepo.Create(opCtx, CreateCreditLedgerEntryInput{
 			UserID:        user.ID,
 			Amount:        user.CreditBalance - before,
 			BalanceBefore: before,
@@ -969,6 +980,11 @@ func (s *adminServiceImpl) UpdateUserCreditBalance(ctx context.Context, userID i
 			Source:        CreditLedgerSourceAdmin,
 			Notes:         notePtr,
 		}); err != nil {
+			return nil, err
+		}
+	}
+	if tx != nil {
+		if err := tx.Commit(); err != nil {
 			return nil, err
 		}
 	}

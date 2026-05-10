@@ -5501,7 +5501,7 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 	if billingErr != nil {
 		return billingErr
 	}
-	usageLog.BillingSource = resolveUsageLogBillingSource(isSubscriptionBilling, isSubscriptionCreditFallback, billingResult)
+	applyUsageLogBillingResult(usageLog, cost, isSubscriptionBilling, isSubscriptionCreditFallback, billingResult)
 	writeUsageLogBestEffort(ctx, s.usageLogRepo, usageLog, "service.openai_gateway")
 
 	return nil

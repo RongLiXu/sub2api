@@ -22,12 +22,24 @@ func (s *billingCacheMissStub) GetUserBalance(ctx context.Context, userID int64)
 	return 0, errors.New("cache miss")
 }
 
+func (s *billingCacheMissStub) GetUserCreditBalance(ctx context.Context, userID int64) (float64, error) {
+	return 0, errors.New("cache miss")
+}
+
 func (s *billingCacheMissStub) SetUserBalance(ctx context.Context, userID int64, balance float64) error {
 	s.setBalanceCalls.Add(1)
 	return nil
 }
 
+func (s *billingCacheMissStub) SetUserCreditBalance(ctx context.Context, userID int64, balance float64) error {
+	return nil
+}
+
 func (s *billingCacheMissStub) DeductUserBalance(ctx context.Context, userID int64, amount float64) error {
+	return nil
+}
+
+func (s *billingCacheMissStub) DeductUserCreditBalance(ctx context.Context, userID int64, amount float64) error {
 	return nil
 }
 

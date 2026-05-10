@@ -1195,13 +1195,29 @@ func (h *GatewayHandler) usageQuotaLimited(c *gin.Context, ctx context.Context, 
 
 // usageUnrestricted 处理 unrestricted 模式的响应（向后兼容）
 func (h *GatewayHandler) usageUnrestricted(c *gin.Context, ctx context.Context, apiKey *service.APIKey, subject middleware2.AuthSubject, usageData gin.H, modelStats any) {
+	latestUser := apiKey.User
+	if h.userService != nil {
+		user, err := h.userService.GetByID(ctx, subject.UserID)
+		if err != nil {
+			h.errorResponse(c, http.StatusInternalServerError, "api_error", "Failed to get user info")
+			return
+		}
+		latestUser = user
+	}
+	if latestUser == nil {
+		h.errorResponse(c, http.StatusInternalServerError, "api_error", "Failed to get user info")
+		return
+	}
+
 	// 订阅模式
 	if apiKey.Group != nil && apiKey.Group.IsSubscriptionType() {
 		resp := gin.H{
-			"mode":     "unrestricted",
-			"isValid":  true,
-			"planName": apiKey.Group.Name,
-			"unit":     "USD",
+			"mode":           "unrestricted",
+			"isValid":        true,
+			"planName":       apiKey.Group.Name,
+			"unit":           "USD",
+			"credit_balance": latestUser.CreditBalance,
+			"balance":        latestUser.Balance,
 		}
 
 		// 订阅信息可能不在 context 中（/v1/usage 路径跳过了中间件的计费检查）
@@ -1230,20 +1246,14 @@ func (h *GatewayHandler) usageUnrestricted(c *gin.Context, ctx context.Context, 
 		return
 	}
 
-	// 余额模式
-	latestUser, err := h.userService.GetByID(ctx, subject.UserID)
-	if err != nil {
-		h.errorResponse(c, http.StatusInternalServerError, "api_error", "Failed to get user info")
-		return
-	}
-
 	resp := gin.H{
-		"mode":      "unrestricted",
-		"isValid":   true,
-		"planName":  "钱包余额",
-		"remaining": latestUser.Balance,
-		"unit":      "USD",
-		"balance":   latestUser.Balance,
+		"mode":           "unrestricted",
+		"isValid":        true,
+		"planName":       "钱包余额",
+		"remaining":      latestUser.WalletBalance(),
+		"unit":           "USD",
+		"balance":        latestUser.Balance,
+		"credit_balance": latestUser.CreditBalance,
 	}
 	if usageData != nil {
 		resp["usage"] = usageData

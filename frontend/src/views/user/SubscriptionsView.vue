@@ -23,14 +23,19 @@
         </p>
       </div>
 
-      <!-- Subscriptions Grid -->
-      <div v-else class="grid gap-6 lg:grid-cols-2">
-        <div
-          v-for="subscription in subscriptions"
-          :key="subscription.id"
-          class="overflow-hidden rounded-2xl border bg-white dark:bg-dark-800"
-          :class="platformBorderClass(subscription.group?.platform || '')"
-        >
+      <template v-else>
+        <div class="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm leading-relaxed text-sky-700 dark:border-sky-900/40 dark:bg-sky-950/30 dark:text-sky-300">
+          {{ t('userSubscriptions.creditFallbackHint') }}
+        </div>
+
+        <!-- Subscriptions Grid -->
+        <div class="grid gap-6 lg:grid-cols-2">
+          <div
+            v-for="subscription in subscriptions"
+            :key="subscription.id"
+            class="overflow-hidden rounded-2xl border bg-white dark:bg-dark-800"
+            :class="platformBorderClass(subscription.group?.platform || '')"
+          >
           <!-- Header -->
           <div
             class="flex items-center justify-between border-b border-gray-100 p-4 dark:border-dark-700"
@@ -239,8 +244,9 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
   </AppLayout>
 </template>

@@ -97,6 +97,24 @@
           </span>
         </template>
 
+        <template #cell-credit_cost="{ row }">
+          <span class="text-sm text-gray-600 dark:text-gray-400">
+            {{ row.credit_cost > 0 ? `$${row.credit_cost.toFixed(6)}` : '-' }}
+          </span>
+        </template>
+
+        <template #cell-balance_cost="{ row }">
+          <span class="text-sm text-gray-600 dark:text-gray-400">
+            {{ row.balance_cost > 0 ? `$${row.balance_cost.toFixed(6)}` : '-' }}
+          </span>
+        </template>
+
+        <template #cell-subscription_cost="{ row }">
+          <span class="text-sm text-gray-600 dark:text-gray-400">
+            {{ row.subscription_cost > 0 ? `$${row.subscription_cost.toFixed(6)}` : '-' }}
+          </span>
+        </template>
+
         <template #cell-tokens="{ row }">
           <!-- 图片生成请求（仅按次计费时显示图片格式） -->
           <div v-if="row.image_count > 0 && row.billing_mode === BILLING_MODE_IMAGE" class="flex items-center gap-1.5">

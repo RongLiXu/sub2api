@@ -1186,6 +1186,9 @@ export interface UsageLog {
   cache_read_cost: number
   total_cost: number
   actual_cost: number
+  credit_cost: number
+  balance_cost: number
+  subscription_cost: number
   rate_multiplier: number
   billing_type: number
   billing_source?: string | null
