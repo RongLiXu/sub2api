@@ -49,6 +49,10 @@ func (User) Fields() []ent.Field {
 		field.Float("balance").
 			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}).
 			Default(0),
+		field.Float("credit_balance").
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}).
+			Default(0).
+			Comment("平台赠送/信用余额，余额模式扣费时优先于 balance 消耗"),
 		field.Int("concurrency").
 			Default(5),
 		field.String("status").

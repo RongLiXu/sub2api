@@ -20,10 +20,15 @@ import (
 var (
 	ErrSubscriptionInvalid       = infraerrors.Forbidden("SUBSCRIPTION_INVALID", "subscription is invalid or expired")
 	ErrBillingServiceUnavailable = infraerrors.ServiceUnavailable("BILLING_SERVICE_ERROR", "Billing service temporarily unavailable. Please retry later.")
+	ErrInsufficientCreditBalance = infraerrors.Forbidden("INSUFFICIENT_CREDIT_BALANCE", "insufficient credit balance")
 	// RPM 超限错误。gateway_handler 负责映射为 HTTP 429。
 	ErrGroupRPMExceeded = infraerrors.TooManyRequests("GROUP_RPM_EXCEEDED", "group requests-per-minute limit exceeded")
 	ErrUserRPMExceeded  = infraerrors.TooManyRequests("USER_RPM_EXCEEDED", "user requests-per-minute limit exceeded")
 )
+
+type SubscriptionCreditFallbackSettingReader interface {
+	IsSubscriptionCreditFallbackEnabled(ctx context.Context) bool
+}
 
 // subscriptionCacheData 订阅缓存数据结构（内部使用）
 type subscriptionCacheData struct {
@@ -40,9 +45,11 @@ type cacheWriteKind int
 
 const (
 	cacheWriteSetBalance cacheWriteKind = iota
+	cacheWriteSetCreditBalance
 	cacheWriteSetSubscription
 	cacheWriteUpdateSubscriptionUsage
 	cacheWriteDeductBalance
+	cacheWriteDeductCreditBalance
 	cacheWriteUpdateRateLimitUsage
 )
 
@@ -74,6 +81,7 @@ type cacheWriteTask struct {
 	groupID          int64
 	apiKeyID         int64
 	balance          float64
+	creditBalance    float64
 	amount           float64
 	subscriptionData *subscriptionCacheData
 }
@@ -86,14 +94,15 @@ type apiKeyRateLimitLoader interface {
 // BillingCacheService 计费缓存服务
 // 负责余额和订阅数据的缓存管理，提供高性能的计费资格检查
 type BillingCacheService struct {
-	cache                 BillingCache
-	userRepo              UserRepository
-	subRepo               UserSubscriptionRepository
-	apiKeyRateLimitLoader apiKeyRateLimitLoader
-	userRPMCache          UserRPMCache
-	userGroupRateRepo     UserGroupRateRepository
-	cfg                   *config.Config
-	circuitBreaker        *billingCircuitBreaker
+	cache                              BillingCache
+	userRepo                           UserRepository
+	subRepo                            UserSubscriptionRepository
+	apiKeyRateLimitLoader              apiKeyRateLimitLoader
+	userRPMCache                       UserRPMCache
+	userGroupRateRepo                  UserGroupRateRepository
+	subscriptionCreditFallbackSettings SubscriptionCreditFallbackSettingReader
+	cfg                                *config.Config
+	circuitBreaker                     *billingCircuitBreaker
 
 	cacheWriteChan     chan cacheWriteTask
 	cacheWriteWg       sync.WaitGroup
@@ -117,6 +126,7 @@ func NewBillingCacheService(
 	userRPMCache UserRPMCache,
 	userGroupRateRepo UserGroupRateRepository,
 	cfg *config.Config,
+	settingReaders ...SubscriptionCreditFallbackSettingReader,
 ) *BillingCacheService {
 	svc := &BillingCacheService{
 		cache:                 cache,
@@ -126,6 +136,9 @@ func NewBillingCacheService(
 		userRPMCache:          userRPMCache,
 		userGroupRateRepo:     userGroupRateRepo,
 		cfg:                   cfg,
+	}
+	if len(settingReaders) > 0 {
+		svc.subscriptionCreditFallbackSettings = settingReaders[0]
 	}
 	svc.circuitBreaker = newBillingCircuitBreaker(cfg.Billing.CircuitBreaker)
 	svc.startCacheWriteWorkers()
@@ -198,6 +211,8 @@ func (s *BillingCacheService) cacheWriteWorker(ch <-chan cacheWriteTask) {
 		switch task.kind {
 		case cacheWriteSetBalance:
 			s.setBalanceCache(ctx, task.userID, task.balance)
+		case cacheWriteSetCreditBalance:
+			s.setCreditBalanceCache(ctx, task.userID, task.creditBalance)
 		case cacheWriteSetSubscription:
 			s.setSubscriptionCache(ctx, task.userID, task.groupID, task.subscriptionData)
 		case cacheWriteUpdateSubscriptionUsage:
@@ -210,6 +225,12 @@ func (s *BillingCacheService) cacheWriteWorker(ch <-chan cacheWriteTask) {
 			if s.cache != nil {
 				if err := s.cache.DeductUserBalance(ctx, task.userID, task.amount); err != nil {
 					logger.LegacyPrintf("service.billing_cache", "Warning: deduct balance cache failed for user %d: %v", task.userID, err)
+				}
+			}
+		case cacheWriteDeductCreditBalance:
+			if s.cache != nil {
+				if err := s.cache.DeductUserCreditBalance(ctx, task.userID, task.amount); err != nil {
+					logger.LegacyPrintf("service.billing_cache", "Warning: deduct credit balance cache failed for user %d: %v", task.userID, err)
 				}
 			}
 		case cacheWriteUpdateRateLimitUsage:
@@ -228,12 +249,16 @@ func cacheWriteKindName(kind cacheWriteKind) string {
 	switch kind {
 	case cacheWriteSetBalance:
 		return "set_balance"
+	case cacheWriteSetCreditBalance:
+		return "set_credit_balance"
 	case cacheWriteSetSubscription:
 		return "set_subscription"
 	case cacheWriteUpdateSubscriptionUsage:
 		return "update_subscription_usage"
 	case cacheWriteDeductBalance:
 		return "deduct_balance"
+	case cacheWriteDeductCreditBalance:
+		return "deduct_credit_balance"
 	case cacheWriteUpdateRateLimitUsage:
 		return "update_rate_limit_usage"
 	default:
@@ -326,6 +351,44 @@ func (s *BillingCacheService) GetUserBalance(ctx context.Context, userID int64) 
 	return balance, nil
 }
 
+func (s *BillingCacheService) GetUserWalletBalance(ctx context.Context, userID int64) (float64, error) {
+	user, err := s.getUserWalletFromDBOrCache(ctx, userID)
+	if err != nil {
+		return 0, err
+	}
+	return user.WalletBalance(), nil
+}
+
+func (s *BillingCacheService) GetUserCreditBalance(ctx context.Context, userID int64) (float64, error) {
+	user, err := s.getUserWalletFromDBOrCache(ctx, userID)
+	if err != nil {
+		return 0, err
+	}
+	return user.CreditBalance, nil
+}
+
+func (s *BillingCacheService) getUserWalletFromDBOrCache(ctx context.Context, userID int64) (*User, error) {
+	if s.cache == nil {
+		user, err := s.userRepo.GetByID(ctx, userID)
+		if err != nil {
+			return nil, fmt.Errorf("get user wallet: %w", err)
+		}
+		return user, nil
+	}
+	balance, balanceErr := s.cache.GetUserBalance(ctx, userID)
+	creditBalance, creditErr := s.cache.GetUserCreditBalance(ctx, userID)
+	if balanceErr == nil && creditErr == nil {
+		return &User{ID: userID, Balance: balance, CreditBalance: creditBalance}, nil
+	}
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("get user wallet: %w", err)
+	}
+	_ = s.enqueueCacheWrite(cacheWriteTask{kind: cacheWriteSetBalance, userID: userID, balance: user.Balance})
+	_ = s.enqueueCacheWrite(cacheWriteTask{kind: cacheWriteSetCreditBalance, userID: userID, creditBalance: user.CreditBalance})
+	return user, nil
+}
+
 // getUserBalanceFromDB 从数据库获取用户余额
 func (s *BillingCacheService) getUserBalanceFromDB(ctx context.Context, userID int64) (float64, error) {
 	user, err := s.userRepo.GetByID(ctx, userID)
@@ -333,6 +396,15 @@ func (s *BillingCacheService) getUserBalanceFromDB(ctx context.Context, userID i
 		return 0, fmt.Errorf("get user balance: %w", err)
 	}
 	return user.Balance, nil
+}
+
+func (s *BillingCacheService) setCreditBalanceCache(ctx context.Context, userID int64, balance float64) {
+	if s.cache == nil {
+		return
+	}
+	if err := s.cache.SetUserCreditBalance(ctx, userID, balance); err != nil {
+		logger.LegacyPrintf("service.billing_cache", "Warning: set credit balance cache failed for user %d: %v", userID, err)
+	}
 }
 
 // setBalanceCache 设置余额缓存
@@ -370,6 +442,33 @@ func (s *BillingCacheService) QueueDeductBalance(userID int64, amount float64) {
 	defer cancel()
 	if err := s.DeductBalanceCache(ctx, userID, amount); err != nil {
 		logger.LegacyPrintf("service.billing_cache", "Warning: deduct balance cache fallback failed for user %d: %v", userID, err)
+	}
+}
+
+func (s *BillingCacheService) QueueDeductWallet(userID int64, creditAmount, balanceAmount float64) {
+	if creditAmount > 0 {
+		s.queueDeductCreditBalance(userID, creditAmount)
+	}
+	if balanceAmount > 0 {
+		s.QueueDeductBalance(userID, balanceAmount)
+	}
+}
+
+func (s *BillingCacheService) queueDeductCreditBalance(userID int64, amount float64) {
+	if s.cache == nil {
+		return
+	}
+	if s.enqueueCacheWrite(cacheWriteTask{
+		kind:   cacheWriteDeductCreditBalance,
+		userID: userID,
+		amount: amount,
+	}) {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), cacheWriteTimeout)
+	defer cancel()
+	if err := s.cache.DeductUserCreditBalance(ctx, userID, amount); err != nil {
+		logger.LegacyPrintf("service.billing_cache", "Warning: deduct credit balance cache fallback failed for user %d: %v", userID, err)
 	}
 }
 
@@ -675,10 +774,14 @@ func (s *BillingCacheService) CheckBillingEligibility(ctx context.Context, user 
 	isSubscriptionMode := group != nil && group.IsSubscriptionType() && subscription != nil
 
 	if isSubscriptionMode {
-		if err := s.checkSubscriptionEligibility(ctx, user.ID, group, subscription); err != nil {
+		apiKey.SubscriptionCreditFallback = false
+		if err := s.checkSubscriptionEligibility(ctx, user, apiKey, group, subscription); err != nil {
 			return err
 		}
 	} else {
+		if apiKey != nil {
+			apiKey.SubscriptionCreditFallback = false
+		}
 		if err := s.checkBalanceEligibility(ctx, user.ID); err != nil {
 			return err
 		}
@@ -785,7 +888,7 @@ func (s *BillingCacheService) checkRPM(ctx context.Context, user *User, group *G
 
 // checkBalanceEligibility 检查余额模式资格
 func (s *BillingCacheService) checkBalanceEligibility(ctx context.Context, userID int64) error {
-	balance, err := s.GetUserBalance(ctx, userID)
+	balance, err := s.GetUserWalletBalance(ctx, userID)
 	if err != nil {
 		if s.circuitBreaker != nil {
 			s.circuitBreaker.OnFailure(err)
@@ -805,7 +908,8 @@ func (s *BillingCacheService) checkBalanceEligibility(ctx context.Context, userI
 }
 
 // checkSubscriptionEligibility 检查订阅模式资格
-func (s *BillingCacheService) checkSubscriptionEligibility(ctx context.Context, userID int64, group *Group, subscription *UserSubscription) error {
+func (s *BillingCacheService) checkSubscriptionEligibility(ctx context.Context, user *User, apiKey *APIKey, group *Group, subscription *UserSubscription) error {
+	userID := user.ID
 	// 获取订阅缓存数据
 	subData, err := s.GetSubscriptionStatus(ctx, userID, group.ID)
 	if err != nil {
@@ -831,18 +935,55 @@ func (s *BillingCacheService) checkSubscriptionEligibility(ctx context.Context, 
 
 	// 检查限额（使用传入的Group限额配置）
 	if group.HasDailyLimit() && subData.DailyUsage >= *group.DailyLimitUSD {
-		return ErrDailyLimitExceeded
+		return s.handleSubscriptionLimitExceeded(ctx, user, apiKey, group, ErrDailyLimitExceeded)
 	}
 
 	if group.HasWeeklyLimit() && subData.WeeklyUsage >= *group.WeeklyLimitUSD {
-		return ErrWeeklyLimitExceeded
+		return s.handleSubscriptionLimitExceeded(ctx, user, apiKey, group, ErrWeeklyLimitExceeded)
 	}
 
 	if group.HasMonthlyLimit() && subData.MonthlyUsage >= *group.MonthlyLimitUSD {
-		return ErrMonthlyLimitExceeded
+		return s.handleSubscriptionLimitExceeded(ctx, user, apiKey, group, ErrMonthlyLimitExceeded)
 	}
 
 	return nil
+}
+
+func (s *BillingCacheService) handleSubscriptionLimitExceeded(ctx context.Context, user *User, apiKey *APIKey, group *Group, limitErr error) error {
+	if !s.effectiveSubscriptionCreditFallbackEnabled(ctx, group) {
+		return limitErr
+	}
+	creditBalance, err := s.GetUserCreditBalance(ctx, user.ID)
+	if err != nil {
+		if s.circuitBreaker != nil {
+			s.circuitBreaker.OnFailure(err)
+		}
+		logger.LegacyPrintf("service.billing_cache", "ALERT: credit balance fallback check failed for user %d group %d: %v", user.ID, group.ID, err)
+		return ErrBillingServiceUnavailable.WithCause(err)
+	}
+	if s.circuitBreaker != nil {
+		s.circuitBreaker.OnSuccess()
+	}
+	if creditBalance <= 0 {
+		return ErrInsufficientCreditBalance
+	}
+	if apiKey != nil {
+		apiKey.SubscriptionCreditFallback = true
+	}
+	if user != nil {
+		user.CreditBalance = creditBalance
+	}
+	return nil
+}
+
+func (s *BillingCacheService) effectiveSubscriptionCreditFallbackEnabled(ctx context.Context, group *Group) bool {
+	if group != nil && group.SubscriptionCreditFallbackEnabled != nil {
+		return *group.SubscriptionCreditFallbackEnabled
+	}
+	if s.subscriptionCreditFallbackSettings == nil {
+		return false
+	}
+	return s.subscriptionCreditFallbackSettings.IsSubscriptionCreditFallbackEnabled(ctx)
 }
 
 type billingCircuitBreakerState int

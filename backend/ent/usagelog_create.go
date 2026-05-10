@@ -379,6 +379,20 @@ func (_c *UsageLogCreate) SetNillableBillingType(v *int8) *UsageLogCreate {
 	return _c
 }
 
+// SetBillingSource sets the "billing_source" field.
+func (_c *UsageLogCreate) SetBillingSource(v string) *UsageLogCreate {
+	_c.mutation.SetBillingSource(v)
+	return _c
+}
+
+// SetNillableBillingSource sets the "billing_source" field if the given value is not nil.
+func (_c *UsageLogCreate) SetNillableBillingSource(v *string) *UsageLogCreate {
+	if v != nil {
+		_c.SetBillingSource(*v)
+	}
+	return _c
+}
+
 // SetStream sets the "stream" field.
 func (_c *UsageLogCreate) SetStream(v bool) *UsageLogCreate {
 	_c.mutation.SetStream(v)
@@ -621,6 +635,10 @@ func (_c *UsageLogCreate) defaults() {
 		v := usagelog.DefaultBillingType
 		_c.mutation.SetBillingType(v)
 	}
+	if _, ok := _c.mutation.BillingSource(); !ok {
+		v := usagelog.DefaultBillingSource
+		_c.mutation.SetBillingSource(v)
+	}
 	if _, ok := _c.mutation.Stream(); !ok {
 		v := usagelog.DefaultStream
 		_c.mutation.SetStream(v)
@@ -732,6 +750,14 @@ func (_c *UsageLogCreate) check() error {
 	}
 	if _, ok := _c.mutation.BillingType(); !ok {
 		return &ValidationError{Name: "billing_type", err: errors.New(`ent: missing required field "UsageLog.billing_type"`)}
+	}
+	if _, ok := _c.mutation.BillingSource(); !ok {
+		return &ValidationError{Name: "billing_source", err: errors.New(`ent: missing required field "UsageLog.billing_source"`)}
+	}
+	if v, ok := _c.mutation.BillingSource(); ok {
+		if err := usagelog.BillingSourceValidator(v); err != nil {
+			return &ValidationError{Name: "billing_source", err: fmt.Errorf(`ent: validator failed for field "UsageLog.billing_source": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.Stream(); !ok {
 		return &ValidationError{Name: "stream", err: errors.New(`ent: missing required field "UsageLog.stream"`)}
@@ -887,6 +913,10 @@ func (_c *UsageLogCreate) createSpec() (*UsageLog, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.BillingType(); ok {
 		_spec.SetField(usagelog.FieldBillingType, field.TypeInt8, value)
 		_node.BillingType = value
+	}
+	if value, ok := _c.mutation.BillingSource(); ok {
+		_spec.SetField(usagelog.FieldBillingSource, field.TypeString, value)
+		_node.BillingSource = value
 	}
 	if value, ok := _c.mutation.Stream(); ok {
 		_spec.SetField(usagelog.FieldStream, field.TypeBool, value)
@@ -1544,6 +1574,18 @@ func (u *UsageLogUpsert) UpdateBillingType() *UsageLogUpsert {
 // AddBillingType adds v to the "billing_type" field.
 func (u *UsageLogUpsert) AddBillingType(v int8) *UsageLogUpsert {
 	u.Add(usagelog.FieldBillingType, v)
+	return u
+}
+
+// SetBillingSource sets the "billing_source" field.
+func (u *UsageLogUpsert) SetBillingSource(v string) *UsageLogUpsert {
+	u.Set(usagelog.FieldBillingSource, v)
+	return u
+}
+
+// UpdateBillingSource sets the "billing_source" field to the value that was provided on create.
+func (u *UsageLogUpsert) UpdateBillingSource() *UsageLogUpsert {
+	u.SetExcluded(usagelog.FieldBillingSource)
 	return u
 }
 
@@ -2300,6 +2342,20 @@ func (u *UsageLogUpsertOne) AddBillingType(v int8) *UsageLogUpsertOne {
 func (u *UsageLogUpsertOne) UpdateBillingType() *UsageLogUpsertOne {
 	return u.Update(func(s *UsageLogUpsert) {
 		s.UpdateBillingType()
+	})
+}
+
+// SetBillingSource sets the "billing_source" field.
+func (u *UsageLogUpsertOne) SetBillingSource(v string) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetBillingSource(v)
+	})
+}
+
+// UpdateBillingSource sets the "billing_source" field to the value that was provided on create.
+func (u *UsageLogUpsertOne) UpdateBillingSource() *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateBillingSource()
 	})
 }
 
@@ -3246,6 +3302,20 @@ func (u *UsageLogUpsertBulk) AddBillingType(v int8) *UsageLogUpsertBulk {
 func (u *UsageLogUpsertBulk) UpdateBillingType() *UsageLogUpsertBulk {
 	return u.Update(func(s *UsageLogUpsert) {
 		s.UpdateBillingType()
+	})
+}
+
+// SetBillingSource sets the "billing_source" field.
+func (u *UsageLogUpsertBulk) SetBillingSource(v string) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetBillingSource(v)
+	})
+}
+
+// UpdateBillingSource sets the "billing_source" field to the value that was provided on create.
+func (u *UsageLogUpsertBulk) UpdateBillingSource() *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateBillingSource()
 	})
 }
 

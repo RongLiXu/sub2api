@@ -30,6 +30,20 @@ func (b *billingCacheWorkerStub) DeductUserBalance(ctx context.Context, userID i
 	return nil
 }
 
+func (b *billingCacheWorkerStub) GetUserCreditBalance(ctx context.Context, userID int64) (float64, error) {
+	return 0, errors.New("not implemented")
+}
+
+func (b *billingCacheWorkerStub) SetUserCreditBalance(ctx context.Context, userID int64, balance float64) error {
+	atomic.AddInt64(&b.balanceUpdates, 1)
+	return nil
+}
+
+func (b *billingCacheWorkerStub) DeductUserCreditBalance(ctx context.Context, userID int64, amount float64) error {
+	atomic.AddInt64(&b.balanceUpdates, 1)
+	return nil
+}
+
 func (b *billingCacheWorkerStub) InvalidateUserBalance(ctx context.Context, userID int64) error {
 	return nil
 }

@@ -181,11 +181,14 @@ func apiKeyAuthWithSubscription(apiKeyService *service.APIKeyService, subscripti
 					if errors.Is(validateErr, service.ErrDailyLimitExceeded) ||
 						errors.Is(validateErr, service.ErrWeeklyLimitExceeded) ||
 						errors.Is(validateErr, service.ErrMonthlyLimitExceeded) {
-						code = "USAGE_LIMIT_EXCEEDED"
-						status = 429
+						// Defer limit handling to the gateway billing check so the
+						// subscription-credit fallback policy can be applied there.
+						validateErr = nil
 					}
-					AbortWithError(c, status, code, validateErr.Error())
-					return
+					if validateErr != nil {
+						AbortWithError(c, status, code, validateErr.Error())
+						return
+					}
 				}
 
 				// 窗口维护异步化（不阻塞请求）
@@ -195,7 +198,7 @@ func apiKeyAuthWithSubscription(apiKeyService *service.APIKeyService, subscripti
 				}
 			} else {
 				// 非订阅模式 或 订阅模式但 subscriptionService 未注入：回退到余额检查
-				if apiKey.User.Balance <= 0 {
+				if apiKey.User.WalletBalance() <= 0 {
 					AbortWithError(c, 403, "INSUFFICIENT_BALANCE", "Insufficient account balance")
 					return
 				}

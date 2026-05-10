@@ -87,10 +87,12 @@ func APIKeyAuthWithSubscriptionGoogle(apiKeyService *service.APIKeyService, subs
 				if errors.Is(err, service.ErrDailyLimitExceeded) ||
 					errors.Is(err, service.ErrWeeklyLimitExceeded) ||
 					errors.Is(err, service.ErrMonthlyLimitExceeded) {
-					status = 429
+					err = nil
 				}
-				abortWithGoogleError(c, status, err.Error())
-				return
+				if err != nil {
+					abortWithGoogleError(c, status, err.Error())
+					return
+				}
 			}
 
 			c.Set(string(ContextKeySubscription), subscription)
@@ -100,7 +102,7 @@ func APIKeyAuthWithSubscriptionGoogle(apiKeyService *service.APIKeyService, subs
 				subscriptionService.DoWindowMaintenance(&maintenanceCopy)
 			}
 		} else {
-			if apiKey.User.Balance <= 0 {
+			if apiKey.User.WalletBalance() <= 0 {
 				abortWithGoogleError(c, 403, "Insufficient account balance")
 				return
 			}

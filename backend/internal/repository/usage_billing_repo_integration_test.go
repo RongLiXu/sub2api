@@ -80,6 +80,108 @@ func TestUsageBillingRepositoryApply_DeduplicatesBalanceBilling(t *testing.T) {
 	require.Equal(t, 1, dedupCount)
 }
 
+func TestUsageBillingRepositoryApply_DeductsCreditBeforeBalance(t *testing.T) {
+	ctx := context.Background()
+	client := testEntClient(t)
+	repo := NewUsageBillingRepository(client, integrationDB)
+
+	user := mustCreateUser(t, client, &service.User{
+		Email:         fmt.Sprintf("usage-billing-credit-user-%d@example.com", time.Now().UnixNano()),
+		PasswordHash:  "hash",
+		Balance:       100,
+		CreditBalance: 5,
+	})
+	apiKey := mustCreateApiKey(t, client, &service.APIKey{
+		UserID: user.ID,
+		Key:    "sk-usage-billing-credit-" + uuid.NewString(),
+		Name:   "billing-credit",
+	})
+
+	result, err := repo.Apply(ctx, &service.UsageBillingCommand{
+		RequestID:   uuid.NewString(),
+		APIKeyID:    apiKey.ID,
+		UserID:      user.ID,
+		BalanceCost: 3.25,
+	})
+	require.NoError(t, err)
+	require.True(t, result.Applied)
+	require.InDelta(t, 3.25, result.CreditBalanceDeducted, 0.000001)
+	require.InDelta(t, 0.0, result.BalanceDeducted, 0.000001)
+
+	var balance, creditBalance float64
+	require.NoError(t, integrationDB.QueryRowContext(ctx, "SELECT balance, credit_balance FROM users WHERE id = $1", user.ID).Scan(&balance, &creditBalance))
+	require.InDelta(t, 100.0, balance, 0.000001)
+	require.InDelta(t, 1.75, creditBalance, 0.000001)
+}
+
+func TestUsageBillingRepositoryApply_DeductsMixedCreditAndBalance(t *testing.T) {
+	ctx := context.Background()
+	client := testEntClient(t)
+	repo := NewUsageBillingRepository(client, integrationDB)
+
+	user := mustCreateUser(t, client, &service.User{
+		Email:         fmt.Sprintf("usage-billing-mixed-user-%d@example.com", time.Now().UnixNano()),
+		PasswordHash:  "hash",
+		Balance:       100,
+		CreditBalance: 2,
+	})
+	apiKey := mustCreateApiKey(t, client, &service.APIKey{
+		UserID: user.ID,
+		Key:    "sk-usage-billing-mixed-" + uuid.NewString(),
+		Name:   "billing-mixed",
+	})
+
+	result, err := repo.Apply(ctx, &service.UsageBillingCommand{
+		RequestID:   uuid.NewString(),
+		APIKeyID:    apiKey.ID,
+		UserID:      user.ID,
+		BalanceCost: 5.5,
+	})
+	require.NoError(t, err)
+	require.True(t, result.Applied)
+	require.InDelta(t, 2.0, result.CreditBalanceDeducted, 0.000001)
+	require.InDelta(t, 3.5, result.BalanceDeducted, 0.000001)
+
+	var balance, creditBalance float64
+	require.NoError(t, integrationDB.QueryRowContext(ctx, "SELECT balance, credit_balance FROM users WHERE id = $1", user.ID).Scan(&balance, &creditBalance))
+	require.InDelta(t, 96.5, balance, 0.000001)
+	require.InDelta(t, 0.0, creditBalance, 0.000001)
+}
+
+func TestUsageBillingRepositoryApply_DeductsCreditBalanceOnly(t *testing.T) {
+	ctx := context.Background()
+	client := testEntClient(t)
+	repo := NewUsageBillingRepository(client, integrationDB)
+
+	user := mustCreateUser(t, client, &service.User{
+		Email:         fmt.Sprintf("usage-billing-credit-only-user-%d@example.com", time.Now().UnixNano()),
+		PasswordHash:  "hash",
+		Balance:       100,
+		CreditBalance: 8,
+	})
+	apiKey := mustCreateApiKey(t, client, &service.APIKey{
+		UserID: user.ID,
+		Key:    "sk-usage-billing-credit-only-" + uuid.NewString(),
+		Name:   "billing-credit-only",
+	})
+
+	result, err := repo.Apply(ctx, &service.UsageBillingCommand{
+		RequestID:         uuid.NewString(),
+		APIKeyID:          apiKey.ID,
+		UserID:            user.ID,
+		CreditBalanceCost: 4.25,
+	})
+	require.NoError(t, err)
+	require.True(t, result.Applied)
+	require.InDelta(t, 4.25, result.CreditBalanceDeducted, 0.000001)
+	require.InDelta(t, 0.0, result.BalanceDeducted, 0.000001)
+
+	var balance, creditBalance float64
+	require.NoError(t, integrationDB.QueryRowContext(ctx, "SELECT balance, credit_balance FROM users WHERE id = $1", user.ID).Scan(&balance, &creditBalance))
+	require.InDelta(t, 100.0, balance, 0.000001)
+	require.InDelta(t, 3.75, creditBalance, 0.000001)
+}
+
 func TestUsageBillingRepositoryApply_DeduplicatesSubscriptionBilling(t *testing.T) {
 	ctx := context.Background()
 	client := testEntClient(t)

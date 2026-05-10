@@ -175,6 +175,11 @@ func (s *stubAdminService) UpdateUserBalance(ctx context.Context, userID int64, 
 	return &user, nil
 }
 
+func (s *stubAdminService) UpdateUserCreditBalance(ctx context.Context, userID int64, amount float64, operation string, notes string) (*service.User, error) {
+	user := service.User{ID: userID, CreditBalance: amount, Status: service.StatusActive}
+	return &user, nil
+}
+
 func (s *stubAdminService) BatchUpdateConcurrency(ctx context.Context, userIDs []int64, value int, mode string) (int, error) {
 	return len(userIDs), nil
 }

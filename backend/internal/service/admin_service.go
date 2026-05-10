@@ -33,6 +33,7 @@ type AdminService interface {
 	UpdateUser(ctx context.Context, id int64, input *UpdateUserInput) (*User, error)
 	DeleteUser(ctx context.Context, id int64) error
 	UpdateUserBalance(ctx context.Context, userID int64, balance float64, operation string, notes string) (*User, error)
+	UpdateUserCreditBalance(ctx context.Context, userID int64, amount float64, operation string, notes string) (*User, error)
 	BatchUpdateConcurrency(ctx context.Context, userIDs []int64, value int, mode string) (int, error)
 	GetUserAPIKeys(ctx context.Context, userID int64, page, pageSize int, sortBy, sortOrder string) ([]APIKey, int64, error)
 	GetUserUsageStats(ctx context.Context, userID int64, period string) (any, error)
@@ -180,15 +181,16 @@ type AdminBoundAuthIdentityChannel struct {
 }
 
 type CreateGroupInput struct {
-	Name             string
-	Description      string
-	Platform         string
-	RateMultiplier   float64
-	IsExclusive      bool
-	SubscriptionType string   // standard/subscription
-	DailyLimitUSD    *float64 // 日限额 (USD)
-	WeeklyLimitUSD   *float64 // 周限额 (USD)
-	MonthlyLimitUSD  *float64 // 月限额 (USD)
+	Name                              string
+	Description                       string
+	Platform                          string
+	RateMultiplier                    float64
+	IsExclusive                       bool
+	SubscriptionType                  string   // standard/subscription
+	DailyLimitUSD                     *float64 // 日限额 (USD)
+	WeeklyLimitUSD                    *float64 // 周限额 (USD)
+	MonthlyLimitUSD                   *float64 // 月限额 (USD)
+	SubscriptionCreditFallbackEnabled *bool
 	// 图片生成计费配置（仅 antigravity 平台使用）
 	AllowImageGeneration bool
 	ImageRateIndependent bool
@@ -219,16 +221,17 @@ type CreateGroupInput struct {
 }
 
 type UpdateGroupInput struct {
-	Name             string
-	Description      string
-	Platform         string
-	RateMultiplier   *float64 // 使用指针以支持设置为0
-	IsExclusive      *bool
-	Status           string
-	SubscriptionType string   // standard/subscription
-	DailyLimitUSD    *float64 // 日限额 (USD)
-	WeeklyLimitUSD   *float64 // 周限额 (USD)
-	MonthlyLimitUSD  *float64 // 月限额 (USD)
+	Name                              string
+	Description                       string
+	Platform                          string
+	RateMultiplier                    *float64 // 使用指针以支持设置为0
+	IsExclusive                       *bool
+	Status                            string
+	SubscriptionType                  string   // standard/subscription
+	DailyLimitUSD                     *float64 // 日限额 (USD)
+	WeeklyLimitUSD                    *float64 // 周限额 (USD)
+	MonthlyLimitUSD                   *float64 // 月限额 (USD)
+	SubscriptionCreditFallbackEnabled *bool
 	// 图片生成计费配置（仅 antigravity 平台使用）
 	AllowImageGeneration *bool
 	ImageRateIndependent *bool
@@ -914,6 +917,49 @@ func (s *adminServiceImpl) UpdateUserBalance(ctx context.Context, userID int64, 
 	}
 
 	return user, nil
+}
+
+func (s *adminServiceImpl) UpdateUserCreditBalance(ctx context.Context, userID int64, amount float64, operation string, notes string) (*User, error) {
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	switch operation {
+	case "set":
+		user.CreditBalance = amount
+	case "add":
+		user.CreditBalance += amount
+	case "subtract":
+		user.CreditBalance -= amount
+	default:
+		return nil, errors.New("invalid operation: must be set, add, or subtract")
+	}
+	if user.CreditBalance < 0 {
+		return nil, fmt.Errorf("credit_balance cannot be negative")
+	}
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return nil, err
+	}
+	s.invalidateUserWalletCaches(ctx, userID)
+	return user, nil
+}
+
+func (s *adminServiceImpl) invalidateUserWalletCaches(ctx context.Context, userID int64) {
+	if s.authCacheInvalidator != nil {
+		s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, userID)
+	}
+	if s.billingCacheService == nil {
+		return
+	}
+	go func() {
+		cacheCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := s.billingCacheService.InvalidateUserBalance(cacheCtx, userID); err != nil {
+			logger.LegacyPrintf("service.admin", "invalidate user wallet cache failed: user_id=%d err=%v", userID, err)
+		}
+	}()
 }
 
 func (s *adminServiceImpl) GetUserAPIKeys(ctx context.Context, userID int64, page, pageSize int, sortBy, sortOrder string) ([]APIKey, int64, error) {
@@ -1661,34 +1707,35 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 	}
 
 	group := &Group{
-		Name:                            input.Name,
-		Description:                     input.Description,
-		Platform:                        platform,
-		RateMultiplier:                  input.RateMultiplier,
-		IsExclusive:                     input.IsExclusive,
-		Status:                          StatusActive,
-		SubscriptionType:                subscriptionType,
-		DailyLimitUSD:                   dailyLimit,
-		WeeklyLimitUSD:                  weeklyLimit,
-		MonthlyLimitUSD:                 monthlyLimit,
-		AllowImageGeneration:            input.AllowImageGeneration,
-		ImageRateIndependent:            input.ImageRateIndependent,
-		ImageRateMultiplier:             imageRateMultiplier,
-		ImagePrice1K:                    imagePrice1K,
-		ImagePrice2K:                    imagePrice2K,
-		ImagePrice4K:                    imagePrice4K,
-		ClaudeCodeOnly:                  input.ClaudeCodeOnly,
-		FallbackGroupID:                 input.FallbackGroupID,
-		FallbackGroupIDOnInvalidRequest: fallbackOnInvalidRequest,
-		ModelRouting:                    input.ModelRouting,
-		MCPXMLInject:                    mcpXMLInject,
-		SupportedModelScopes:            input.SupportedModelScopes,
-		AllowMessagesDispatch:           input.AllowMessagesDispatch,
-		RequireOAuthOnly:                input.RequireOAuthOnly,
-		RequirePrivacySet:               input.RequirePrivacySet,
-		DefaultMappedModel:              input.DefaultMappedModel,
-		MessagesDispatchModelConfig:     normalizeOpenAIMessagesDispatchModelConfig(input.MessagesDispatchModelConfig),
-		RPMLimit:                        input.RPMLimit,
+		Name:                              input.Name,
+		Description:                       input.Description,
+		Platform:                          platform,
+		RateMultiplier:                    input.RateMultiplier,
+		IsExclusive:                       input.IsExclusive,
+		Status:                            StatusActive,
+		SubscriptionType:                  subscriptionType,
+		DailyLimitUSD:                     dailyLimit,
+		WeeklyLimitUSD:                    weeklyLimit,
+		MonthlyLimitUSD:                   monthlyLimit,
+		SubscriptionCreditFallbackEnabled: input.SubscriptionCreditFallbackEnabled,
+		AllowImageGeneration:              input.AllowImageGeneration,
+		ImageRateIndependent:              input.ImageRateIndependent,
+		ImageRateMultiplier:               imageRateMultiplier,
+		ImagePrice1K:                      imagePrice1K,
+		ImagePrice2K:                      imagePrice2K,
+		ImagePrice4K:                      imagePrice4K,
+		ClaudeCodeOnly:                    input.ClaudeCodeOnly,
+		FallbackGroupID:                   input.FallbackGroupID,
+		FallbackGroupIDOnInvalidRequest:   fallbackOnInvalidRequest,
+		ModelRouting:                      input.ModelRouting,
+		MCPXMLInject:                      mcpXMLInject,
+		SupportedModelScopes:              input.SupportedModelScopes,
+		AllowMessagesDispatch:             input.AllowMessagesDispatch,
+		RequireOAuthOnly:                  input.RequireOAuthOnly,
+		RequirePrivacySet:                 input.RequirePrivacySet,
+		DefaultMappedModel:                input.DefaultMappedModel,
+		MessagesDispatchModelConfig:       normalizeOpenAIMessagesDispatchModelConfig(input.MessagesDispatchModelConfig),
+		RPMLimit:                          input.RPMLimit,
 	}
 	sanitizeGroupMessagesDispatchFields(group)
 	if err := s.groupRepo.Create(ctx, group); err != nil {
@@ -1849,6 +1896,7 @@ func (s *adminServiceImpl) UpdateGroup(ctx context.Context, id int64, input *Upd
 	group.DailyLimitUSD = normalizeLimit(input.DailyLimitUSD)
 	group.WeeklyLimitUSD = normalizeLimit(input.WeeklyLimitUSD)
 	group.MonthlyLimitUSD = normalizeLimit(input.MonthlyLimitUSD)
+	group.SubscriptionCreditFallbackEnabled = input.SubscriptionCreditFallbackEnabled
 	// 图片生成计费配置：负数表示清除（使用默认价格）
 	if input.AllowImageGeneration != nil {
 		group.AllowImageGeneration = *input.AllowImageGeneration

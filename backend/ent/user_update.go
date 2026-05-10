@@ -128,6 +128,27 @@ func (_u *UserUpdate) AddBalance(v float64) *UserUpdate {
 	return _u
 }
 
+// SetCreditBalance sets the "credit_balance" field.
+func (_u *UserUpdate) SetCreditBalance(v float64) *UserUpdate {
+	_u.mutation.ResetCreditBalance()
+	_u.mutation.SetCreditBalance(v)
+	return _u
+}
+
+// SetNillableCreditBalance sets the "credit_balance" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableCreditBalance(v *float64) *UserUpdate {
+	if v != nil {
+		_u.SetCreditBalance(*v)
+	}
+	return _u
+}
+
+// AddCreditBalance adds value to the "credit_balance" field.
+func (_u *UserUpdate) AddCreditBalance(v float64) *UserUpdate {
+	_u.mutation.AddCreditBalance(v)
+	return _u
+}
+
 // SetConcurrency sets the "concurrency" field.
 func (_u *UserUpdate) SetConcurrency(v int) *UserUpdate {
 	_u.mutation.ResetConcurrency()
@@ -960,6 +981,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedBalance(); ok {
 		_spec.AddField(user.FieldBalance, field.TypeFloat64, value)
 	}
+	if value, ok := _u.mutation.CreditBalance(); ok {
+		_spec.SetField(user.FieldCreditBalance, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedCreditBalance(); ok {
+		_spec.AddField(user.FieldCreditBalance, field.TypeFloat64, value)
+	}
 	if value, ok := _u.mutation.Concurrency(); ok {
 		_spec.SetField(user.FieldConcurrency, field.TypeInt, value)
 	}
@@ -1693,6 +1720,27 @@ func (_u *UserUpdateOne) SetNillableBalance(v *float64) *UserUpdateOne {
 // AddBalance adds value to the "balance" field.
 func (_u *UserUpdateOne) AddBalance(v float64) *UserUpdateOne {
 	_u.mutation.AddBalance(v)
+	return _u
+}
+
+// SetCreditBalance sets the "credit_balance" field.
+func (_u *UserUpdateOne) SetCreditBalance(v float64) *UserUpdateOne {
+	_u.mutation.ResetCreditBalance()
+	_u.mutation.SetCreditBalance(v)
+	return _u
+}
+
+// SetNillableCreditBalance sets the "credit_balance" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableCreditBalance(v *float64) *UserUpdateOne {
+	if v != nil {
+		_u.SetCreditBalance(*v)
+	}
+	return _u
+}
+
+// AddCreditBalance adds value to the "credit_balance" field.
+func (_u *UserUpdateOne) AddCreditBalance(v float64) *UserUpdateOne {
+	_u.mutation.AddCreditBalance(v)
 	return _u
 }
 
@@ -2557,6 +2605,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.AddedBalance(); ok {
 		_spec.AddField(user.FieldBalance, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.CreditBalance(); ok {
+		_spec.SetField(user.FieldCreditBalance, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedCreditBalance(); ok {
+		_spec.AddField(user.FieldCreditBalance, field.TypeFloat64, value)
 	}
 	if value, ok := _u.mutation.Concurrency(); ok {
 		_spec.SetField(user.FieldConcurrency, field.TypeInt, value)

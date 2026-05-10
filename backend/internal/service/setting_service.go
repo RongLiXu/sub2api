@@ -1768,6 +1768,17 @@ func (s *SettingService) IsRegistrationEnabled(ctx context.Context) bool {
 	return value == "true"
 }
 
+func (s *SettingService) IsSubscriptionCreditFallbackEnabled(ctx context.Context) bool {
+	if s == nil || s.settingRepo == nil {
+		return false
+	}
+	value, err := s.settingRepo.GetValue(ctx, SettingKeySubscriptionCreditFallbackEnabled)
+	if err != nil {
+		return false
+	}
+	return strings.EqualFold(strings.TrimSpace(value), "true")
+}
+
 // IsBackendModeEnabled checks if backend mode is enabled
 // Uses in-process atomic.Value cache with 60s TTL, zero-lock hot path
 func (s *SettingService) IsBackendModeEnabled(ctx context.Context) bool {
@@ -2288,6 +2299,7 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeyAffiliateRebateDurationDays:              strconv.Itoa(AffiliateRebateDurationDaysDefault),
 		SettingKeyAffiliateRebatePerInviteeCap:             strconv.FormatFloat(AffiliateRebatePerInviteeCapDefault, 'f', 2, 64),
 		SettingKeyDefaultUserRPMLimit:                      "0",
+		SettingKeySubscriptionCreditFallbackEnabled:        "false",
 		SettingKeyDefaultSubscriptions:                     "[]",
 		SettingKeyAuthSourceDefaultEmailBalance:            "0",
 		SettingKeyAuthSourceDefaultEmailConcurrency:        "5",

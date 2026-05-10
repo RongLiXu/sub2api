@@ -27,6 +27,9 @@ type BillingCache interface {
 	SetUserBalance(ctx context.Context, userID int64, balance float64) error
 	DeductUserBalance(ctx context.Context, userID int64, amount float64) error
 	InvalidateUserBalance(ctx context.Context, userID int64) error
+	GetUserCreditBalance(ctx context.Context, userID int64) (float64, error)
+	SetUserCreditBalance(ctx context.Context, userID int64, balance float64) error
+	DeductUserCreditBalance(ctx context.Context, userID int64, amount float64) error
 
 	// Subscription operations
 	GetSubscriptionCache(ctx context.Context, userID, groupID int64) (*SubscriptionCacheData, error)

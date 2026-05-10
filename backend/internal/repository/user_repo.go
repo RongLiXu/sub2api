@@ -88,6 +88,7 @@ func (r *userRepository) Create(ctx context.Context, userIn *service.User) error
 		SetPasswordHash(userIn.PasswordHash).
 		SetRole(userIn.Role).
 		SetBalance(userIn.Balance).
+		SetCreditBalance(userIn.CreditBalance).
 		SetConcurrency(userIn.Concurrency).
 		SetStatus(userIn.Status).
 		SetSignupSource(userSignupSourceOrDefault(userIn.SignupSource)).
@@ -214,6 +215,7 @@ func (r *userRepository) Update(ctx context.Context, userIn *service.User) error
 		SetPasswordHash(userIn.PasswordHash).
 		SetRole(userIn.Role).
 		SetBalance(userIn.Balance).
+		SetCreditBalance(userIn.CreditBalance).
 		SetConcurrency(userIn.Concurrency).
 		SetStatus(userIn.Status).
 		SetBalanceNotifyEnabled(userIn.BalanceNotifyEnabled).
@@ -711,16 +713,54 @@ func (r *userRepository) UpdateBalance(ctx context.Context, id int64, amount flo
 // 透支策略：允许余额变为负数，确保当前请求能够完成
 // 中间件会阻止余额 <= 0 的用户发起后续请求
 func (r *userRepository) DeductBalance(ctx context.Context, id int64, amount float64) error {
-	client := clientFromContext(ctx, r.client)
-	n, err := client.User.Update().
-		Where(dbuser.IDEQ(id)).
-		AddBalance(-amount).
-		Save(ctx)
+	exec := txAwareSQLExecutor(ctx, r.sql, r.client)
+	res, err := exec.ExecContext(ctx, `
+		WITH locked_user AS (
+			SELECT id, LEAST(GREATEST(credit_balance, 0), $1::numeric) AS credit_deduct
+			FROM users
+			WHERE id = $2 AND deleted_at IS NULL
+			FOR UPDATE
+		)
+		UPDATE users u
+		SET
+			credit_balance = u.credit_balance - locked_user.credit_deduct,
+			balance = u.balance - ($1::numeric - locked_user.credit_deduct),
+			updated_at = NOW()
+		FROM locked_user
+		WHERE u.id = locked_user.id
+	`, amount, id)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
 	if n == 0 {
 		return service.ErrUserNotFound
+	}
+	return nil
+}
+
+func (r *userRepository) DeductCreditBalance(ctx context.Context, id int64, amount float64) error {
+	exec := txAwareSQLExecutor(ctx, r.sql, r.client)
+	res, err := exec.ExecContext(ctx, `
+		UPDATE users
+		SET credit_balance = credit_balance - $1,
+			updated_at = NOW()
+		WHERE id = $2
+			AND deleted_at IS NULL
+			AND credit_balance >= $1
+	`, amount, id)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return service.ErrInsufficientCreditBalance
 	}
 	return nil
 }

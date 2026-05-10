@@ -70,6 +70,10 @@ func (Group) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
+		field.Bool("subscription_credit_fallback_enabled").
+			Optional().
+			Nillable().
+			Comment("订阅限额超限后是否允许使用 credit_balance 兜底；NULL 表示继承全局配置"),
 		field.Int("default_validity_days").
 			Default(30),
 

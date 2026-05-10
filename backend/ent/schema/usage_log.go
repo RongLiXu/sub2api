@@ -110,6 +110,10 @@ func (UsageLog) Fields() []ent.Field {
 		// 其他字段
 		field.Int8("billing_type").
 			Default(0),
+		field.String("billing_source").
+			MaxLen(32).
+			Default("").
+			Comment("实际扣费来源：subscription/credit_balance/balance/mixed/subscription_credit_fallback"),
 		field.Bool("stream").
 			Default(false),
 		field.Int("duration_ms").

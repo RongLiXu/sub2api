@@ -90,6 +90,11 @@ func Balance(v float64) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldBalance, v))
 }
 
+// CreditBalance applies equality check predicate on the "credit_balance" field. It's identical to CreditBalanceEQ.
+func CreditBalance(v float64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldCreditBalance, v))
+}
+
 // Concurrency applies equality check predicate on the "concurrency" field. It's identical to ConcurrencyEQ.
 func Concurrency(v int) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldConcurrency, v))
@@ -533,6 +538,46 @@ func BalanceLT(v float64) predicate.User {
 // BalanceLTE applies the LTE predicate on the "balance" field.
 func BalanceLTE(v float64) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldBalance, v))
+}
+
+// CreditBalanceEQ applies the EQ predicate on the "credit_balance" field.
+func CreditBalanceEQ(v float64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldCreditBalance, v))
+}
+
+// CreditBalanceNEQ applies the NEQ predicate on the "credit_balance" field.
+func CreditBalanceNEQ(v float64) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldCreditBalance, v))
+}
+
+// CreditBalanceIn applies the In predicate on the "credit_balance" field.
+func CreditBalanceIn(vs ...float64) predicate.User {
+	return predicate.User(sql.FieldIn(FieldCreditBalance, vs...))
+}
+
+// CreditBalanceNotIn applies the NotIn predicate on the "credit_balance" field.
+func CreditBalanceNotIn(vs ...float64) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldCreditBalance, vs...))
+}
+
+// CreditBalanceGT applies the GT predicate on the "credit_balance" field.
+func CreditBalanceGT(v float64) predicate.User {
+	return predicate.User(sql.FieldGT(FieldCreditBalance, v))
+}
+
+// CreditBalanceGTE applies the GTE predicate on the "credit_balance" field.
+func CreditBalanceGTE(v float64) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldCreditBalance, v))
+}
+
+// CreditBalanceLT applies the LT predicate on the "credit_balance" field.
+func CreditBalanceLT(v float64) predicate.User {
+	return predicate.User(sql.FieldLT(FieldCreditBalance, v))
+}
+
+// CreditBalanceLTE applies the LTE predicate on the "credit_balance" field.
+func CreditBalanceLTE(v float64) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldCreditBalance, v))
 }
 
 // ConcurrencyEQ applies the EQ predicate on the "concurrency" field.

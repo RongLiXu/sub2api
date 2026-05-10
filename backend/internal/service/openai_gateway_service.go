@@ -5377,7 +5377,8 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 	}
 
 	// Determine billing type
-	isSubscriptionBilling := subscription != nil && apiKey.Group != nil && apiKey.Group.IsSubscriptionType()
+	isSubscriptionCreditFallback := apiKey != nil && apiKey.SubscriptionCreditFallback
+	isSubscriptionBilling := subscription != nil && apiKey.Group != nil && apiKey.Group.IsSubscriptionType() && !isSubscriptionCreditFallback
 	billingType := BillingTypeBalance
 	if isSubscriptionBilling {
 		billingType = BillingTypeSubscription
@@ -5481,24 +5482,26 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 		return nil
 	}
 
-	billingErr := func() error {
-		_, err := applyUsageBilling(ctx, requestID, usageLog, &postUsageBillingParams{
-			Cost:                  cost,
-			User:                  user,
-			APIKey:                apiKey,
-			Account:               account,
-			Subscription:          subscription,
-			RequestPayloadHash:    resolveUsageBillingPayloadFingerprint(ctx, input.RequestPayloadHash),
-			IsSubscriptionBill:    isSubscriptionBilling,
-			AccountRateMultiplier: accountRateMultiplier,
-			APIKeyService:         input.APIKeyService,
+	billingResult, billingErr := func() (*UsageBillingApplyResult, error) {
+		_, result, err := applyUsageBilling(ctx, requestID, usageLog, &postUsageBillingParams{
+			Cost:                         cost,
+			User:                         user,
+			APIKey:                       apiKey,
+			Account:                      account,
+			Subscription:                 subscription,
+			RequestPayloadHash:           resolveUsageBillingPayloadFingerprint(ctx, input.RequestPayloadHash),
+			IsSubscriptionBill:           isSubscriptionBilling,
+			IsSubscriptionCreditFallback: isSubscriptionCreditFallback,
+			AccountRateMultiplier:        accountRateMultiplier,
+			APIKeyService:                input.APIKeyService,
 		}, s.billingDeps(), s.usageBillingRepo)
-		return err
+		return result, err
 	}()
 
 	if billingErr != nil {
 		return billingErr
 	}
+	usageLog.BillingSource = resolveUsageLogBillingSource(isSubscriptionBilling, isSubscriptionCreditFallback, billingResult)
 	writeUsageLogBestEffort(ctx, s.usageLogRepo, usageLog, "service.openai_gateway")
 
 	return nil

@@ -12,6 +12,7 @@ type User struct {
 	Username      string     `json:"username"`
 	Role          string     `json:"role"`
 	Balance       float64    `json:"balance"`
+	CreditBalance float64    `json:"credit_balance"`
 	Concurrency   int        `json:"concurrency"`
 	Status        string     `json:"status"`
 	AllowedGroups []int64    `json:"allowed_groups"`
@@ -88,10 +89,11 @@ type Group struct {
 	IsExclusive    bool    `json:"is_exclusive"`
 	Status         string  `json:"status"`
 
-	SubscriptionType string   `json:"subscription_type"`
-	DailyLimitUSD    *float64 `json:"daily_limit_usd"`
-	WeeklyLimitUSD   *float64 `json:"weekly_limit_usd"`
-	MonthlyLimitUSD  *float64 `json:"monthly_limit_usd"`
+	SubscriptionType                  string   `json:"subscription_type"`
+	DailyLimitUSD                     *float64 `json:"daily_limit_usd"`
+	WeeklyLimitUSD                    *float64 `json:"weekly_limit_usd"`
+	MonthlyLimitUSD                   *float64 `json:"monthly_limit_usd"`
+	SubscriptionCreditFallbackEnabled *bool    `json:"subscription_credit_fallback_enabled,omitempty"`
 
 	// 图片生成计费配置（仅 antigravity 平台使用）
 	AllowImageGeneration bool     `json:"allow_image_generation"`
@@ -394,12 +396,13 @@ type UsageLog struct {
 	ActualCost        float64 `json:"actual_cost"`
 	RateMultiplier    float64 `json:"rate_multiplier"`
 
-	BillingType  int8   `json:"billing_type"`
-	RequestType  string `json:"request_type"`
-	Stream       bool   `json:"stream"`
-	OpenAIWSMode bool   `json:"openai_ws_mode"`
-	DurationMs   *int   `json:"duration_ms"`
-	FirstTokenMs *int   `json:"first_token_ms"`
+	BillingType   int8   `json:"billing_type"`
+	BillingSource string `json:"billing_source"`
+	RequestType   string `json:"request_type"`
+	Stream        bool   `json:"stream"`
+	OpenAIWSMode  bool   `json:"openai_ws_mode"`
+	DurationMs    *int   `json:"duration_ms"`
+	FirstTokenMs  *int   `json:"first_token_ms"`
 
 	// 图片生成字段
 	ImageCount int     `json:"image_count"`

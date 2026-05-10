@@ -15,6 +15,7 @@ import (
 
 const (
 	billingBalanceKeyPrefix   = "billing:balance:"
+	billingCreditKeyPrefix    = "billing:credit_balance:"
 	billingSubKeyPrefix       = "billing:sub:"
 	billingRateLimitKeyPrefix = "apikey:rate:"
 	billingCacheTTL           = 5 * time.Minute
@@ -40,6 +41,10 @@ func jitteredTTL() time.Duration {
 // billingBalanceKey generates the Redis key for user balance cache.
 func billingBalanceKey(userID int64) string {
 	return fmt.Sprintf("%s%d", billingBalanceKeyPrefix, userID)
+}
+
+func billingCreditBalanceKey(userID int64) string {
+	return fmt.Sprintf("%s%d", billingCreditKeyPrefix, userID)
 }
 
 // billingSubKey generates the Redis key for subscription cache.
@@ -167,8 +172,28 @@ func (c *billingCache) DeductUserBalance(ctx context.Context, userID int64, amou
 }
 
 func (c *billingCache) InvalidateUserBalance(ctx context.Context, userID int64) error {
-	key := billingBalanceKey(userID)
-	return c.rdb.Del(ctx, key).Err()
+	return c.rdb.Del(ctx, billingBalanceKey(userID), billingCreditBalanceKey(userID)).Err()
+}
+
+func (c *billingCache) GetUserCreditBalance(ctx context.Context, userID int64) (float64, error) {
+	val, err := c.rdb.Get(ctx, billingCreditBalanceKey(userID)).Result()
+	if err != nil {
+		return 0, err
+	}
+	return strconv.ParseFloat(val, 64)
+}
+
+func (c *billingCache) SetUserCreditBalance(ctx context.Context, userID int64, balance float64) error {
+	return c.rdb.Set(ctx, billingCreditBalanceKey(userID), balance, jitteredTTL()).Err()
+}
+
+func (c *billingCache) DeductUserCreditBalance(ctx context.Context, userID int64, amount float64) error {
+	_, err := deductBalanceScript.Run(ctx, c.rdb, []string{billingCreditBalanceKey(userID)}, amount, int(jitteredTTL().Seconds())).Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		log.Printf("Warning: deduct credit balance cache failed for user %d: %v", userID, err)
+		return err
+	}
+	return nil
 }
 
 func (c *billingCache) GetSubscriptionCache(ctx context.Context, userID, groupID int64) (*service.SubscriptionCacheData, error) {

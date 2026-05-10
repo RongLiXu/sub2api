@@ -7880,15 +7880,16 @@ type usageLogBestEffortWriter interface {
 
 // postUsageBillingParams 统一扣费所需的参数
 type postUsageBillingParams struct {
-	Cost                  *CostBreakdown
-	User                  *User
-	APIKey                *APIKey
-	Account               *Account
-	Subscription          *UserSubscription
-	RequestPayloadHash    string
-	IsSubscriptionBill    bool
-	AccountRateMultiplier float64
-	APIKeyService         APIKeyQuotaUpdater
+	Cost                         *CostBreakdown
+	User                         *User
+	APIKey                       *APIKey
+	Account                      *Account
+	Subscription                 *UserSubscription
+	RequestPayloadHash           string
+	IsSubscriptionBill           bool
+	IsSubscriptionCreditFallback bool
+	AccountRateMultiplier        float64
+	APIKeyService                APIKeyQuotaUpdater
 }
 
 func (p *postUsageBillingParams) shouldDeductAPIKeyQuota() bool {
@@ -7918,6 +7919,18 @@ func postUsageBilling(ctx context.Context, p *postUsageBillingParams, deps *bill
 		if cost.ActualCost > 0 {
 			if err := deps.userSubRepo.IncrementUsage(billingCtx, p.Subscription.ID, cost.ActualCost); err != nil {
 				slog.Error("increment subscription usage failed", "subscription_id", p.Subscription.ID, "error", err)
+			}
+		}
+	} else if p.IsSubscriptionCreditFallback {
+		if cost.ActualCost > 0 {
+			if repo, ok := deps.userRepo.(interface {
+				DeductCreditBalance(context.Context, int64, float64) error
+			}); ok {
+				if err := repo.DeductCreditBalance(billingCtx, p.User.ID, cost.ActualCost); err != nil {
+					slog.Error("deduct credit balance failed", "user_id", p.User.ID, "error", err)
+				}
+			} else {
+				slog.Error("deduct credit balance failed", "user_id", p.User.ID, "error", "repository does not support credit balance")
 			}
 		}
 	} else {
@@ -8022,6 +8035,8 @@ func buildUsageBillingCommand(requestID string, usageLog *UsageLog, p *postUsage
 	if p.IsSubscriptionBill && p.Subscription != nil && p.Cost.TotalCost > 0 {
 		cmd.SubscriptionID = &p.Subscription.ID
 		cmd.SubscriptionCost = p.Cost.ActualCost
+	} else if p.IsSubscriptionCreditFallback && p.Cost.ActualCost > 0 {
+		cmd.CreditBalanceCost = p.Cost.ActualCost
 	} else if p.Cost.ActualCost > 0 {
 		cmd.BalanceCost = p.Cost.ActualCost
 	}
@@ -8040,15 +8055,15 @@ func buildUsageBillingCommand(requestID string, usageLog *UsageLog, p *postUsage
 	return cmd
 }
 
-func applyUsageBilling(ctx context.Context, requestID string, usageLog *UsageLog, p *postUsageBillingParams, deps *billingDeps, repo UsageBillingRepository) (bool, error) {
+func applyUsageBilling(ctx context.Context, requestID string, usageLog *UsageLog, p *postUsageBillingParams, deps *billingDeps, repo UsageBillingRepository) (bool, *UsageBillingApplyResult, error) {
 	if p == nil || deps == nil {
-		return false, nil
+		return false, nil, nil
 	}
 
 	cmd := buildUsageBillingCommand(requestID, usageLog, p)
 	if cmd == nil || cmd.RequestID == "" || repo == nil {
 		postUsageBilling(ctx, p, deps)
-		return true, nil
+		return true, legacyBillingResult(p), nil
 	}
 
 	billingCtx, cancel := detachedBillingContext(ctx)
@@ -8056,12 +8071,12 @@ func applyUsageBilling(ctx context.Context, requestID string, usageLog *UsageLog
 
 	result, err := repo.Apply(billingCtx, cmd)
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
 
 	if result == nil || !result.Applied {
 		deps.deferredService.ScheduleLastUsedUpdate(p.Account.ID)
-		return false, nil
+		return false, result, nil
 	}
 
 	if result.APIKeyQuotaExhausted {
@@ -8071,7 +8086,24 @@ func applyUsageBilling(ctx context.Context, requestID string, usageLog *UsageLog
 	}
 
 	finalizePostUsageBilling(p, deps, result)
-	return true, nil
+	return true, result, nil
+}
+
+func legacyBillingResult(p *postUsageBillingParams) *UsageBillingApplyResult {
+	result := &UsageBillingApplyResult{Applied: true}
+	if p == nil || p.Cost == nil || p.Cost.ActualCost <= 0 {
+		return result
+	}
+	if p.IsSubscriptionBill || p.IsSubscriptionCreditFallback {
+		return result
+	}
+	creditDeducted := 0.0
+	if p.User != nil && p.User.CreditBalance > 0 {
+		creditDeducted = min(p.User.CreditBalance, p.Cost.ActualCost)
+	}
+	result.CreditBalanceDeducted = creditDeducted
+	result.BalanceDeducted = p.Cost.ActualCost - creditDeducted
+	return result
 }
 
 func finalizePostUsageBilling(p *postUsageBillingParams, deps *billingDeps, result *UsageBillingApplyResult) {
@@ -8083,8 +8115,14 @@ func finalizePostUsageBilling(p *postUsageBillingParams, deps *billingDeps, resu
 		if p.Cost.ActualCost > 0 && p.User != nil && p.APIKey != nil && p.APIKey.GroupID != nil {
 			deps.billingCacheService.QueueUpdateSubscriptionUsage(p.User.ID, *p.APIKey.GroupID, p.Cost.ActualCost)
 		}
+	} else if p.IsSubscriptionCreditFallback && p.Cost.ActualCost > 0 && p.User != nil {
+		deps.billingCacheService.QueueDeductWallet(p.User.ID, p.Cost.ActualCost, 0)
 	} else if p.Cost.ActualCost > 0 && p.User != nil {
-		deps.billingCacheService.QueueDeductBalance(p.User.ID, p.Cost.ActualCost)
+		if result != nil && (result.CreditBalanceDeducted > 0 || result.BalanceDeducted > 0) {
+			deps.billingCacheService.QueueDeductWallet(p.User.ID, result.CreditBalanceDeducted, result.BalanceDeducted)
+		} else {
+			deps.billingCacheService.QueueDeductBalance(p.User.ID, p.Cost.ActualCost)
+		}
 	}
 
 	if p.Cost.ActualCost > 0 && p.APIKey != nil && p.APIKey.HasRateLimits() {
@@ -8108,7 +8146,7 @@ func notifyBalanceLow(p *postUsageBillingParams, deps *billingDeps, result *Usag
 			slog.Error("panic in notifyBalanceLow", "recover", r)
 		}
 	}()
-	if p.IsSubscriptionBill || p.Cost.ActualCost <= 0 || p.User == nil || deps.balanceNotifyService == nil {
+	if p.IsSubscriptionBill || p.IsSubscriptionCreditFallback || p.Cost.ActualCost <= 0 || p.User == nil || deps.balanceNotifyService == nil {
 		slog.Debug("notifyBalanceLow: skipped",
 			"is_subscription", p.IsSubscriptionBill,
 			"actual_cost", p.Cost.ActualCost,
@@ -8394,7 +8432,8 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 	cost := s.calculateRecordUsageCost(ctx, result, apiKey, billingModel, multiplier, imageMultiplier, opts)
 
 	// 判断计费方式：订阅模式 vs 余额模式
-	isSubscriptionBilling := subscription != nil && apiKey.Group != nil && apiKey.Group.IsSubscriptionType()
+	isSubscriptionCreditFallback := apiKey != nil && apiKey.SubscriptionCreditFallback
+	isSubscriptionBilling := subscription != nil && apiKey.Group != nil && apiKey.Group.IsSubscriptionType() && !isSubscriptionCreditFallback
 	billingType := BillingTypeBalance
 	if isSubscriptionBilling {
 		billingType = BillingTypeSubscription
@@ -8430,24 +8469,39 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 	}
 
 	requestID := usageLog.RequestID
-	_, billingErr := applyUsageBilling(ctx, requestID, usageLog, &postUsageBillingParams{
-		Cost:                  cost,
-		User:                  user,
-		APIKey:                apiKey,
-		Account:               account,
-		Subscription:          subscription,
-		RequestPayloadHash:    resolveUsageBillingPayloadFingerprint(ctx, input.RequestPayloadHash),
-		IsSubscriptionBill:    isSubscriptionBilling,
-		AccountRateMultiplier: accountRateMultiplier,
-		APIKeyService:         input.APIKeyService,
+	_, billingResult, billingErr := applyUsageBilling(ctx, requestID, usageLog, &postUsageBillingParams{
+		Cost:                         cost,
+		User:                         user,
+		APIKey:                       apiKey,
+		Account:                      account,
+		Subscription:                 subscription,
+		RequestPayloadHash:           resolveUsageBillingPayloadFingerprint(ctx, input.RequestPayloadHash),
+		IsSubscriptionBill:           isSubscriptionBilling,
+		IsSubscriptionCreditFallback: isSubscriptionCreditFallback,
+		AccountRateMultiplier:        accountRateMultiplier,
+		APIKeyService:                input.APIKeyService,
 	}, s.billingDeps(), s.usageBillingRepo)
 
 	if billingErr != nil {
 		return billingErr
 	}
+	usageLog.BillingSource = resolveUsageLogBillingSource(isSubscriptionBilling, isSubscriptionCreditFallback, billingResult)
 	writeUsageLogBestEffort(ctx, s.usageLogRepo, usageLog, "service.gateway")
 
 	return nil
+}
+
+func resolveUsageLogBillingSource(isSubscriptionBilling bool, isSubscriptionCreditFallback bool, result *UsageBillingApplyResult) string {
+	if isSubscriptionBilling {
+		return BillingSourceSubscription
+	}
+	if isSubscriptionCreditFallback {
+		return BillingSourceSubscriptionCreditFallback
+	}
+	if source := result.BillingSource(); source != BillingSourceNone {
+		return source
+	}
+	return BillingSourceBalance
 }
 
 // calculateRecordUsageCost 根据请求类型和选项计算费用。

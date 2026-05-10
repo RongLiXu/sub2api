@@ -68,6 +68,12 @@ type UpdateBalanceRequest struct {
 	Notes     string  `json:"notes"`
 }
 
+type UpdateCreditBalanceRequest struct {
+	Amount    float64 `json:"amount" binding:"required,gt=0"`
+	Operation string  `json:"operation" binding:"required,oneof=set add subtract"`
+	Notes     string  `json:"notes"`
+}
+
 type BindUserAuthIdentityRequest struct {
 	ProviderType    string                              `json:"provider_type"`
 	ProviderKey     string                              `json:"provider_key"`
@@ -334,6 +340,37 @@ func (h *UserHandler) UpdateBalance(c *gin.Context) {
 	}
 	executeAdminIdempotentJSON(c, "admin.users.balance.update", idempotencyPayload, service.DefaultWriteIdempotencyTTL(), func(ctx context.Context) (any, error) {
 		user, execErr := h.adminService.UpdateUserBalance(ctx, userID, req.Balance, req.Operation, req.Notes)
+		if execErr != nil {
+			return nil, execErr
+		}
+		return dto.UserFromServiceAdmin(user), nil
+	})
+}
+
+// UpdateCreditBalance handles updating user credit balance.
+// POST /api/v1/admin/users/:id/credit-balance
+func (h *UserHandler) UpdateCreditBalance(c *gin.Context) {
+	userID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid user ID")
+		return
+	}
+
+	var req UpdateCreditBalanceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	idempotencyPayload := struct {
+		UserID int64                      `json:"user_id"`
+		Body   UpdateCreditBalanceRequest `json:"body"`
+	}{
+		UserID: userID,
+		Body:   req,
+	}
+	executeAdminIdempotentJSON(c, "admin.users.credit_balance.update", idempotencyPayload, service.DefaultWriteIdempotencyTTL(), func(ctx context.Context) (any, error) {
+		user, execErr := h.adminService.UpdateUserCreditBalance(ctx, userID, req.Amount, req.Operation, req.Notes)
 		if execErr != nil {
 			return nil, execErr
 		}

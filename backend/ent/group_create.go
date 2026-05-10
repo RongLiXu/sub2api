@@ -203,6 +203,20 @@ func (_c *GroupCreate) SetNillableMonthlyLimitUsd(v *float64) *GroupCreate {
 	return _c
 }
 
+// SetSubscriptionCreditFallbackEnabled sets the "subscription_credit_fallback_enabled" field.
+func (_c *GroupCreate) SetSubscriptionCreditFallbackEnabled(v bool) *GroupCreate {
+	_c.mutation.SetSubscriptionCreditFallbackEnabled(v)
+	return _c
+}
+
+// SetNillableSubscriptionCreditFallbackEnabled sets the "subscription_credit_fallback_enabled" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableSubscriptionCreditFallbackEnabled(v *bool) *GroupCreate {
+	if v != nil {
+		_c.SetSubscriptionCreditFallbackEnabled(*v)
+	}
+	return _c
+}
+
 // SetDefaultValidityDays sets the "default_validity_days" field.
 func (_c *GroupCreate) SetDefaultValidityDays(v int) *GroupCreate {
 	_c.mutation.SetDefaultValidityDays(v)
@@ -880,6 +894,10 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		_spec.SetField(group.FieldMonthlyLimitUsd, field.TypeFloat64, value)
 		_node.MonthlyLimitUsd = &value
 	}
+	if value, ok := _c.mutation.SubscriptionCreditFallbackEnabled(); ok {
+		_spec.SetField(group.FieldSubscriptionCreditFallbackEnabled, field.TypeBool, value)
+		_node.SubscriptionCreditFallbackEnabled = &value
+	}
 	if value, ok := _c.mutation.DefaultValidityDays(); ok {
 		_spec.SetField(group.FieldDefaultValidityDays, field.TypeInt, value)
 		_node.DefaultValidityDays = value
@@ -1315,6 +1333,24 @@ func (u *GroupUpsert) AddMonthlyLimitUsd(v float64) *GroupUpsert {
 // ClearMonthlyLimitUsd clears the value of the "monthly_limit_usd" field.
 func (u *GroupUpsert) ClearMonthlyLimitUsd() *GroupUpsert {
 	u.SetNull(group.FieldMonthlyLimitUsd)
+	return u
+}
+
+// SetSubscriptionCreditFallbackEnabled sets the "subscription_credit_fallback_enabled" field.
+func (u *GroupUpsert) SetSubscriptionCreditFallbackEnabled(v bool) *GroupUpsert {
+	u.Set(group.FieldSubscriptionCreditFallbackEnabled, v)
+	return u
+}
+
+// UpdateSubscriptionCreditFallbackEnabled sets the "subscription_credit_fallback_enabled" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateSubscriptionCreditFallbackEnabled() *GroupUpsert {
+	u.SetExcluded(group.FieldSubscriptionCreditFallbackEnabled)
+	return u
+}
+
+// ClearSubscriptionCreditFallbackEnabled clears the value of the "subscription_credit_fallback_enabled" field.
+func (u *GroupUpsert) ClearSubscriptionCreditFallbackEnabled() *GroupUpsert {
+	u.SetNull(group.FieldSubscriptionCreditFallbackEnabled)
 	return u
 }
 
@@ -1933,6 +1969,27 @@ func (u *GroupUpsertOne) UpdateMonthlyLimitUsd() *GroupUpsertOne {
 func (u *GroupUpsertOne) ClearMonthlyLimitUsd() *GroupUpsertOne {
 	return u.Update(func(s *GroupUpsert) {
 		s.ClearMonthlyLimitUsd()
+	})
+}
+
+// SetSubscriptionCreditFallbackEnabled sets the "subscription_credit_fallback_enabled" field.
+func (u *GroupUpsertOne) SetSubscriptionCreditFallbackEnabled(v bool) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetSubscriptionCreditFallbackEnabled(v)
+	})
+}
+
+// UpdateSubscriptionCreditFallbackEnabled sets the "subscription_credit_fallback_enabled" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateSubscriptionCreditFallbackEnabled() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateSubscriptionCreditFallbackEnabled()
+	})
+}
+
+// ClearSubscriptionCreditFallbackEnabled clears the value of the "subscription_credit_fallback_enabled" field.
+func (u *GroupUpsertOne) ClearSubscriptionCreditFallbackEnabled() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.ClearSubscriptionCreditFallbackEnabled()
 	})
 }
 
@@ -2774,6 +2831,27 @@ func (u *GroupUpsertBulk) UpdateMonthlyLimitUsd() *GroupUpsertBulk {
 func (u *GroupUpsertBulk) ClearMonthlyLimitUsd() *GroupUpsertBulk {
 	return u.Update(func(s *GroupUpsert) {
 		s.ClearMonthlyLimitUsd()
+	})
+}
+
+// SetSubscriptionCreditFallbackEnabled sets the "subscription_credit_fallback_enabled" field.
+func (u *GroupUpsertBulk) SetSubscriptionCreditFallbackEnabled(v bool) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetSubscriptionCreditFallbackEnabled(v)
+	})
+}
+
+// UpdateSubscriptionCreditFallbackEnabled sets the "subscription_credit_fallback_enabled" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateSubscriptionCreditFallbackEnabled() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateSubscriptionCreditFallbackEnabled()
+	})
+}
+
+// ClearSubscriptionCreditFallbackEnabled clears the value of the "subscription_credit_fallback_enabled" field.
+func (u *GroupUpsertBulk) ClearSubscriptionCreditFallbackEnabled() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.ClearSubscriptionCreditFallbackEnabled()
 	})
 }
 

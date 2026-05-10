@@ -19,6 +19,7 @@ type User struct {
 	PasswordHash   string
 	Role           string
 	Balance        float64
+	CreditBalance  float64
 	Concurrency    int
 	Status         string
 	AllowedGroups  []int64
@@ -60,6 +61,13 @@ type User struct {
 
 	APIKeys       []APIKey
 	Subscriptions []UserSubscription
+}
+
+func (u *User) WalletBalance() float64 {
+	if u == nil {
+		return 0
+	}
+	return u.CreditBalance + u.Balance
 }
 
 func (u *User) IsAdmin() bool {

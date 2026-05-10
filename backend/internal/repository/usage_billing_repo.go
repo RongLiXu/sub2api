@@ -113,11 +113,23 @@ func (r *usageBillingRepository) applyUsageBillingEffects(ctx context.Context, t
 	}
 
 	if cmd.BalanceCost > 0 {
-		newBalance, err := deductUsageBillingBalance(ctx, tx, cmd.UserID, cmd.BalanceCost)
+		wallet, err := deductUsageBillingWallet(ctx, tx, cmd.UserID, cmd.BalanceCost)
 		if err != nil {
 			return err
 		}
-		result.NewBalance = &newBalance
+		result.NewBalance = &wallet.Balance
+		result.NewCreditBalance = &wallet.CreditBalance
+		result.BalanceDeducted = wallet.BalanceDeducted
+		result.CreditBalanceDeducted = wallet.CreditBalanceDeducted
+	}
+
+	if cmd.CreditBalanceCost > 0 {
+		newCreditBalance, err := deductUsageBillingCreditBalance(ctx, tx, cmd.UserID, cmd.CreditBalanceCost)
+		if err != nil {
+			return err
+		}
+		result.NewCreditBalance = &newCreditBalance
+		result.CreditBalanceDeducted = cmd.CreditBalanceCost
 	}
 
 	if cmd.APIKeyQuotaCost > 0 {
@@ -173,22 +185,71 @@ func incrementUsageBillingSubscription(ctx context.Context, tx *sql.Tx, subscrip
 	return service.ErrSubscriptionNotFound
 }
 
-func deductUsageBillingBalance(ctx context.Context, tx *sql.Tx, userID int64, amount float64) (float64, error) {
-	var newBalance float64
+type usageBillingWalletDeduction struct {
+	Balance               float64
+	CreditBalance         float64
+	BalanceDeducted       float64
+	CreditBalanceDeducted float64
+}
+
+func deductUsageBillingWallet(ctx context.Context, tx *sql.Tx, userID int64, amount float64) (*usageBillingWalletDeduction, error) {
+	var out usageBillingWalletDeduction
+	err := tx.QueryRowContext(ctx, `
+		WITH locked_user AS (
+			SELECT
+				id,
+				balance,
+				credit_balance,
+				LEAST(GREATEST(credit_balance, 0), $1::numeric) AS credit_deduct
+			FROM users
+			WHERE id = $2 AND deleted_at IS NULL
+			FOR UPDATE
+		)
+		UPDATE users u
+		SET
+			credit_balance = u.credit_balance - locked_user.credit_deduct,
+			balance = u.balance - ($1::numeric - locked_user.credit_deduct),
+			updated_at = NOW()
+		FROM locked_user
+		WHERE u.id = locked_user.id
+		RETURNING
+			u.balance::double precision,
+			u.credit_balance::double precision,
+			($1::numeric - locked_user.credit_deduct)::double precision,
+			locked_user.credit_deduct::double precision
+	`, amount, userID).Scan(
+		&out.Balance,
+		&out.CreditBalance,
+		&out.BalanceDeducted,
+		&out.CreditBalanceDeducted,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, service.ErrUserNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func deductUsageBillingCreditBalance(ctx context.Context, tx *sql.Tx, userID int64, amount float64) (float64, error) {
+	var newCreditBalance float64
 	err := tx.QueryRowContext(ctx, `
 		UPDATE users
-		SET balance = balance - $1,
+		SET credit_balance = credit_balance - $1,
 			updated_at = NOW()
-		WHERE id = $2 AND deleted_at IS NULL
-		RETURNING balance
-	`, amount, userID).Scan(&newBalance)
+		WHERE id = $2
+			AND deleted_at IS NULL
+			AND credit_balance >= $1
+		RETURNING credit_balance::double precision
+	`, amount, userID).Scan(&newCreditBalance)
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, service.ErrUserNotFound
+		return 0, service.ErrInsufficientCreditBalance
 	}
 	if err != nil {
 		return 0, err
 	}
-	return newBalance, nil
+	return newCreditBalance, nil
 }
 
 func incrementUsageBillingAPIKeyQuota(ctx context.Context, tx *sql.Tx, apiKeyID int64, amount float64) (bool, error) {

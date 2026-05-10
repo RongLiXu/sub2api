@@ -29,6 +29,8 @@ const (
 	FieldRole = "role"
 	// FieldBalance holds the string denoting the balance field in the database.
 	FieldBalance = "balance"
+	// FieldCreditBalance holds the string denoting the credit_balance field in the database.
+	FieldCreditBalance = "credit_balance"
 	// FieldConcurrency holds the string denoting the concurrency field in the database.
 	FieldConcurrency = "concurrency"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -190,6 +192,7 @@ var Columns = []string{
 	FieldPasswordHash,
 	FieldRole,
 	FieldBalance,
+	FieldCreditBalance,
 	FieldConcurrency,
 	FieldStatus,
 	FieldUsername,
@@ -248,6 +251,8 @@ var (
 	RoleValidator func(string) error
 	// DefaultBalance holds the default value on creation for the "balance" field.
 	DefaultBalance float64
+	// DefaultCreditBalance holds the default value on creation for the "credit_balance" field.
+	DefaultCreditBalance float64
 	// DefaultConcurrency holds the default value on creation for the "concurrency" field.
 	DefaultConcurrency int
 	// DefaultStatus holds the default value on creation for the "status" field.
@@ -319,6 +324,11 @@ func ByRole(opts ...sql.OrderTermOption) OrderOption {
 // ByBalance orders the results by the balance field.
 func ByBalance(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBalance, opts...).ToFunc()
+}
+
+// ByCreditBalance orders the results by the credit_balance field.
+func ByCreditBalance(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreditBalance, opts...).ToFunc()
 }
 
 // ByConcurrency orders the results by the concurrency field.

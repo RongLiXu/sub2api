@@ -115,6 +115,20 @@ func (_c *UserCreate) SetNillableBalance(v *float64) *UserCreate {
 	return _c
 }
 
+// SetCreditBalance sets the "credit_balance" field.
+func (_c *UserCreate) SetCreditBalance(v float64) *UserCreate {
+	_c.mutation.SetCreditBalance(v)
+	return _c
+}
+
+// SetNillableCreditBalance sets the "credit_balance" field if the given value is not nil.
+func (_c *UserCreate) SetNillableCreditBalance(v *float64) *UserCreate {
+	if v != nil {
+		_c.SetCreditBalance(*v)
+	}
+	return _c
+}
+
 // SetConcurrency sets the "concurrency" field.
 func (_c *UserCreate) SetConcurrency(v int) *UserCreate {
 	_c.mutation.SetConcurrency(v)
@@ -578,6 +592,10 @@ func (_c *UserCreate) defaults() error {
 		v := user.DefaultBalance
 		_c.mutation.SetBalance(v)
 	}
+	if _, ok := _c.mutation.CreditBalance(); !ok {
+		v := user.DefaultCreditBalance
+		_c.mutation.SetCreditBalance(v)
+	}
 	if _, ok := _c.mutation.Concurrency(); !ok {
 		v := user.DefaultConcurrency
 		_c.mutation.SetConcurrency(v)
@@ -659,6 +677,9 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.Balance(); !ok {
 		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "User.balance"`)}
+	}
+	if _, ok := _c.mutation.CreditBalance(); !ok {
+		return &ValidationError{Name: "credit_balance", err: errors.New(`ent: missing required field "User.credit_balance"`)}
 	}
 	if _, ok := _c.mutation.Concurrency(); !ok {
 		return &ValidationError{Name: "concurrency", err: errors.New(`ent: missing required field "User.concurrency"`)}
@@ -762,6 +783,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Balance(); ok {
 		_spec.SetField(user.FieldBalance, field.TypeFloat64, value)
 		_node.Balance = value
+	}
+	if value, ok := _c.mutation.CreditBalance(); ok {
+		_spec.SetField(user.FieldCreditBalance, field.TypeFloat64, value)
+		_node.CreditBalance = value
 	}
 	if value, ok := _c.mutation.Concurrency(); ok {
 		_spec.SetField(user.FieldConcurrency, field.TypeInt, value)
@@ -1159,6 +1184,24 @@ func (u *UserUpsert) AddBalance(v float64) *UserUpsert {
 	return u
 }
 
+// SetCreditBalance sets the "credit_balance" field.
+func (u *UserUpsert) SetCreditBalance(v float64) *UserUpsert {
+	u.Set(user.FieldCreditBalance, v)
+	return u
+}
+
+// UpdateCreditBalance sets the "credit_balance" field to the value that was provided on create.
+func (u *UserUpsert) UpdateCreditBalance() *UserUpsert {
+	u.SetExcluded(user.FieldCreditBalance)
+	return u
+}
+
+// AddCreditBalance adds v to the "credit_balance" field.
+func (u *UserUpsert) AddCreditBalance(v float64) *UserUpsert {
+	u.Add(user.FieldCreditBalance, v)
+	return u
+}
+
 // SetConcurrency sets the "concurrency" field.
 func (u *UserUpsert) SetConcurrency(v int) *UserUpsert {
 	u.Set(user.FieldConcurrency, v)
@@ -1545,6 +1588,27 @@ func (u *UserUpsertOne) AddBalance(v float64) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateBalance() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateBalance()
+	})
+}
+
+// SetCreditBalance sets the "credit_balance" field.
+func (u *UserUpsertOne) SetCreditBalance(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetCreditBalance(v)
+	})
+}
+
+// AddCreditBalance adds v to the "credit_balance" field.
+func (u *UserUpsertOne) AddCreditBalance(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddCreditBalance(v)
+	})
+}
+
+// UpdateCreditBalance sets the "credit_balance" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateCreditBalance() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateCreditBalance()
 	})
 }
 
@@ -2141,6 +2205,27 @@ func (u *UserUpsertBulk) AddBalance(v float64) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateBalance() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateBalance()
+	})
+}
+
+// SetCreditBalance sets the "credit_balance" field.
+func (u *UserUpsertBulk) SetCreditBalance(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetCreditBalance(v)
+	})
+}
+
+// AddCreditBalance adds v to the "credit_balance" field.
+func (u *UserUpsertBulk) AddCreditBalance(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddCreditBalance(v)
+	})
+}
+
+// UpdateCreditBalance sets the "credit_balance" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateCreditBalance() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateCreditBalance()
 	})
 }
 

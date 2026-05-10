@@ -120,6 +120,11 @@ func MonthlyLimitUsd(v float64) predicate.Group {
 	return predicate.Group(sql.FieldEQ(FieldMonthlyLimitUsd, v))
 }
 
+// SubscriptionCreditFallbackEnabled applies equality check predicate on the "subscription_credit_fallback_enabled" field. It's identical to SubscriptionCreditFallbackEnabledEQ.
+func SubscriptionCreditFallbackEnabled(v bool) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldSubscriptionCreditFallbackEnabled, v))
+}
+
 // DefaultValidityDays applies equality check predicate on the "default_validity_days" field. It's identical to DefaultValidityDaysEQ.
 func DefaultValidityDays(v int) predicate.Group {
 	return predicate.Group(sql.FieldEQ(FieldDefaultValidityDays, v))
@@ -873,6 +878,26 @@ func MonthlyLimitUsdIsNil() predicate.Group {
 // MonthlyLimitUsdNotNil applies the NotNil predicate on the "monthly_limit_usd" field.
 func MonthlyLimitUsdNotNil() predicate.Group {
 	return predicate.Group(sql.FieldNotNull(FieldMonthlyLimitUsd))
+}
+
+// SubscriptionCreditFallbackEnabledEQ applies the EQ predicate on the "subscription_credit_fallback_enabled" field.
+func SubscriptionCreditFallbackEnabledEQ(v bool) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldSubscriptionCreditFallbackEnabled, v))
+}
+
+// SubscriptionCreditFallbackEnabledNEQ applies the NEQ predicate on the "subscription_credit_fallback_enabled" field.
+func SubscriptionCreditFallbackEnabledNEQ(v bool) predicate.Group {
+	return predicate.Group(sql.FieldNEQ(FieldSubscriptionCreditFallbackEnabled, v))
+}
+
+// SubscriptionCreditFallbackEnabledIsNil applies the IsNil predicate on the "subscription_credit_fallback_enabled" field.
+func SubscriptionCreditFallbackEnabledIsNil() predicate.Group {
+	return predicate.Group(sql.FieldIsNull(FieldSubscriptionCreditFallbackEnabled))
+}
+
+// SubscriptionCreditFallbackEnabledNotNil applies the NotNil predicate on the "subscription_credit_fallback_enabled" field.
+func SubscriptionCreditFallbackEnabledNotNil() predicate.Group {
+	return predicate.Group(sql.FieldNotNull(FieldSubscriptionCreditFallbackEnabled))
 }
 
 // DefaultValidityDaysEQ applies the EQ predicate on the "default_validity_days" field.
