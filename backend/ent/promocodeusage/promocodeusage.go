@@ -20,6 +20,8 @@ const (
 	FieldUserID = "user_id"
 	// FieldBonusAmount holds the string denoting the bonus_amount field in the database.
 	FieldBonusAmount = "bonus_amount"
+	// FieldCreditBonusAmount holds the string denoting the credit_bonus_amount field in the database.
+	FieldCreditBonusAmount = "credit_bonus_amount"
 	// FieldUsedAt holds the string denoting the used_at field in the database.
 	FieldUsedAt = "used_at"
 	// EdgePromoCode holds the string denoting the promo_code edge name in mutations.
@@ -50,6 +52,7 @@ var Columns = []string{
 	FieldPromoCodeID,
 	FieldUserID,
 	FieldBonusAmount,
+	FieldCreditBonusAmount,
 	FieldUsedAt,
 }
 
@@ -64,6 +67,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreditBonusAmount holds the default value on creation for the "credit_bonus_amount" field.
+	DefaultCreditBonusAmount float64
 	// DefaultUsedAt holds the default value on creation for the "used_at" field.
 	DefaultUsedAt func() time.Time
 )
@@ -89,6 +94,11 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByBonusAmount orders the results by the bonus_amount field.
 func ByBonusAmount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBonusAmount, opts...).ToFunc()
+}
+
+// ByCreditBonusAmount orders the results by the credit_bonus_amount field.
+func ByCreditBonusAmount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreditBonusAmount, opts...).ToFunc()
 }
 
 // ByUsedAt orders the results by the used_at field.

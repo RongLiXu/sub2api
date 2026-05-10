@@ -42,6 +42,7 @@ type AdminService interface {
 	// codeType is optional - pass empty string to return all types.
 	// Also returns totalRecharged (sum of all positive balance top-ups).
 	GetUserBalanceHistory(ctx context.Context, userID int64, page, pageSize int, codeType string) ([]RedeemCode, int64, float64, error)
+	GetUserCreditLedger(ctx context.Context, userID int64, page, pageSize int, entryType, source string) ([]CreditLedgerEntry, int64, error)
 	BindUserAuthIdentity(ctx context.Context, userID int64, input AdminBindAuthIdentityInput) (*AdminBoundAuthIdentity, error)
 
 	// Group management
@@ -522,6 +523,7 @@ type adminServiceImpl struct {
 	proxyRepo            ProxyRepository
 	apiKeyRepo           APIKeyRepository
 	redeemCodeRepo       RedeemCodeRepository
+	creditLedgerRepo     CreditLedgerRepository
 	userGroupRateRepo    UserGroupRateRepository
 	userRPMCache         UserRPMCache
 	billingCacheService  *BillingCacheService
@@ -547,6 +549,7 @@ func NewAdminService(
 	proxyRepo ProxyRepository,
 	apiKeyRepo APIKeyRepository,
 	redeemCodeRepo RedeemCodeRepository,
+	creditLedgerRepo CreditLedgerRepository,
 	userGroupRateRepo UserGroupRateRepository,
 	userRPMCache UserRPMCache,
 	billingCacheService *BillingCacheService,
@@ -566,6 +569,7 @@ func NewAdminService(
 		proxyRepo:            proxyRepo,
 		apiKeyRepo:           apiKeyRepo,
 		redeemCodeRepo:       redeemCodeRepo,
+		creditLedgerRepo:     creditLedgerRepo,
 		userGroupRateRepo:    userGroupRateRepo,
 		userRPMCache:         userRPMCache,
 		billingCacheService:  billingCacheService,
@@ -925,6 +929,7 @@ func (s *adminServiceImpl) UpdateUserCreditBalance(ctx context.Context, userID i
 		return nil, err
 	}
 
+	before := user.CreditBalance
 	switch operation {
 	case "set":
 		user.CreditBalance = amount
@@ -941,6 +946,31 @@ func (s *adminServiceImpl) UpdateUserCreditBalance(ctx context.Context, userID i
 
 	if err := s.userRepo.Update(ctx, user); err != nil {
 		return nil, err
+	}
+	if s.creditLedgerRepo != nil && before != user.CreditBalance {
+		entryType := CreditLedgerEntryTypeAdminSet
+		switch operation {
+		case "add":
+			entryType = CreditLedgerEntryTypeAdminAdd
+		case "subtract":
+			entryType = CreditLedgerEntryTypeAdminSubtract
+		}
+		var notePtr *string
+		if strings.TrimSpace(notes) != "" {
+			trimmed := strings.TrimSpace(notes)
+			notePtr = &trimmed
+		}
+		if _, err := s.creditLedgerRepo.Create(ctx, CreateCreditLedgerEntryInput{
+			UserID:        user.ID,
+			Amount:        user.CreditBalance - before,
+			BalanceBefore: before,
+			BalanceAfter:  user.CreditBalance,
+			EntryType:     entryType,
+			Source:        CreditLedgerSourceAdmin,
+			Notes:         notePtr,
+		}); err != nil {
+			return nil, err
+		}
 	}
 	s.invalidateUserWalletCaches(ctx, userID)
 	return user, nil
@@ -1087,6 +1117,22 @@ func (s *adminServiceImpl) GetUserBalanceHistory(ctx context.Context, userID int
 		return nil, 0, 0, err
 	}
 	return codes, total, totalRecharged, nil
+}
+
+func (s *adminServiceImpl) GetUserCreditLedger(ctx context.Context, userID int64, page, pageSize int, entryType, source string) ([]CreditLedgerEntry, int64, error) {
+	if s.creditLedgerRepo == nil {
+		return []CreditLedgerEntry{}, 0, nil
+	}
+	params := pagination.PaginationParams{Page: page, PageSize: pageSize}
+	items, result, err := s.creditLedgerRepo.List(ctx, params, CreditLedgerListFilter{
+		UserID:    userID,
+		EntryType: entryType,
+		Source:    source,
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	return items, result.Total, nil
 }
 
 func (s *adminServiceImpl) getAllUserBalanceHistory(ctx context.Context, userID int64, params pagination.PaginationParams) ([]RedeemCode, int64, float64, error) {

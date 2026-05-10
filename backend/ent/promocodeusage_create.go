@@ -42,6 +42,20 @@ func (_c *PromoCodeUsageCreate) SetBonusAmount(v float64) *PromoCodeUsageCreate 
 	return _c
 }
 
+// SetCreditBonusAmount sets the "credit_bonus_amount" field.
+func (_c *PromoCodeUsageCreate) SetCreditBonusAmount(v float64) *PromoCodeUsageCreate {
+	_c.mutation.SetCreditBonusAmount(v)
+	return _c
+}
+
+// SetNillableCreditBonusAmount sets the "credit_bonus_amount" field if the given value is not nil.
+func (_c *PromoCodeUsageCreate) SetNillableCreditBonusAmount(v *float64) *PromoCodeUsageCreate {
+	if v != nil {
+		_c.SetCreditBonusAmount(*v)
+	}
+	return _c
+}
+
 // SetUsedAt sets the "used_at" field.
 func (_c *PromoCodeUsageCreate) SetUsedAt(v time.Time) *PromoCodeUsageCreate {
 	_c.mutation.SetUsedAt(v)
@@ -101,6 +115,10 @@ func (_c *PromoCodeUsageCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *PromoCodeUsageCreate) defaults() {
+	if _, ok := _c.mutation.CreditBonusAmount(); !ok {
+		v := promocodeusage.DefaultCreditBonusAmount
+		_c.mutation.SetCreditBonusAmount(v)
+	}
 	if _, ok := _c.mutation.UsedAt(); !ok {
 		v := promocodeusage.DefaultUsedAt()
 		_c.mutation.SetUsedAt(v)
@@ -117,6 +135,9 @@ func (_c *PromoCodeUsageCreate) check() error {
 	}
 	if _, ok := _c.mutation.BonusAmount(); !ok {
 		return &ValidationError{Name: "bonus_amount", err: errors.New(`ent: missing required field "PromoCodeUsage.bonus_amount"`)}
+	}
+	if _, ok := _c.mutation.CreditBonusAmount(); !ok {
+		return &ValidationError{Name: "credit_bonus_amount", err: errors.New(`ent: missing required field "PromoCodeUsage.credit_bonus_amount"`)}
 	}
 	if _, ok := _c.mutation.UsedAt(); !ok {
 		return &ValidationError{Name: "used_at", err: errors.New(`ent: missing required field "PromoCodeUsage.used_at"`)}
@@ -157,6 +178,10 @@ func (_c *PromoCodeUsageCreate) createSpec() (*PromoCodeUsage, *sqlgraph.CreateS
 	if value, ok := _c.mutation.BonusAmount(); ok {
 		_spec.SetField(promocodeusage.FieldBonusAmount, field.TypeFloat64, value)
 		_node.BonusAmount = value
+	}
+	if value, ok := _c.mutation.CreditBonusAmount(); ok {
+		_spec.SetField(promocodeusage.FieldCreditBonusAmount, field.TypeFloat64, value)
+		_node.CreditBonusAmount = value
 	}
 	if value, ok := _c.mutation.UsedAt(); ok {
 		_spec.SetField(promocodeusage.FieldUsedAt, field.TypeTime, value)
@@ -290,6 +315,24 @@ func (u *PromoCodeUsageUpsert) AddBonusAmount(v float64) *PromoCodeUsageUpsert {
 	return u
 }
 
+// SetCreditBonusAmount sets the "credit_bonus_amount" field.
+func (u *PromoCodeUsageUpsert) SetCreditBonusAmount(v float64) *PromoCodeUsageUpsert {
+	u.Set(promocodeusage.FieldCreditBonusAmount, v)
+	return u
+}
+
+// UpdateCreditBonusAmount sets the "credit_bonus_amount" field to the value that was provided on create.
+func (u *PromoCodeUsageUpsert) UpdateCreditBonusAmount() *PromoCodeUsageUpsert {
+	u.SetExcluded(promocodeusage.FieldCreditBonusAmount)
+	return u
+}
+
+// AddCreditBonusAmount adds v to the "credit_bonus_amount" field.
+func (u *PromoCodeUsageUpsert) AddCreditBonusAmount(v float64) *PromoCodeUsageUpsert {
+	u.Add(promocodeusage.FieldCreditBonusAmount, v)
+	return u
+}
+
 // SetUsedAt sets the "used_at" field.
 func (u *PromoCodeUsageUpsert) SetUsedAt(v time.Time) *PromoCodeUsageUpsert {
 	u.Set(promocodeusage.FieldUsedAt, v)
@@ -388,6 +431,27 @@ func (u *PromoCodeUsageUpsertOne) AddBonusAmount(v float64) *PromoCodeUsageUpser
 func (u *PromoCodeUsageUpsertOne) UpdateBonusAmount() *PromoCodeUsageUpsertOne {
 	return u.Update(func(s *PromoCodeUsageUpsert) {
 		s.UpdateBonusAmount()
+	})
+}
+
+// SetCreditBonusAmount sets the "credit_bonus_amount" field.
+func (u *PromoCodeUsageUpsertOne) SetCreditBonusAmount(v float64) *PromoCodeUsageUpsertOne {
+	return u.Update(func(s *PromoCodeUsageUpsert) {
+		s.SetCreditBonusAmount(v)
+	})
+}
+
+// AddCreditBonusAmount adds v to the "credit_bonus_amount" field.
+func (u *PromoCodeUsageUpsertOne) AddCreditBonusAmount(v float64) *PromoCodeUsageUpsertOne {
+	return u.Update(func(s *PromoCodeUsageUpsert) {
+		s.AddCreditBonusAmount(v)
+	})
+}
+
+// UpdateCreditBonusAmount sets the "credit_bonus_amount" field to the value that was provided on create.
+func (u *PromoCodeUsageUpsertOne) UpdateCreditBonusAmount() *PromoCodeUsageUpsertOne {
+	return u.Update(func(s *PromoCodeUsageUpsert) {
+		s.UpdateCreditBonusAmount()
 	})
 }
 
@@ -655,6 +719,27 @@ func (u *PromoCodeUsageUpsertBulk) AddBonusAmount(v float64) *PromoCodeUsageUpse
 func (u *PromoCodeUsageUpsertBulk) UpdateBonusAmount() *PromoCodeUsageUpsertBulk {
 	return u.Update(func(s *PromoCodeUsageUpsert) {
 		s.UpdateBonusAmount()
+	})
+}
+
+// SetCreditBonusAmount sets the "credit_bonus_amount" field.
+func (u *PromoCodeUsageUpsertBulk) SetCreditBonusAmount(v float64) *PromoCodeUsageUpsertBulk {
+	return u.Update(func(s *PromoCodeUsageUpsert) {
+		s.SetCreditBonusAmount(v)
+	})
+}
+
+// AddCreditBonusAmount adds v to the "credit_bonus_amount" field.
+func (u *PromoCodeUsageUpsertBulk) AddCreditBonusAmount(v float64) *PromoCodeUsageUpsertBulk {
+	return u.Update(func(s *PromoCodeUsageUpsert) {
+		s.AddCreditBonusAmount(v)
+	})
+}
+
+// UpdateCreditBonusAmount sets the "credit_bonus_amount" field to the value that was provided on create.
+func (u *PromoCodeUsageUpsertBulk) UpdateCreditBonusAmount() *PromoCodeUsageUpsertBulk {
+	return u.Update(func(s *PromoCodeUsageUpsert) {
+		s.UpdateCreditBonusAmount()
 	})
 }
 

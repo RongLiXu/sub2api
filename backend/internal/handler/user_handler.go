@@ -98,6 +98,32 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	response.Success(c, profileResp)
 }
 
+// GetCreditLedger returns the current user's credit balance ledger.
+// GET /api/v1/user/credit-ledger
+func (h *UserHandler) GetCreditLedger(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	page, pageSize := response.ParsePagination(c)
+	entryType := c.Query("entry_type")
+	source := c.Query("source")
+
+	items, total, err := h.userService.GetCreditLedger(c.Request.Context(), subject.UserID, page, pageSize, entryType, source)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	out := make([]dto.CreditLedgerItem, 0, len(items))
+	for i := range items {
+		out = append(out, *dto.CreditLedgerItemFromService(&items[i]))
+	}
+	response.Paginated(c, out, total, page, pageSize)
+}
+
 // ChangePassword handles changing user password
 // POST /api/v1/users/me/password
 func (h *UserHandler) ChangePassword(c *gin.Context) {

@@ -29,6 +29,7 @@ type PromoService struct {
 	billingCacheService  *BillingCacheService
 	entClient            *dbent.Client
 	authCacheInvalidator APIKeyAuthCacheInvalidator
+	creditLedgerRepo     CreditLedgerRepository
 }
 
 // NewPromoService 创建优惠码服务实例
@@ -38,13 +39,19 @@ func NewPromoService(
 	billingCacheService *BillingCacheService,
 	entClient *dbent.Client,
 	authCacheInvalidator APIKeyAuthCacheInvalidator,
+	creditLedgerRepo ...CreditLedgerRepository,
 ) *PromoService {
+	var ledgerRepo CreditLedgerRepository
+	if len(creditLedgerRepo) > 0 {
+		ledgerRepo = creditLedgerRepo[0]
+	}
 	return &PromoService{
 		promoRepo:            promoRepo,
 		userRepo:             userRepo,
 		billingCacheService:  billingCacheService,
 		entClient:            entClient,
 		authCacheInvalidator: authCacheInvalidator,
+		creditLedgerRepo:     ledgerRepo,
 	}
 }
 
@@ -123,17 +130,53 @@ func (s *PromoService) ApplyPromoCode(ctx context.Context, userID int64, code st
 		return ErrPromoCodeAlreadyUsed
 	}
 
+	user, err := s.userRepo.GetByID(txCtx, userID)
+	if err != nil {
+		return fmt.Errorf("get user: %w", err)
+	}
+
 	// 增加用户余额
-	if err := s.userRepo.UpdateBalance(txCtx, userID, promoCode.BonusAmount); err != nil {
-		return fmt.Errorf("update user balance: %w", err)
+	if promoCode.BonusAmount > 0 {
+		if err := s.userRepo.UpdateBalance(txCtx, userID, promoCode.BonusAmount); err != nil {
+			return fmt.Errorf("update user balance: %w", err)
+		}
+		user.Balance += promoCode.BonusAmount
+	}
+
+	if promoCode.CreditBonusAmount > 0 {
+		before := user.CreditBalance
+		user.CreditBalance += promoCode.CreditBonusAmount
+		if err := s.userRepo.Update(txCtx, user); err != nil {
+			return fmt.Errorf("update user credit balance: %w", err)
+		}
+		if s.creditLedgerRepo != nil {
+			codeValue := promoCode.Code
+			if _, err := s.creditLedgerRepo.Create(txCtx, CreateCreditLedgerEntryInput{
+				UserID:        userID,
+				Amount:        promoCode.CreditBonusAmount,
+				BalanceBefore: before,
+				BalanceAfter:  user.CreditBalance,
+				EntryType:     CreditLedgerEntryTypePromoGrant,
+				Source:        CreditLedgerSourcePromo,
+				RequestID:     &codeValue,
+				Notes:         &promoCode.Notes,
+				Metadata: map[string]any{
+					"promo_code_id": promoCode.ID,
+					"promo_code":    promoCode.Code,
+				},
+			}); err != nil {
+				return fmt.Errorf("create promo credit ledger: %w", err)
+			}
+		}
 	}
 
 	// 创建使用记录
 	usage := &PromoCodeUsage{
-		PromoCodeID: promoCode.ID,
-		UserID:      userID,
-		BonusAmount: promoCode.BonusAmount,
-		UsedAt:      time.Now(),
+		PromoCodeID:       promoCode.ID,
+		UserID:            userID,
+		BonusAmount:       promoCode.BonusAmount,
+		CreditBonusAmount: promoCode.CreditBonusAmount,
+		UsedAt:            time.Now(),
 	}
 	if err := s.promoRepo.CreateUsage(txCtx, usage); err != nil {
 		return fmt.Errorf("create usage record: %w", err)
@@ -148,7 +191,7 @@ func (s *PromoService) ApplyPromoCode(ctx context.Context, userID int64, code st
 		return fmt.Errorf("commit transaction: %w", err)
 	}
 
-	s.invalidatePromoCaches(ctx, userID, promoCode.BonusAmount)
+	s.invalidatePromoCaches(ctx, userID, promoCode.BonusAmount, promoCode.CreditBonusAmount)
 
 	// 失效余额缓存
 	if s.billingCacheService != nil {
@@ -162,8 +205,11 @@ func (s *PromoService) ApplyPromoCode(ctx context.Context, userID int64, code st
 	return nil
 }
 
-func (s *PromoService) invalidatePromoCaches(ctx context.Context, userID int64, bonusAmount float64) {
-	if bonusAmount == 0 || s.authCacheInvalidator == nil {
+func (s *PromoService) invalidatePromoCaches(ctx context.Context, userID int64, bonusAmount float64, creditBonusAmount float64) {
+	if bonusAmount == 0 && creditBonusAmount == 0 {
+		return
+	}
+	if s.authCacheInvalidator == nil {
 		return
 	}
 	s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, userID)
@@ -180,6 +226,9 @@ func (s *PromoService) GenerateRandomCode() (string, error) {
 
 // Create 创建优惠码
 func (s *PromoService) Create(ctx context.Context, input *CreatePromoCodeInput) (*PromoCode, error) {
+	if input.BonusAmount <= 0 && input.CreditBonusAmount <= 0 {
+		return nil, ErrPromoCodeInvalid
+	}
 	code := strings.TrimSpace(input.Code)
 	if code == "" {
 		// 自动生成
@@ -191,13 +240,14 @@ func (s *PromoService) Create(ctx context.Context, input *CreatePromoCodeInput) 
 	}
 
 	promoCode := &PromoCode{
-		Code:        strings.ToUpper(code),
-		BonusAmount: input.BonusAmount,
-		MaxUses:     input.MaxUses,
-		UsedCount:   0,
-		Status:      PromoCodeStatusActive,
-		ExpiresAt:   input.ExpiresAt,
-		Notes:       input.Notes,
+		Code:              strings.ToUpper(code),
+		BonusAmount:       input.BonusAmount,
+		CreditBonusAmount: input.CreditBonusAmount,
+		MaxUses:           input.MaxUses,
+		UsedCount:         0,
+		Status:            PromoCodeStatusActive,
+		ExpiresAt:         input.ExpiresAt,
+		Notes:             input.Notes,
 	}
 
 	if err := s.promoRepo.Create(ctx, promoCode); err != nil {
@@ -228,6 +278,12 @@ func (s *PromoService) Update(ctx context.Context, id int64, input *UpdatePromoC
 	}
 	if input.BonusAmount != nil {
 		promoCode.BonusAmount = *input.BonusAmount
+	}
+	if input.CreditBonusAmount != nil {
+		promoCode.CreditBonusAmount = *input.CreditBonusAmount
+	}
+	if promoCode.BonusAmount <= 0 && promoCode.CreditBonusAmount <= 0 {
+		return nil, ErrPromoCodeInvalid
 	}
 	if input.MaxUses != nil {
 		promoCode.MaxUses = *input.MaxUses

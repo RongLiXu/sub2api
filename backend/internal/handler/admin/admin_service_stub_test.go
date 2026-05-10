@@ -552,6 +552,10 @@ func (s *stubAdminService) GetUserBalanceHistory(ctx context.Context, userID int
 	return s.redeems, int64(len(s.redeems)), 100.0, nil
 }
 
+func (s *stubAdminService) GetUserCreditLedger(ctx context.Context, userID int64, page, pageSize int, entryType, source string) ([]service.CreditLedgerEntry, int64, error) {
+	return nil, 0, nil
+}
+
 func (s *stubAdminService) UpdateGroupSortOrders(ctx context.Context, updates []service.GroupSortOrderUpdate) error {
 	return nil
 }

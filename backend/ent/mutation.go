@@ -26045,28 +26045,30 @@ func (m *PendingAuthSessionMutation) ResetEdge(name string) error {
 // PromoCodeMutation represents an operation that mutates the PromoCode nodes in the graph.
 type PromoCodeMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *int64
-	code                 *string
-	bonus_amount         *float64
-	addbonus_amount      *float64
-	max_uses             *int
-	addmax_uses          *int
-	used_count           *int
-	addused_count        *int
-	status               *string
-	expires_at           *time.Time
-	notes                *string
-	created_at           *time.Time
-	updated_at           *time.Time
-	clearedFields        map[string]struct{}
-	usage_records        map[int64]struct{}
-	removedusage_records map[int64]struct{}
-	clearedusage_records bool
-	done                 bool
-	oldValue             func(context.Context) (*PromoCode, error)
-	predicates           []predicate.PromoCode
+	op                     Op
+	typ                    string
+	id                     *int64
+	code                   *string
+	bonus_amount           *float64
+	addbonus_amount        *float64
+	credit_bonus_amount    *float64
+	addcredit_bonus_amount *float64
+	max_uses               *int
+	addmax_uses            *int
+	used_count             *int
+	addused_count          *int
+	status                 *string
+	expires_at             *time.Time
+	notes                  *string
+	created_at             *time.Time
+	updated_at             *time.Time
+	clearedFields          map[string]struct{}
+	usage_records          map[int64]struct{}
+	removedusage_records   map[int64]struct{}
+	clearedusage_records   bool
+	done                   bool
+	oldValue               func(context.Context) (*PromoCode, error)
+	predicates             []predicate.PromoCode
 }
 
 var _ ent.Mutation = (*PromoCodeMutation)(nil)
@@ -26257,6 +26259,62 @@ func (m *PromoCodeMutation) AddedBonusAmount() (r float64, exists bool) {
 func (m *PromoCodeMutation) ResetBonusAmount() {
 	m.bonus_amount = nil
 	m.addbonus_amount = nil
+}
+
+// SetCreditBonusAmount sets the "credit_bonus_amount" field.
+func (m *PromoCodeMutation) SetCreditBonusAmount(f float64) {
+	m.credit_bonus_amount = &f
+	m.addcredit_bonus_amount = nil
+}
+
+// CreditBonusAmount returns the value of the "credit_bonus_amount" field in the mutation.
+func (m *PromoCodeMutation) CreditBonusAmount() (r float64, exists bool) {
+	v := m.credit_bonus_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreditBonusAmount returns the old "credit_bonus_amount" field's value of the PromoCode entity.
+// If the PromoCode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PromoCodeMutation) OldCreditBonusAmount(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreditBonusAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreditBonusAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreditBonusAmount: %w", err)
+	}
+	return oldValue.CreditBonusAmount, nil
+}
+
+// AddCreditBonusAmount adds f to the "credit_bonus_amount" field.
+func (m *PromoCodeMutation) AddCreditBonusAmount(f float64) {
+	if m.addcredit_bonus_amount != nil {
+		*m.addcredit_bonus_amount += f
+	} else {
+		m.addcredit_bonus_amount = &f
+	}
+}
+
+// AddedCreditBonusAmount returns the value that was added to the "credit_bonus_amount" field in this mutation.
+func (m *PromoCodeMutation) AddedCreditBonusAmount() (r float64, exists bool) {
+	v := m.addcredit_bonus_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreditBonusAmount resets all changes to the "credit_bonus_amount" field.
+func (m *PromoCodeMutation) ResetCreditBonusAmount() {
+	m.credit_bonus_amount = nil
+	m.addcredit_bonus_amount = nil
 }
 
 // SetMaxUses sets the "max_uses" field.
@@ -26665,12 +26723,15 @@ func (m *PromoCodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PromoCodeMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.code != nil {
 		fields = append(fields, promocode.FieldCode)
 	}
 	if m.bonus_amount != nil {
 		fields = append(fields, promocode.FieldBonusAmount)
+	}
+	if m.credit_bonus_amount != nil {
+		fields = append(fields, promocode.FieldCreditBonusAmount)
 	}
 	if m.max_uses != nil {
 		fields = append(fields, promocode.FieldMaxUses)
@@ -26705,6 +26766,8 @@ func (m *PromoCodeMutation) Field(name string) (ent.Value, bool) {
 		return m.Code()
 	case promocode.FieldBonusAmount:
 		return m.BonusAmount()
+	case promocode.FieldCreditBonusAmount:
+		return m.CreditBonusAmount()
 	case promocode.FieldMaxUses:
 		return m.MaxUses()
 	case promocode.FieldUsedCount:
@@ -26732,6 +26795,8 @@ func (m *PromoCodeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldCode(ctx)
 	case promocode.FieldBonusAmount:
 		return m.OldBonusAmount(ctx)
+	case promocode.FieldCreditBonusAmount:
+		return m.OldCreditBonusAmount(ctx)
 	case promocode.FieldMaxUses:
 		return m.OldMaxUses(ctx)
 	case promocode.FieldUsedCount:
@@ -26768,6 +26833,13 @@ func (m *PromoCodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBonusAmount(v)
+		return nil
+	case promocode.FieldCreditBonusAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreditBonusAmount(v)
 		return nil
 	case promocode.FieldMaxUses:
 		v, ok := value.(int)
@@ -26829,6 +26901,9 @@ func (m *PromoCodeMutation) AddedFields() []string {
 	if m.addbonus_amount != nil {
 		fields = append(fields, promocode.FieldBonusAmount)
 	}
+	if m.addcredit_bonus_amount != nil {
+		fields = append(fields, promocode.FieldCreditBonusAmount)
+	}
 	if m.addmax_uses != nil {
 		fields = append(fields, promocode.FieldMaxUses)
 	}
@@ -26845,6 +26920,8 @@ func (m *PromoCodeMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case promocode.FieldBonusAmount:
 		return m.AddedBonusAmount()
+	case promocode.FieldCreditBonusAmount:
+		return m.AddedCreditBonusAmount()
 	case promocode.FieldMaxUses:
 		return m.AddedMaxUses()
 	case promocode.FieldUsedCount:
@@ -26864,6 +26941,13 @@ func (m *PromoCodeMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddBonusAmount(v)
+		return nil
+	case promocode.FieldCreditBonusAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreditBonusAmount(v)
 		return nil
 	case promocode.FieldMaxUses:
 		v, ok := value.(int)
@@ -26926,6 +27010,9 @@ func (m *PromoCodeMutation) ResetField(name string) error {
 		return nil
 	case promocode.FieldBonusAmount:
 		m.ResetBonusAmount()
+		return nil
+	case promocode.FieldCreditBonusAmount:
+		m.ResetCreditBonusAmount()
 		return nil
 	case promocode.FieldMaxUses:
 		m.ResetMaxUses()
@@ -27039,20 +27126,22 @@ func (m *PromoCodeMutation) ResetEdge(name string) error {
 // PromoCodeUsageMutation represents an operation that mutates the PromoCodeUsage nodes in the graph.
 type PromoCodeUsageMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *int64
-	bonus_amount      *float64
-	addbonus_amount   *float64
-	used_at           *time.Time
-	clearedFields     map[string]struct{}
-	promo_code        *int64
-	clearedpromo_code bool
-	user              *int64
-	cleareduser       bool
-	done              bool
-	oldValue          func(context.Context) (*PromoCodeUsage, error)
-	predicates        []predicate.PromoCodeUsage
+	op                     Op
+	typ                    string
+	id                     *int64
+	bonus_amount           *float64
+	addbonus_amount        *float64
+	credit_bonus_amount    *float64
+	addcredit_bonus_amount *float64
+	used_at                *time.Time
+	clearedFields          map[string]struct{}
+	promo_code             *int64
+	clearedpromo_code      bool
+	user                   *int64
+	cleareduser            bool
+	done                   bool
+	oldValue               func(context.Context) (*PromoCodeUsage, error)
+	predicates             []predicate.PromoCodeUsage
 }
 
 var _ ent.Mutation = (*PromoCodeUsageMutation)(nil)
@@ -27281,6 +27370,62 @@ func (m *PromoCodeUsageMutation) ResetBonusAmount() {
 	m.addbonus_amount = nil
 }
 
+// SetCreditBonusAmount sets the "credit_bonus_amount" field.
+func (m *PromoCodeUsageMutation) SetCreditBonusAmount(f float64) {
+	m.credit_bonus_amount = &f
+	m.addcredit_bonus_amount = nil
+}
+
+// CreditBonusAmount returns the value of the "credit_bonus_amount" field in the mutation.
+func (m *PromoCodeUsageMutation) CreditBonusAmount() (r float64, exists bool) {
+	v := m.credit_bonus_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreditBonusAmount returns the old "credit_bonus_amount" field's value of the PromoCodeUsage entity.
+// If the PromoCodeUsage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PromoCodeUsageMutation) OldCreditBonusAmount(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreditBonusAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreditBonusAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreditBonusAmount: %w", err)
+	}
+	return oldValue.CreditBonusAmount, nil
+}
+
+// AddCreditBonusAmount adds f to the "credit_bonus_amount" field.
+func (m *PromoCodeUsageMutation) AddCreditBonusAmount(f float64) {
+	if m.addcredit_bonus_amount != nil {
+		*m.addcredit_bonus_amount += f
+	} else {
+		m.addcredit_bonus_amount = &f
+	}
+}
+
+// AddedCreditBonusAmount returns the value that was added to the "credit_bonus_amount" field in this mutation.
+func (m *PromoCodeUsageMutation) AddedCreditBonusAmount() (r float64, exists bool) {
+	v := m.addcredit_bonus_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreditBonusAmount resets all changes to the "credit_bonus_amount" field.
+func (m *PromoCodeUsageMutation) ResetCreditBonusAmount() {
+	m.credit_bonus_amount = nil
+	m.addcredit_bonus_amount = nil
+}
+
 // SetUsedAt sets the "used_at" field.
 func (m *PromoCodeUsageMutation) SetUsedAt(t time.Time) {
 	m.used_at = &t
@@ -27405,7 +27550,7 @@ func (m *PromoCodeUsageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PromoCodeUsageMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.promo_code != nil {
 		fields = append(fields, promocodeusage.FieldPromoCodeID)
 	}
@@ -27414,6 +27559,9 @@ func (m *PromoCodeUsageMutation) Fields() []string {
 	}
 	if m.bonus_amount != nil {
 		fields = append(fields, promocodeusage.FieldBonusAmount)
+	}
+	if m.credit_bonus_amount != nil {
+		fields = append(fields, promocodeusage.FieldCreditBonusAmount)
 	}
 	if m.used_at != nil {
 		fields = append(fields, promocodeusage.FieldUsedAt)
@@ -27432,6 +27580,8 @@ func (m *PromoCodeUsageMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case promocodeusage.FieldBonusAmount:
 		return m.BonusAmount()
+	case promocodeusage.FieldCreditBonusAmount:
+		return m.CreditBonusAmount()
 	case promocodeusage.FieldUsedAt:
 		return m.UsedAt()
 	}
@@ -27449,6 +27599,8 @@ func (m *PromoCodeUsageMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldUserID(ctx)
 	case promocodeusage.FieldBonusAmount:
 		return m.OldBonusAmount(ctx)
+	case promocodeusage.FieldCreditBonusAmount:
+		return m.OldCreditBonusAmount(ctx)
 	case promocodeusage.FieldUsedAt:
 		return m.OldUsedAt(ctx)
 	}
@@ -27481,6 +27633,13 @@ func (m *PromoCodeUsageMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetBonusAmount(v)
 		return nil
+	case promocodeusage.FieldCreditBonusAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreditBonusAmount(v)
+		return nil
 	case promocodeusage.FieldUsedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -27499,6 +27658,9 @@ func (m *PromoCodeUsageMutation) AddedFields() []string {
 	if m.addbonus_amount != nil {
 		fields = append(fields, promocodeusage.FieldBonusAmount)
 	}
+	if m.addcredit_bonus_amount != nil {
+		fields = append(fields, promocodeusage.FieldCreditBonusAmount)
+	}
 	return fields
 }
 
@@ -27509,6 +27671,8 @@ func (m *PromoCodeUsageMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case promocodeusage.FieldBonusAmount:
 		return m.AddedBonusAmount()
+	case promocodeusage.FieldCreditBonusAmount:
+		return m.AddedCreditBonusAmount()
 	}
 	return nil, false
 }
@@ -27524,6 +27688,13 @@ func (m *PromoCodeUsageMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddBonusAmount(v)
+		return nil
+	case promocodeusage.FieldCreditBonusAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreditBonusAmount(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PromoCodeUsage numeric field %s", name)
@@ -27560,6 +27731,9 @@ func (m *PromoCodeUsageMutation) ResetField(name string) error {
 		return nil
 	case promocodeusage.FieldBonusAmount:
 		m.ResetBonusAmount()
+		return nil
+	case promocodeusage.FieldCreditBonusAmount:
+		m.ResetCreditBonusAmount()
 		return nil
 	case promocodeusage.FieldUsedAt:
 		m.ResetUsedAt()

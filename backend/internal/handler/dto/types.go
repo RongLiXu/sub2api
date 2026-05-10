@@ -357,6 +357,32 @@ type AdminRedeemCode struct {
 	Notes string `json:"notes"`
 }
 
+type CreditLedgerItem struct {
+	ID           int64     `json:"id"`
+	UserID       int64     `json:"user_id,omitempty"`
+	Amount       float64   `json:"amount"`
+	BalanceAfter float64   `json:"balance_after"`
+	EntryType    string    `json:"entry_type"`
+	Source       string    `json:"source"`
+	RequestID    *string   `json:"request_id,omitempty"`
+	APIKeyID     *int64    `json:"api_key_id,omitempty"`
+	UsageLogID   *int64    `json:"usage_log_id,omitempty"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+type AdminCreditLedgerItem struct {
+	CreditLedgerItem
+
+	BalanceBefore  float64        `json:"balance_before"`
+	OperatorUserID *int64         `json:"operator_user_id,omitempty"`
+	AccountID      *int64         `json:"account_id,omitempty"`
+	GroupID        *int64         `json:"group_id,omitempty"`
+	SubscriptionID *int64         `json:"subscription_id,omitempty"`
+	IdempotencyKey *string        `json:"idempotency_key,omitempty"`
+	Notes          *string        `json:"notes,omitempty"`
+	Metadata       map[string]any `json:"metadata,omitempty"`
+}
+
 // UsageLog 是普通用户接口使用的 usage log DTO（不包含管理员字段）。
 type UsageLog struct {
 	ID        int64  `json:"id"`
@@ -543,25 +569,27 @@ type BulkAssignResult struct {
 
 // PromoCode 注册优惠码
 type PromoCode struct {
-	ID          int64      `json:"id"`
-	Code        string     `json:"code"`
-	BonusAmount float64    `json:"bonus_amount"`
-	MaxUses     int        `json:"max_uses"`
-	UsedCount   int        `json:"used_count"`
-	Status      string     `json:"status"`
-	ExpiresAt   *time.Time `json:"expires_at"`
-	Notes       string     `json:"notes"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
+	ID                int64      `json:"id"`
+	Code              string     `json:"code"`
+	BonusAmount       float64    `json:"bonus_amount"`
+	CreditBonusAmount float64    `json:"credit_bonus_amount"`
+	MaxUses           int        `json:"max_uses"`
+	UsedCount         int        `json:"used_count"`
+	Status            string     `json:"status"`
+	ExpiresAt         *time.Time `json:"expires_at"`
+	Notes             string     `json:"notes"`
+	CreatedAt         time.Time  `json:"created_at"`
+	UpdatedAt         time.Time  `json:"updated_at"`
 }
 
 // PromoCodeUsage 优惠码使用记录
 type PromoCodeUsage struct {
-	ID          int64     `json:"id"`
-	PromoCodeID int64     `json:"promo_code_id"`
-	UserID      int64     `json:"user_id"`
-	BonusAmount float64   `json:"bonus_amount"`
-	UsedAt      time.Time `json:"used_at"`
+	ID                int64     `json:"id"`
+	PromoCodeID       int64     `json:"promo_code_id"`
+	UserID            int64     `json:"user_id"`
+	BonusAmount       float64   `json:"bonus_amount"`
+	CreditBonusAmount float64   `json:"credit_bonus_amount"`
+	UsedAt            time.Time `json:"used_at"`
 
 	User *User `json:"user,omitempty"`
 }

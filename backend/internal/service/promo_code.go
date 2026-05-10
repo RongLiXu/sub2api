@@ -6,16 +6,17 @@ import (
 
 // PromoCode 注册优惠码
 type PromoCode struct {
-	ID          int64
-	Code        string
-	BonusAmount float64
-	MaxUses     int
-	UsedCount   int
-	Status      string
-	ExpiresAt   *time.Time
-	Notes       string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID                int64
+	Code              string
+	BonusAmount       float64
+	CreditBonusAmount float64
+	MaxUses           int
+	UsedCount         int
+	Status            string
+	ExpiresAt         *time.Time
+	Notes             string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 
 	// 关联
 	UsageRecords []PromoCodeUsage
@@ -23,11 +24,12 @@ type PromoCode struct {
 
 // PromoCodeUsage 优惠码使用记录
 type PromoCodeUsage struct {
-	ID          int64
-	PromoCodeID int64
-	UserID      int64
-	BonusAmount float64
-	UsedAt      time.Time
+	ID                int64
+	PromoCodeID       int64
+	UserID            int64
+	BonusAmount       float64
+	CreditBonusAmount float64
+	UsedAt            time.Time
 
 	// 关联
 	PromoCode *PromoCode
@@ -55,19 +57,21 @@ func (p *PromoCode) IsExpired() bool {
 
 // CreatePromoCodeInput 创建优惠码输入
 type CreatePromoCodeInput struct {
-	Code        string
-	BonusAmount float64
-	MaxUses     int
-	ExpiresAt   *time.Time
-	Notes       string
+	Code              string
+	BonusAmount       float64
+	CreditBonusAmount float64
+	MaxUses           int
+	ExpiresAt         *time.Time
+	Notes             string
 }
 
 // UpdatePromoCodeInput 更新优惠码输入
 type UpdatePromoCodeInput struct {
-	Code        *string
-	BonusAmount *float64
-	MaxUses     *int
-	Status      *string
-	ExpiresAt   *time.Time
-	Notes       *string
+	Code              *string
+	BonusAmount       *float64
+	CreditBonusAmount *float64
+	MaxUses           *int
+	Status            *string
+	ExpiresAt         *time.Time
+	Notes             *string
 }

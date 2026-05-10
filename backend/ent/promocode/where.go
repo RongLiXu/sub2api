@@ -65,6 +65,11 @@ func BonusAmount(v float64) predicate.PromoCode {
 	return predicate.PromoCode(sql.FieldEQ(FieldBonusAmount, v))
 }
 
+// CreditBonusAmount applies equality check predicate on the "credit_bonus_amount" field. It's identical to CreditBonusAmountEQ.
+func CreditBonusAmount(v float64) predicate.PromoCode {
+	return predicate.PromoCode(sql.FieldEQ(FieldCreditBonusAmount, v))
+}
+
 // MaxUses applies equality check predicate on the "max_uses" field. It's identical to MaxUsesEQ.
 func MaxUses(v int) predicate.PromoCode {
 	return predicate.PromoCode(sql.FieldEQ(FieldMaxUses, v))
@@ -203,6 +208,46 @@ func BonusAmountLT(v float64) predicate.PromoCode {
 // BonusAmountLTE applies the LTE predicate on the "bonus_amount" field.
 func BonusAmountLTE(v float64) predicate.PromoCode {
 	return predicate.PromoCode(sql.FieldLTE(FieldBonusAmount, v))
+}
+
+// CreditBonusAmountEQ applies the EQ predicate on the "credit_bonus_amount" field.
+func CreditBonusAmountEQ(v float64) predicate.PromoCode {
+	return predicate.PromoCode(sql.FieldEQ(FieldCreditBonusAmount, v))
+}
+
+// CreditBonusAmountNEQ applies the NEQ predicate on the "credit_bonus_amount" field.
+func CreditBonusAmountNEQ(v float64) predicate.PromoCode {
+	return predicate.PromoCode(sql.FieldNEQ(FieldCreditBonusAmount, v))
+}
+
+// CreditBonusAmountIn applies the In predicate on the "credit_bonus_amount" field.
+func CreditBonusAmountIn(vs ...float64) predicate.PromoCode {
+	return predicate.PromoCode(sql.FieldIn(FieldCreditBonusAmount, vs...))
+}
+
+// CreditBonusAmountNotIn applies the NotIn predicate on the "credit_bonus_amount" field.
+func CreditBonusAmountNotIn(vs ...float64) predicate.PromoCode {
+	return predicate.PromoCode(sql.FieldNotIn(FieldCreditBonusAmount, vs...))
+}
+
+// CreditBonusAmountGT applies the GT predicate on the "credit_bonus_amount" field.
+func CreditBonusAmountGT(v float64) predicate.PromoCode {
+	return predicate.PromoCode(sql.FieldGT(FieldCreditBonusAmount, v))
+}
+
+// CreditBonusAmountGTE applies the GTE predicate on the "credit_bonus_amount" field.
+func CreditBonusAmountGTE(v float64) predicate.PromoCode {
+	return predicate.PromoCode(sql.FieldGTE(FieldCreditBonusAmount, v))
+}
+
+// CreditBonusAmountLT applies the LT predicate on the "credit_bonus_amount" field.
+func CreditBonusAmountLT(v float64) predicate.PromoCode {
+	return predicate.PromoCode(sql.FieldLT(FieldCreditBonusAmount, v))
+}
+
+// CreditBonusAmountLTE applies the LTE predicate on the "credit_bonus_amount" field.
+func CreditBonusAmountLTE(v float64) predicate.PromoCode {
+	return predicate.PromoCode(sql.FieldLTE(FieldCreditBonusAmount, v))
 }
 
 // MaxUsesEQ applies the EQ predicate on the "max_uses" field.

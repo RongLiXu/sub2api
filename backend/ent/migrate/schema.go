@@ -1008,6 +1008,7 @@ var (
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "code", Type: field.TypeString, Unique: true, Size: 32},
 		{Name: "bonus_amount", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "credit_bonus_amount", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "max_uses", Type: field.TypeInt, Default: 0},
 		{Name: "used_count", Type: field.TypeInt, Default: 0},
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "active"},
@@ -1025,12 +1026,12 @@ var (
 			{
 				Name:    "promocode_status",
 				Unique:  false,
-				Columns: []*schema.Column{PromoCodesColumns[5]},
+				Columns: []*schema.Column{PromoCodesColumns[6]},
 			},
 			{
 				Name:    "promocode_expires_at",
 				Unique:  false,
-				Columns: []*schema.Column{PromoCodesColumns[6]},
+				Columns: []*schema.Column{PromoCodesColumns[7]},
 			},
 		},
 	}
@@ -1038,6 +1039,7 @@ var (
 	PromoCodeUsagesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "bonus_amount", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "credit_bonus_amount", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "used_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "promo_code_id", Type: field.TypeInt64},
 		{Name: "user_id", Type: field.TypeInt64},
@@ -1050,13 +1052,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "promo_code_usages_promo_codes_usage_records",
-				Columns:    []*schema.Column{PromoCodeUsagesColumns[3]},
+				Columns:    []*schema.Column{PromoCodeUsagesColumns[4]},
 				RefColumns: []*schema.Column{PromoCodesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "promo_code_usages_users_promo_code_usages",
-				Columns:    []*schema.Column{PromoCodeUsagesColumns[4]},
+				Columns:    []*schema.Column{PromoCodeUsagesColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1065,17 +1067,17 @@ var (
 			{
 				Name:    "promocodeusage_promo_code_id",
 				Unique:  false,
-				Columns: []*schema.Column{PromoCodeUsagesColumns[3]},
+				Columns: []*schema.Column{PromoCodeUsagesColumns[4]},
 			},
 			{
 				Name:    "promocodeusage_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{PromoCodeUsagesColumns[4]},
+				Columns: []*schema.Column{PromoCodeUsagesColumns[5]},
 			},
 			{
 				Name:    "promocodeusage_promo_code_id_user_id",
 				Unique:  true,
-				Columns: []*schema.Column{PromoCodeUsagesColumns[3], PromoCodeUsagesColumns[4]},
+				Columns: []*schema.Column{PromoCodeUsagesColumns[4], PromoCodeUsagesColumns[5]},
 			},
 		},
 	}

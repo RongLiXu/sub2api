@@ -79,6 +79,27 @@ func (_u *PromoCodeUsageUpdate) AddBonusAmount(v float64) *PromoCodeUsageUpdate 
 	return _u
 }
 
+// SetCreditBonusAmount sets the "credit_bonus_amount" field.
+func (_u *PromoCodeUsageUpdate) SetCreditBonusAmount(v float64) *PromoCodeUsageUpdate {
+	_u.mutation.ResetCreditBonusAmount()
+	_u.mutation.SetCreditBonusAmount(v)
+	return _u
+}
+
+// SetNillableCreditBonusAmount sets the "credit_bonus_amount" field if the given value is not nil.
+func (_u *PromoCodeUsageUpdate) SetNillableCreditBonusAmount(v *float64) *PromoCodeUsageUpdate {
+	if v != nil {
+		_u.SetCreditBonusAmount(*v)
+	}
+	return _u
+}
+
+// AddCreditBonusAmount adds value to the "credit_bonus_amount" field.
+func (_u *PromoCodeUsageUpdate) AddCreditBonusAmount(v float64) *PromoCodeUsageUpdate {
+	_u.mutation.AddCreditBonusAmount(v)
+	return _u
+}
+
 // SetUsedAt sets the "used_at" field.
 func (_u *PromoCodeUsageUpdate) SetUsedAt(v time.Time) *PromoCodeUsageUpdate {
 	_u.mutation.SetUsedAt(v)
@@ -175,6 +196,12 @@ func (_u *PromoCodeUsageUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if value, ok := _u.mutation.AddedBonusAmount(); ok {
 		_spec.AddField(promocodeusage.FieldBonusAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.CreditBonusAmount(); ok {
+		_spec.SetField(promocodeusage.FieldCreditBonusAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedCreditBonusAmount(); ok {
+		_spec.AddField(promocodeusage.FieldCreditBonusAmount, field.TypeFloat64, value)
 	}
 	if value, ok := _u.mutation.UsedAt(); ok {
 		_spec.SetField(promocodeusage.FieldUsedAt, field.TypeTime, value)
@@ -306,6 +333,27 @@ func (_u *PromoCodeUsageUpdateOne) AddBonusAmount(v float64) *PromoCodeUsageUpda
 	return _u
 }
 
+// SetCreditBonusAmount sets the "credit_bonus_amount" field.
+func (_u *PromoCodeUsageUpdateOne) SetCreditBonusAmount(v float64) *PromoCodeUsageUpdateOne {
+	_u.mutation.ResetCreditBonusAmount()
+	_u.mutation.SetCreditBonusAmount(v)
+	return _u
+}
+
+// SetNillableCreditBonusAmount sets the "credit_bonus_amount" field if the given value is not nil.
+func (_u *PromoCodeUsageUpdateOne) SetNillableCreditBonusAmount(v *float64) *PromoCodeUsageUpdateOne {
+	if v != nil {
+		_u.SetCreditBonusAmount(*v)
+	}
+	return _u
+}
+
+// AddCreditBonusAmount adds value to the "credit_bonus_amount" field.
+func (_u *PromoCodeUsageUpdateOne) AddCreditBonusAmount(v float64) *PromoCodeUsageUpdateOne {
+	_u.mutation.AddCreditBonusAmount(v)
+	return _u
+}
+
 // SetUsedAt sets the "used_at" field.
 func (_u *PromoCodeUsageUpdateOne) SetUsedAt(v time.Time) *PromoCodeUsageUpdateOne {
 	_u.mutation.SetUsedAt(v)
@@ -432,6 +480,12 @@ func (_u *PromoCodeUsageUpdateOne) sqlSave(ctx context.Context) (_node *PromoCod
 	}
 	if value, ok := _u.mutation.AddedBonusAmount(); ok {
 		_spec.AddField(promocodeusage.FieldBonusAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.CreditBonusAmount(); ok {
+		_spec.SetField(promocodeusage.FieldCreditBonusAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedCreditBonusAmount(); ok {
+		_spec.AddField(promocodeusage.FieldCreditBonusAmount, field.TypeFloat64, value)
 	}
 	if value, ok := _u.mutation.UsedAt(); ok {
 		_spec.SetField(promocodeusage.FieldUsedAt, field.TypeTime, value)

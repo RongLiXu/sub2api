@@ -523,6 +523,41 @@ func RedeemCodeFromServiceAdmin(rc *service.RedeemCode) *AdminRedeemCode {
 	}
 }
 
+func CreditLedgerItemFromService(entry *service.CreditLedgerEntry) *CreditLedgerItem {
+	if entry == nil {
+		return nil
+	}
+	return &CreditLedgerItem{
+		ID:           entry.ID,
+		UserID:       entry.UserID,
+		Amount:       entry.Amount,
+		BalanceAfter: entry.BalanceAfter,
+		EntryType:    entry.EntryType,
+		Source:       entry.Source,
+		RequestID:    entry.RequestID,
+		APIKeyID:     entry.APIKeyID,
+		UsageLogID:   entry.UsageLogID,
+		CreatedAt:    entry.CreatedAt,
+	}
+}
+
+func CreditLedgerItemFromServiceAdmin(entry *service.CreditLedgerEntry) *AdminCreditLedgerItem {
+	if entry == nil {
+		return nil
+	}
+	return &AdminCreditLedgerItem{
+		CreditLedgerItem: *CreditLedgerItemFromService(entry),
+		BalanceBefore:    entry.BalanceBefore,
+		OperatorUserID:   entry.OperatorUserID,
+		AccountID:        entry.AccountID,
+		GroupID:          entry.GroupID,
+		SubscriptionID:   entry.SubscriptionID,
+		IdempotencyKey:   entry.IdempotencyKey,
+		Notes:            entry.Notes,
+		Metadata:         entry.Metadata,
+	}
+}
+
 func redeemCodeFromServiceBase(rc *service.RedeemCode) RedeemCode {
 	out := RedeemCode{
 		ID:           rc.ID,
@@ -768,16 +803,17 @@ func PromoCodeFromService(pc *service.PromoCode) *PromoCode {
 		return nil
 	}
 	return &PromoCode{
-		ID:          pc.ID,
-		Code:        pc.Code,
-		BonusAmount: pc.BonusAmount,
-		MaxUses:     pc.MaxUses,
-		UsedCount:   pc.UsedCount,
-		Status:      pc.Status,
-		ExpiresAt:   pc.ExpiresAt,
-		Notes:       pc.Notes,
-		CreatedAt:   pc.CreatedAt,
-		UpdatedAt:   pc.UpdatedAt,
+		ID:                pc.ID,
+		Code:              pc.Code,
+		BonusAmount:       pc.BonusAmount,
+		CreditBonusAmount: pc.CreditBonusAmount,
+		MaxUses:           pc.MaxUses,
+		UsedCount:         pc.UsedCount,
+		Status:            pc.Status,
+		ExpiresAt:         pc.ExpiresAt,
+		Notes:             pc.Notes,
+		CreatedAt:         pc.CreatedAt,
+		UpdatedAt:         pc.UpdatedAt,
 	}
 }
 
@@ -786,11 +822,12 @@ func PromoCodeUsageFromService(u *service.PromoCodeUsage) *PromoCodeUsage {
 		return nil
 	}
 	return &PromoCodeUsage{
-		ID:          u.ID,
-		PromoCodeID: u.PromoCodeID,
-		UserID:      u.UserID,
-		BonusAmount: u.BonusAmount,
-		UsedAt:      u.UsedAt,
-		User:        UserFromServiceShallow(u.User),
+		ID:                u.ID,
+		PromoCodeID:       u.PromoCodeID,
+		UserID:            u.UserID,
+		BonusAmount:       u.BonusAmount,
+		CreditBonusAmount: u.CreditBonusAmount,
+		UsedAt:            u.UsedAt,
+		User:              UserFromServiceShallow(u.User),
 	}
 }

@@ -209,17 +209,23 @@ type UserService struct {
 	settingRepo          SettingRepository
 	authCacheInvalidator APIKeyAuthCacheInvalidator
 	billingCache         BillingCache
+	creditLedgerRepo     CreditLedgerRepository
 	lastActiveTouchL1    sync.Map
 	lastActiveTouchSF    singleflight.Group
 }
 
 // NewUserService 创建用户服务实例
-func NewUserService(userRepo UserRepository, settingRepo SettingRepository, authCacheInvalidator APIKeyAuthCacheInvalidator, billingCache BillingCache) *UserService {
+func NewUserService(userRepo UserRepository, settingRepo SettingRepository, authCacheInvalidator APIKeyAuthCacheInvalidator, billingCache BillingCache, creditLedgerRepo ...CreditLedgerRepository) *UserService {
+	var repo CreditLedgerRepository
+	if len(creditLedgerRepo) > 0 {
+		repo = creditLedgerRepo[0]
+	}
 	return &UserService{
 		userRepo:             userRepo,
 		settingRepo:          settingRepo,
 		authCacheInvalidator: authCacheInvalidator,
 		billingCache:         billingCache,
+		creditLedgerRepo:     repo,
 	}
 }
 
@@ -243,6 +249,22 @@ func (s *UserService) GetProfile(ctx context.Context, userID int64) (*User, erro
 		return nil, fmt.Errorf("get user avatar: %w", err)
 	}
 	return user, nil
+}
+
+func (s *UserService) GetCreditLedger(ctx context.Context, userID int64, page, pageSize int, entryType, source string) ([]CreditLedgerEntry, int64, error) {
+	if s.creditLedgerRepo == nil {
+		return []CreditLedgerEntry{}, 0, nil
+	}
+	params := pagination.PaginationParams{Page: page, PageSize: pageSize}
+	items, result, err := s.creditLedgerRepo.List(ctx, params, CreditLedgerListFilter{
+		UserID:    userID,
+		EntryType: entryType,
+		Source:    source,
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	return items, result.Total, nil
 }
 
 func (s *UserService) GetProfileIdentitySummaries(ctx context.Context, userID int64, user *User) (UserIdentitySummarySet, error) {

@@ -117,6 +117,11 @@ func (r *usageBillingRepository) applyUsageBillingEffects(ctx context.Context, t
 		if err != nil {
 			return err
 		}
+		if wallet.CreditBalanceDeducted > 0 {
+			if err := insertUsageCreditLedger(ctx, tx, cmd, wallet.CreditBalance, wallet.CreditBalanceDeducted); err != nil {
+				return err
+			}
+		}
 		result.NewBalance = &wallet.Balance
 		result.NewCreditBalance = &wallet.CreditBalance
 		result.BalanceDeducted = wallet.BalanceDeducted
@@ -126,6 +131,9 @@ func (r *usageBillingRepository) applyUsageBillingEffects(ctx context.Context, t
 	if cmd.CreditBalanceCost > 0 {
 		newCreditBalance, err := deductUsageBillingCreditBalance(ctx, tx, cmd.UserID, cmd.CreditBalanceCost)
 		if err != nil {
+			return err
+		}
+		if err := insertUsageCreditLedger(ctx, tx, cmd, newCreditBalance, cmd.CreditBalanceCost); err != nil {
 			return err
 		}
 		result.NewCreditBalance = &newCreditBalance
@@ -250,6 +258,72 @@ func deductUsageBillingCreditBalance(ctx context.Context, tx *sql.Tx, userID int
 		return 0, err
 	}
 	return newCreditBalance, nil
+}
+
+func insertUsageCreditLedger(ctx context.Context, tx *sql.Tx, cmd *service.UsageBillingCommand, balanceAfter float64, deducted float64) error {
+	if cmd == nil || deducted <= 0 {
+		return nil
+	}
+	balanceBefore := balanceAfter + deducted
+	var (
+		requestIDArg      any
+		apiKeyIDArg       any
+		accountIDArg      any
+		subscriptionIDArg any
+	)
+	if strings.TrimSpace(cmd.RequestID) != "" {
+		requestIDArg = strings.TrimSpace(cmd.RequestID)
+	}
+	if cmd.APIKeyID > 0 {
+		apiKeyIDArg = cmd.APIKeyID
+	}
+	if cmd.AccountID > 0 {
+		accountIDArg = cmd.AccountID
+	}
+	if cmd.SubscriptionID != nil && *cmd.SubscriptionID > 0 {
+		subscriptionIDArg = *cmd.SubscriptionID
+	}
+
+	entryType := service.CreditLedgerEntryTypeUsageDeduct
+	if cmd.BillingType == service.BillingTypeSubscription {
+		entryType = service.CreditLedgerEntryTypeUsageDeduct
+	}
+
+	_, err := tx.ExecContext(ctx, `
+		INSERT INTO user_credit_ledger (
+			user_id,
+			amount,
+			balance_before,
+			balance_after,
+			entry_type,
+			source,
+			request_id,
+			api_key_id,
+			account_id,
+			subscription_id,
+			created_at,
+			updated_at
+		) VALUES (
+			$1,
+			$2,
+			$3,
+			$4,
+			$5,
+			$6,
+			$7,
+			$8,
+			$9,
+			$10,
+			NOW(),
+			NOW()
+		)
+		ON CONFLICT (request_id, api_key_id, entry_type)
+		WHERE request_id IS NOT NULL
+		  AND api_key_id IS NOT NULL
+		  AND entry_type IN ('usage_deduct', 'usage_refund')
+		DO NOTHING
+	`, cmd.UserID, -deducted, balanceBefore, balanceAfter, entryType, service.CreditLedgerSourceUsageBilling, requestIDArg, apiKeyIDArg, accountIDArg, subscriptionIDArg)
+	return err
 }
 
 func incrementUsageBillingAPIKeyQuota(ctx context.Context, tx *sql.Tx, apiKeyID int64, amount float64) (bool, error) {

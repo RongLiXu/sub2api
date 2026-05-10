@@ -25,6 +25,8 @@ type PromoCodeUsage struct {
 	UserID int64 `json:"user_id,omitempty"`
 	// 实际赠送金额
 	BonusAmount float64 `json:"bonus_amount,omitempty"`
+	// 实际赠送信用额度金额
+	CreditBonusAmount float64 `json:"credit_bonus_amount,omitempty"`
 	// 使用时间
 	UsedAt time.Time `json:"used_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -71,7 +73,7 @@ func (*PromoCodeUsage) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case promocodeusage.FieldBonusAmount:
+		case promocodeusage.FieldBonusAmount, promocodeusage.FieldCreditBonusAmount:
 			values[i] = new(sql.NullFloat64)
 		case promocodeusage.FieldID, promocodeusage.FieldPromoCodeID, promocodeusage.FieldUserID:
 			values[i] = new(sql.NullInt64)
@@ -115,6 +117,12 @@ func (_m *PromoCodeUsage) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field bonus_amount", values[i])
 			} else if value.Valid {
 				_m.BonusAmount = value.Float64
+			}
+		case promocodeusage.FieldCreditBonusAmount:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field credit_bonus_amount", values[i])
+			} else if value.Valid {
+				_m.CreditBonusAmount = value.Float64
 			}
 		case promocodeusage.FieldUsedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -176,6 +184,9 @@ func (_m *PromoCodeUsage) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("bonus_amount=")
 	builder.WriteString(fmt.Sprintf("%v", _m.BonusAmount))
+	builder.WriteString(", ")
+	builder.WriteString("credit_bonus_amount=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreditBonusAmount))
 	builder.WriteString(", ")
 	builder.WriteString("used_at=")
 	builder.WriteString(_m.UsedAt.Format(time.ANSIC))

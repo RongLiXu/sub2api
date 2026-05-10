@@ -91,6 +91,7 @@ type RedeemService struct {
 	entClient            *dbent.Client
 	authCacheInvalidator APIKeyAuthCacheInvalidator
 	affiliateService     *AffiliateService
+	creditLedgerRepo     CreditLedgerRepository
 }
 
 // NewRedeemService 创建兑换码服务实例
@@ -103,7 +104,12 @@ func NewRedeemService(
 	entClient *dbent.Client,
 	authCacheInvalidator APIKeyAuthCacheInvalidator,
 	affiliateService *AffiliateService,
+	creditLedgerRepo ...CreditLedgerRepository,
 ) *RedeemService {
+	var ledgerRepo CreditLedgerRepository
+	if len(creditLedgerRepo) > 0 {
+		ledgerRepo = creditLedgerRepo[0]
+	}
 	return &RedeemService{
 		redeemRepo:           redeemRepo,
 		userRepo:             userRepo,
@@ -113,6 +119,7 @@ func NewRedeemService(
 		entClient:            entClient,
 		authCacheInvalidator: authCacheInvalidator,
 		affiliateService:     affiliateService,
+		creditLedgerRepo:     ledgerRepo,
 	}
 }
 
@@ -337,6 +344,36 @@ func (s *RedeemService) Redeem(ctx context.Context, userID int64, code string) (
 			return nil, fmt.Errorf("update user balance: %w", err)
 		}
 
+	case RedeemTypeCreditBalance:
+		before := user.CreditBalance
+		user.CreditBalance += redeemCode.Value
+		if user.CreditBalance < 0 {
+			return nil, ErrInsufficientCreditBalance
+		}
+		if err := s.userRepo.Update(txCtx, user); err != nil {
+			return nil, fmt.Errorf("update user credit balance: %w", err)
+		}
+		if s.creditLedgerRepo != nil && redeemCode.Value != 0 {
+			requestID := redeemCode.Code
+			if _, err := s.creditLedgerRepo.Create(txCtx, CreateCreditLedgerEntryInput{
+				UserID:        userID,
+				Amount:        redeemCode.Value,
+				BalanceBefore: before,
+				BalanceAfter:  user.CreditBalance,
+				EntryType:     CreditLedgerEntryTypeRedeemGrant,
+				Source:        CreditLedgerSourceRedeem,
+				RequestID:     &requestID,
+				Notes:         &redeemCode.Notes,
+				Metadata: map[string]any{
+					"redeem_code_id": redeemCode.ID,
+					"redeem_code":    redeemCode.Code,
+					"redeem_type":    redeemCode.Type,
+				},
+			}); err != nil {
+				return nil, fmt.Errorf("create redeem credit ledger: %w", err)
+			}
+		}
+
 	case RedeemTypeConcurrency:
 		delta := int(redeemCode.Value)
 		// 负数为退款扣减，并发数最低为 0
@@ -400,6 +437,18 @@ func (s *RedeemService) Redeem(ctx context.Context, userID int64, code string) (
 func (s *RedeemService) invalidateRedeemCaches(ctx context.Context, userID int64, redeemCode *RedeemCode) {
 	switch redeemCode.Type {
 	case RedeemTypeBalance:
+		if s.authCacheInvalidator != nil {
+			s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, userID)
+		}
+		if s.billingCacheService == nil {
+			return
+		}
+		go func() {
+			cacheCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = s.billingCacheService.InvalidateUserBalance(cacheCtx, userID)
+		}()
+	case RedeemTypeCreditBalance:
 		if s.authCacheInvalidator != nil {
 			s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, userID)
 		}

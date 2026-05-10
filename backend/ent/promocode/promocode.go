@@ -18,6 +18,8 @@ const (
 	FieldCode = "code"
 	// FieldBonusAmount holds the string denoting the bonus_amount field in the database.
 	FieldBonusAmount = "bonus_amount"
+	// FieldCreditBonusAmount holds the string denoting the credit_bonus_amount field in the database.
+	FieldCreditBonusAmount = "credit_bonus_amount"
 	// FieldMaxUses holds the string denoting the max_uses field in the database.
 	FieldMaxUses = "max_uses"
 	// FieldUsedCount holds the string denoting the used_count field in the database.
@@ -50,6 +52,7 @@ var Columns = []string{
 	FieldID,
 	FieldCode,
 	FieldBonusAmount,
+	FieldCreditBonusAmount,
 	FieldMaxUses,
 	FieldUsedCount,
 	FieldStatus,
@@ -74,6 +77,8 @@ var (
 	CodeValidator func(string) error
 	// DefaultBonusAmount holds the default value on creation for the "bonus_amount" field.
 	DefaultBonusAmount float64
+	// DefaultCreditBonusAmount holds the default value on creation for the "credit_bonus_amount" field.
+	DefaultCreditBonusAmount float64
 	// DefaultMaxUses holds the default value on creation for the "max_uses" field.
 	DefaultMaxUses int
 	// DefaultUsedCount holds the default value on creation for the "used_count" field.
@@ -106,6 +111,11 @@ func ByCode(opts ...sql.OrderTermOption) OrderOption {
 // ByBonusAmount orders the results by the bonus_amount field.
 func ByBonusAmount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBonusAmount, opts...).ToFunc()
+}
+
+// ByCreditBonusAmount orders the results by the credit_bonus_amount field.
+func ByCreditBonusAmount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreditBonusAmount, opts...).ToFunc()
 }
 
 // ByMaxUses orders the results by the max_uses field.
