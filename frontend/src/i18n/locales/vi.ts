@@ -2682,6 +2682,7 @@ const messages = {
       "resetQuota": "Đặt lại hạn ngạch",
       "resetQuotaTitle": "Đặt lại hạn mức sử dụng",
       "resetQuotaConfirm": "Chọn các khung hạn mức sử dụng cần đặt lại cho '{user}'. Mức sử dụng đã chọn sẽ về 0 và được tính lại từ hôm nay.",
+      "resetQuotaUsagePlaceholder": "Tùy chọn: đặt mức đã dùng sau khi đặt lại (mặc định 0)",
       "resetQuotaSelectAtLeastOne": "Chọn ít nhất một khung hạn mức để đặt lại.",
       "quotaResetSuccess": "Đặt lại hạn ngạch thành công",
       "failedToResetQuota": "Không thể đặt lại hạn ngạch",

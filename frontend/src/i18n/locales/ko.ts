@@ -2734,6 +2734,7 @@ const messages = {
       "resetQuota": "할당량 재설정",
       "resetQuotaTitle": "사용 할당량 재설정",
       "resetQuotaConfirm": "'{user}'에 대해 재설정할 사용량 할당량 기간을 선택하세요. 선택한 사용량은 0이 되고 오늘부터 다시 계산됩니다.",
+      "resetQuotaUsagePlaceholder": "선택 사항: 재설정 후 사용량 지정 (기본값 0)",
       "resetQuotaSelectAtLeastOne": "재설정할 할당량 기간을 하나 이상 선택하세요.",
       "quotaResetSuccess": "할당량이 재설정되었습니다.",
       "failedToResetQuota": "할당량을 재설정하지 못했습니다.",

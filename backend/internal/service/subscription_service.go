@@ -37,6 +37,7 @@ var (
 	ErrMonthlyLimitExceeded       = infraerrors.TooManyRequests("MONTHLY_LIMIT_EXCEEDED", "monthly usage limit exceeded")
 	ErrSubscriptionNilInput       = infraerrors.BadRequest("SUBSCRIPTION_NIL_INPUT", "subscription input cannot be nil")
 	ErrAdjustWouldExpire          = infraerrors.BadRequest("ADJUST_WOULD_EXPIRE", "adjustment would result in expired subscription (remaining days must be > 0)")
+	ErrSubscriptionUsageNegative  = infraerrors.BadRequest("SUBSCRIPTION_USAGE_NEGATIVE", "subscription usage must be greater than or equal to 0")
 )
 
 // SubscriptionService 订阅服务
@@ -696,9 +697,19 @@ func (s *SubscriptionService) CheckAndActivateWindow(ctx context.Context, sub *U
 	return s.userSubRepo.ActivateWindows(ctx, sub.ID, windowStart)
 }
 
+func normalizedResetUsage(value *float64) (float64, error) {
+	if value == nil {
+		return 0, nil
+	}
+	if *value < 0 {
+		return 0, ErrSubscriptionUsageNegative
+	}
+	return *value, nil
+}
+
 // AdminResetQuota manually resets the daily, weekly, and/or monthly usage windows.
 // Uses startOfDay(now) as the new window start, matching automatic resets.
-func (s *SubscriptionService) AdminResetQuota(ctx context.Context, subscriptionID int64, resetDaily, resetWeekly, resetMonthly bool) (*UserSubscription, error) {
+func (s *SubscriptionService) AdminResetQuota(ctx context.Context, subscriptionID int64, resetDaily, resetWeekly, resetMonthly bool, dailyUsageUSD, weeklyUsageUSD, monthlyUsageUSD *float64) (*UserSubscription, error) {
 	if !resetDaily && !resetWeekly && !resetMonthly {
 		return nil, ErrInvalidInput
 	}
@@ -708,17 +719,29 @@ func (s *SubscriptionService) AdminResetQuota(ctx context.Context, subscriptionI
 	}
 	windowStart := startOfDay(time.Now())
 	if resetDaily {
-		if err := s.userSubRepo.ResetDailyUsage(ctx, sub.ID, windowStart); err != nil {
+		usage, usageErr := normalizedResetUsage(dailyUsageUSD)
+		if usageErr != nil {
+			return nil, usageErr
+		}
+		if err := s.userSubRepo.ResetDailyUsage(ctx, sub.ID, windowStart, usage); err != nil {
 			return nil, err
 		}
 	}
 	if resetWeekly {
-		if err := s.userSubRepo.ResetWeeklyUsage(ctx, sub.ID, windowStart); err != nil {
+		usage, usageErr := normalizedResetUsage(weeklyUsageUSD)
+		if usageErr != nil {
+			return nil, usageErr
+		}
+		if err := s.userSubRepo.ResetWeeklyUsage(ctx, sub.ID, windowStart, usage); err != nil {
 			return nil, err
 		}
 	}
 	if resetMonthly {
-		if err := s.userSubRepo.ResetMonthlyUsage(ctx, sub.ID, windowStart); err != nil {
+		usage, usageErr := normalizedResetUsage(monthlyUsageUSD)
+		if usageErr != nil {
+			return nil, usageErr
+		}
+		if err := s.userSubRepo.ResetMonthlyUsage(ctx, sub.ID, windowStart, usage); err != nil {
 			return nil, err
 		}
 	}
@@ -744,7 +767,7 @@ func (s *SubscriptionService) CheckAndResetWindows(ctx context.Context, sub *Use
 
 	// 日窗口重置（24小时）
 	if sub.NeedsDailyReset() {
-		if err := s.userSubRepo.ResetDailyUsage(ctx, sub.ID, windowStart); err != nil {
+		if err := s.userSubRepo.ResetDailyUsage(ctx, sub.ID, windowStart, 0); err != nil {
 			return err
 		}
 		sub.DailyWindowStart = &windowStart
@@ -754,7 +777,7 @@ func (s *SubscriptionService) CheckAndResetWindows(ctx context.Context, sub *Use
 
 	// 周窗口重置（7天）
 	if sub.NeedsWeeklyReset() {
-		if err := s.userSubRepo.ResetWeeklyUsage(ctx, sub.ID, windowStart); err != nil {
+		if err := s.userSubRepo.ResetWeeklyUsage(ctx, sub.ID, windowStart, 0); err != nil {
 			return err
 		}
 		sub.WeeklyWindowStart = &windowStart
@@ -764,7 +787,7 @@ func (s *SubscriptionService) CheckAndResetWindows(ctx context.Context, sub *Use
 
 	// 月窗口重置（30天）
 	if sub.NeedsMonthlyReset() {
-		if err := s.userSubRepo.ResetMonthlyUsage(ctx, sub.ID, windowStart); err != nil {
+		if err := s.userSubRepo.ResetMonthlyUsage(ctx, sub.ID, windowStart, 0); err != nil {
 			return err
 		}
 		sub.MonthlyWindowStart = &windowStart

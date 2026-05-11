@@ -661,17 +661,30 @@
           <label
             v-for="option in resetQuotaOptions"
             :key="option.key"
-            class="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2 transition-colors hover:bg-gray-50 dark:border-dark-600 dark:hover:bg-dark-700/60"
+            class="block cursor-pointer rounded-lg border border-gray-200 px-3 py-2 transition-colors hover:bg-gray-50 dark:border-dark-600 dark:hover:bg-dark-700/60"
           >
-            <span class="flex items-center gap-2">
+            <div class="flex items-center justify-between gap-3">
+              <span class="flex items-center gap-2">
+                <input
+                  v-model="resetQuotaForm[option.key]"
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-dark-500 dark:bg-dark-700"
+                />
+                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ option.label }}</span>
+              </span>
+              <span class="text-xs text-gray-500 dark:text-gray-400">{{ option.usage }}</span>
+            </div>
+            <div class="mt-2">
               <input
-                v-model="resetQuotaForm[option.key]"
-                type="checkbox"
-                class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-dark-500 dark:bg-dark-700"
+                v-model.number="resetQuotaUsageForm[option.key]"
+                type="number"
+                min="0"
+                step="0.01"
+                :disabled="!resetQuotaForm[option.key]"
+                class="input"
+                :placeholder="t('admin.subscriptions.resetQuotaUsagePlaceholder')"
               />
-              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ option.label }}</span>
-            </span>
-            <span class="text-xs text-gray-500 dark:text-gray-400">{{ option.usage }}</span>
+            </div>
           </label>
         </div>
 
@@ -1004,6 +1017,12 @@ const resetQuotaForm = reactive<Record<ResetQuotaWindow, boolean>>({
   daily: true,
   weekly: true,
   monthly: true
+})
+
+const resetQuotaUsageForm = reactive<Record<ResetQuotaWindow, number>>({
+  daily: 0,
+  weekly: 0,
+  monthly: 0
 })
 
 const hasSelectedResetQuotaWindow = computed(() =>
@@ -1342,6 +1361,9 @@ const handleResetQuota = (subscription: UserSubscription) => {
   resetQuotaForm.daily = true
   resetQuotaForm.weekly = true
   resetQuotaForm.monthly = true
+  resetQuotaUsageForm.daily = 0
+  resetQuotaUsageForm.weekly = 0
+  resetQuotaUsageForm.monthly = 0
   showResetQuotaConfirm.value = true
 }
 
@@ -1352,6 +1374,9 @@ const closeResetQuotaModal = (force = false) => {
   resetQuotaForm.daily = true
   resetQuotaForm.weekly = true
   resetQuotaForm.monthly = true
+  resetQuotaUsageForm.daily = 0
+  resetQuotaUsageForm.weekly = 0
+  resetQuotaUsageForm.monthly = 0
 }
 
 const confirmResetQuota = async () => {
@@ -1366,7 +1391,10 @@ const confirmResetQuota = async () => {
     await adminAPI.subscriptions.resetQuota(resettingSubscription.value.id, {
       daily: resetQuotaForm.daily,
       weekly: resetQuotaForm.weekly,
-      monthly: resetQuotaForm.monthly
+      monthly: resetQuotaForm.monthly,
+      ...(resetQuotaForm.daily ? { daily_usage_usd: resetQuotaUsageForm.daily } : {}),
+      ...(resetQuotaForm.weekly ? { weekly_usage_usd: resetQuotaUsageForm.weekly } : {}),
+      ...(resetQuotaForm.monthly ? { monthly_usage_usd: resetQuotaUsageForm.monthly } : {})
     })
     appStore.showSuccess(t('admin.subscriptions.quotaResetSuccess'))
     closeResetQuotaModal(true)

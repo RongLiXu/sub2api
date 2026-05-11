@@ -2822,6 +2822,7 @@ export default {
       resetQuota: 'Reset Quota',
       resetQuotaTitle: 'Reset Usage Quota',
       resetQuotaConfirm: "Select which usage quota windows to reset for '{user}'. Selected usage will be zeroed and windows restarted from today.",
+      resetQuotaUsagePlaceholder: 'Optional target used amount (default 0)',
       resetQuotaSelectAtLeastOne: 'Select at least one quota window to reset.',
       quotaResetSuccess: 'Quota reset successfully',
       failedToResetQuota: 'Failed to reset quota',

@@ -2770,6 +2770,7 @@ const messages = {
       "resetQuota": "重置配額",
       "resetQuotaTitle": "重置用量配額",
       "resetQuotaConfirm": "請選擇要為 '{user}' 重設的用量配額視窗。所選用量將歸零並從今天開始重新計算。",
+      "resetQuotaUsagePlaceholder": "可選：設定重置後的已使用額，預設為 0",
       "resetQuotaSelectAtLeastOne": "請至少選擇一個要重設的配額視窗。",
       "quotaResetSuccess": "配額重置成功",
       "failedToResetQuota": "重置配額失敗",

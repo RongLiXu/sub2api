@@ -2682,6 +2682,7 @@ const messages = {
       "resetQuota": "クォータのリセット",
       "resetQuotaTitle": "使用量クォータのリセット",
       "resetQuotaConfirm": "「{user}」のリセットする使用量クォータ期間を選択してください。選択した使用量はゼロになり、今日から再計算されます。",
+      "resetQuotaUsagePlaceholder": "任意: リセット後の使用量を設定（デフォルト 0）",
       "resetQuotaSelectAtLeastOne": "リセットするクォータ期間を少なくとも1つ選択してください。",
       "quotaResetSuccess": "クォータが正常にリセットされました",
       "failedToResetQuota": "クォータのリセットに失敗しました",

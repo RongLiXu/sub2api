@@ -110,13 +110,13 @@ func (userSubRepoNoop) UpdateNotes(context.Context, int64, string) error {
 func (userSubRepoNoop) ActivateWindows(context.Context, int64, time.Time) error {
 	panic("unexpected ActivateWindows call")
 }
-func (userSubRepoNoop) ResetDailyUsage(context.Context, int64, time.Time) error {
+func (userSubRepoNoop) ResetDailyUsage(context.Context, int64, time.Time, float64) error {
 	panic("unexpected ResetDailyUsage call")
 }
-func (userSubRepoNoop) ResetWeeklyUsage(context.Context, int64, time.Time) error {
+func (userSubRepoNoop) ResetWeeklyUsage(context.Context, int64, time.Time, float64) error {
 	panic("unexpected ResetWeeklyUsage call")
 }
-func (userSubRepoNoop) ResetMonthlyUsage(context.Context, int64, time.Time) error {
+func (userSubRepoNoop) ResetMonthlyUsage(context.Context, int64, time.Time, float64) error {
 	panic("unexpected ResetMonthlyUsage call")
 }
 func (userSubRepoNoop) IncrementUsage(context.Context, int64, float64) error {

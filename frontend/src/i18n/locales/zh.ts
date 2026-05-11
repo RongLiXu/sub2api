@@ -2913,6 +2913,7 @@ export default {
       resetQuota: '重置配额',
       resetQuotaTitle: '重置用量配额',
       resetQuotaConfirm: "请选择要为 '{user}' 重置的用量配额窗口。所选用量将归零并从今天开始重新计算。",
+      resetQuotaUsagePlaceholder: '可选：设置重置后的已使用额，默认 0',
       resetQuotaSelectAtLeastOne: '请至少选择一个要重置的配额窗口。',
       quotaResetSuccess: '配额重置成功',
       failedToResetQuota: '重置配额失败',

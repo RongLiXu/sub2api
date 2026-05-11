@@ -2715,6 +2715,7 @@ const messages = {
       "resetQuota": "Réinitialiser le quota",
       "resetQuotaTitle": "Réinitialiser le quota d'utilisation",
       "resetQuotaConfirm": "Sélectionnez les fenêtres de quota d'utilisation à réinitialiser pour « {user} ». L'utilisation sélectionnée sera remise à zéro et recalculée à partir d'aujourd'hui.",
+      "resetQuotaUsagePlaceholder": "Facultatif : montant utilisé après réinitialisation (0 par défaut)",
       "resetQuotaSelectAtLeastOne": "Sélectionnez au moins une fenêtre de quota à réinitialiser.",
       "quotaResetSuccess": "Le quota a été réinitialisé avec succès",
       "failedToResetQuota": "Échec de la réinitialisation du quota",

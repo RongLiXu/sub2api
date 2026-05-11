@@ -129,7 +129,14 @@ export async function revoke(id: number): Promise<{ message: string }> {
  */
 export async function resetQuota(
   id: number,
-  options: { daily: boolean; weekly: boolean; monthly: boolean }
+  options: {
+    daily: boolean
+    weekly: boolean
+    monthly: boolean
+    daily_usage_usd?: number
+    weekly_usage_usd?: number
+    monthly_usage_usd?: number
+  }
 ): Promise<UserSubscription> {
   const { data } = await apiClient.post<UserSubscription>(
     `/admin/subscriptions/${id}/reset-quota`,
