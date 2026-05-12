@@ -271,9 +271,19 @@ func (s *BillingService) initFallbackPricing() {
 		InputPricePerTokenFlex:      15e-6,  // $15 per MTok
 		OutputPricePerToken:         180e-6, // $180 per MTok
 		OutputPricePerTokenFlex:     90e-6,  // $90 per MTok
-		CacheReadPricePerToken:      3e-6,   // $3 per MTok
 		SupportsCacheBreakdown:      false,
 		LongContextInputThreshold:   openAIGPT55LongContextInputThreshold,
+		LongContextInputMultiplier:  openAIGPT54LongContextInputMultiplier,
+		LongContextOutputMultiplier: openAIGPT54LongContextOutputMultiplier,
+	}
+	// OpenAI GPT-5.4 Pro（官方无 priority 价格；flex 为 50%）
+	s.fallbackPrices["gpt-5.4-pro"] = &ModelPricing{
+		InputPricePerToken:          30e-6,  // $30 per MTok
+		InputPricePerTokenFlex:      15e-6,  // $15 per MTok
+		OutputPricePerToken:         180e-6, // $180 per MTok
+		OutputPricePerTokenFlex:     90e-6,  // $90 per MTok
+		SupportsCacheBreakdown:      false,
+		LongContextInputThreshold:   openAIGPT54LongContextInputThreshold,
 		LongContextInputMultiplier:  openAIGPT54LongContextInputMultiplier,
 		LongContextOutputMultiplier: openAIGPT54LongContextOutputMultiplier,
 	}
@@ -364,6 +374,8 @@ func (s *BillingService) getFallbackPricing(model string) *ModelPricing {
 			return s.fallbackPrices["gpt-5.5-pro"]
 		case "gpt-5.5":
 			return s.fallbackPrices["gpt-5.5"]
+		case "gpt-5.4-pro":
+			return s.fallbackPrices["gpt-5.4-pro"]
 		case "gpt-5.4-mini":
 			return s.fallbackPrices["gpt-5.4-mini"]
 		case "gpt-5.4-nano":
@@ -816,7 +828,7 @@ func normalizeOpenAIGPT5BillingModel(model string) (string, bool) {
 	}
 	normalized := normalizeCodexModel(trimmed)
 	switch normalized {
-	case "gpt-5.4", "gpt-5.5", "gpt-5.5-pro":
+	case "gpt-5.4", "gpt-5.4-pro", "gpt-5.5", "gpt-5.5-pro":
 		return normalized, true
 	default:
 		return normalized, false
@@ -825,7 +837,7 @@ func normalizeOpenAIGPT5BillingModel(model string) (string, bool) {
 
 func openAIGPT5LongContextPolicy(normalizedModel string) (threshold int, inputMultiplier, outputMultiplier float64, ok bool) {
 	switch normalizedModel {
-	case "gpt-5.4":
+	case "gpt-5.4", "gpt-5.4-pro":
 		return openAIGPT54LongContextInputThreshold, openAIGPT54LongContextInputMultiplier, openAIGPT54LongContextOutputMultiplier, true
 	case "gpt-5.5", "gpt-5.5-pro":
 		return openAIGPT55LongContextInputThreshold, openAIGPT54LongContextInputMultiplier, openAIGPT54LongContextOutputMultiplier, true

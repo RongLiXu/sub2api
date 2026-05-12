@@ -142,9 +142,34 @@ func TestGetModelPricing_Gpt55ProUsesDedicatedStaticFallbackWhenRemoteMissing(t 
 	require.Zero(t, got.OutputCostPerTokenPriority)
 	require.InDelta(t, 15e-6, got.InputCostPerTokenFlex, 1e-12)
 	require.InDelta(t, 90e-6, got.OutputCostPerTokenFlex, 1e-12)
-	require.InDelta(t, 3e-6, got.CacheReadInputTokenCost, 1e-12)
+	require.Zero(t, got.CacheReadInputTokenCost)
 	require.Zero(t, got.CacheReadInputTokenCostPriority)
 	require.Equal(t, 272000, got.LongContextInputTokenThreshold)
+}
+
+func TestGetModelPricing_Gpt54ProUsesDedicatedStaticFallbackWhenRemoteMissing(t *testing.T) {
+	svc := &PricingService{
+		pricingData: map[string]*LiteLLMModelPricing{
+			"gpt-5.4": {InputCostPerToken: 2.5e-6},
+		},
+	}
+
+	for _, model := range []string{"gpt-5.4-pro", "gpt-5.4-pro-2026-03-05"} {
+		t.Run(model, func(t *testing.T) {
+			got := svc.GetModelPricing(model)
+			require.NotNil(t, got)
+			require.InDelta(t, 30e-6, got.InputCostPerToken, 1e-12)
+			require.Zero(t, got.InputCostPerTokenPriority)
+			require.InDelta(t, 15e-6, got.InputCostPerTokenFlex, 1e-12)
+			require.InDelta(t, 180e-6, got.OutputCostPerToken, 1e-12)
+			require.Zero(t, got.OutputCostPerTokenPriority)
+			require.InDelta(t, 90e-6, got.OutputCostPerTokenFlex, 1e-12)
+			require.Zero(t, got.CacheReadInputTokenCost)
+			require.Equal(t, 272000, got.LongContextInputTokenThreshold)
+			require.InDelta(t, 2.0, got.LongContextInputCostMultiplier, 1e-12)
+			require.InDelta(t, 1.5, got.LongContextOutputCostMultiplier, 1e-12)
+		})
+	}
 }
 
 func TestGetModelPricing_Gpt54MiniUsesDedicatedStaticFallbackWhenRemoteMissing(t *testing.T) {

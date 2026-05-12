@@ -12,6 +12,8 @@ describe('useModelWhitelist', () => {
 
     expect(models).toContain('gpt-5.5')
     expect(models).toContain('gpt-5.5-pro')
+    expect(models).toContain('gpt-5.4-pro')
+    expect(models).toContain('gpt-5.4-pro-2026-03-05')
     expect(models).toContain('gpt-5.4')
     expect(models).toContain('gpt-5.4-mini')
     expect(models).toContain('gpt-5.4-2026-03-05')

@@ -665,6 +665,21 @@ function generateOpenCodeConfig(platform: string, baseUrl: string, apiKey: strin
         xhigh: {}
       }
     },
+    'gpt-5.4-pro': {
+      name: 'GPT-5.4 Pro',
+      limit: {
+        context: 1050000,
+        output: 128000
+      },
+      options: {
+        store: false
+      },
+      variants: {
+        medium: {},
+        high: {},
+        xhigh: {}
+      }
+    },
     'gpt-5.4': {
       name: 'GPT-5.4',
       limit: {

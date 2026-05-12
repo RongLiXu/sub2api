@@ -64,12 +64,22 @@ var (
 		InputCostPerTokenFlex:           15e-06,  // $15 per MTok
 		OutputCostPerToken:              180e-06, // $180 per MTok
 		OutputCostPerTokenFlex:          90e-06,  // $90 per MTok
-		CacheReadInputTokenCost:         3e-06,   // $3 per MTok
 		LongContextInputTokenThreshold:  272000,
 		LongContextInputCostMultiplier:  2.0,
 		LongContextOutputCostMultiplier: 1.5,
 		LiteLLMProvider:                 "openai",
 		Mode:                            "chat",
+	}
+	openAIGPT54ProFallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:               30e-06,  // $30 per MTok
+		InputCostPerTokenFlex:           15e-06,  // $15 per MTok
+		OutputCostPerToken:              180e-06, // $180 per MTok
+		OutputCostPerTokenFlex:          90e-06,  // $90 per MTok
+		LongContextInputTokenThreshold:  272000,
+		LongContextInputCostMultiplier:  2.0,
+		LongContextOutputCostMultiplier: 1.5,
+		LiteLLMProvider:                 "openai",
+		Mode:                            "responses",
 	}
 	openAIGPT54MiniFallbackPricing = &LiteLLMModelPricing{
 		InputCostPerToken:               7.5e-07,
@@ -911,6 +921,18 @@ func (s *PricingService) matchOpenAIModel(model string) *LiteLLMModelPricing {
 		}
 	}
 
+	if strings.HasPrefix(model, "gpt-5.5-pro") {
+		logger.With(zap.String("component", "service.pricing")).
+			Info(fmt.Sprintf("[Pricing] OpenAI fallback matched %s -> %s", model, "gpt-5.5-pro(static)"))
+		return openAIGPT55ProFallbackPricing
+	}
+
+	if strings.HasPrefix(model, "gpt-5.4-pro") {
+		logger.With(zap.String("component", "service.pricing")).
+			Info(fmt.Sprintf("[Pricing] OpenAI fallback matched %s -> %s", model, "gpt-5.4-pro(static)"))
+		return openAIGPT54ProFallbackPricing
+	}
+
 	// 尝试的回退变体
 	variants := s.generateOpenAIModelVariants(model, openAIModelDatePattern)
 
@@ -928,12 +950,6 @@ func (s *PricingService) matchOpenAIModel(model string) *LiteLLMModelPricing {
 				Info(fmt.Sprintf("[Pricing] OpenAI fallback matched %s -> %s", model, "gpt-5.2-codex"))
 			return pricing
 		}
-	}
-
-	if strings.HasPrefix(model, "gpt-5.5-pro") {
-		logger.With(zap.String("component", "service.pricing")).
-			Info(fmt.Sprintf("[Pricing] OpenAI fallback matched %s -> %s", model, "gpt-5.5-pro(static)"))
-		return openAIGPT55ProFallbackPricing
 	}
 
 	if strings.HasPrefix(model, "gpt-5.5") {

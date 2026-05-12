@@ -8,7 +8,7 @@ func TestDefaultModelsContainGPT55AheadOfGPT54(t *testing.T) {
 		positions[model.ID] = i
 	}
 
-	for _, id := range []string{"gpt-5.5-pro", "gpt-5.5", "gpt-5.4"} {
+	for _, id := range []string{"gpt-5.5-pro", "gpt-5.5", "gpt-5.4-pro", "gpt-5.4-pro-2026-03-05", "gpt-5.4"} {
 		if _, ok := positions[id]; !ok {
 			t.Fatalf("expected model %q in DefaultModels", id)
 		}
@@ -19,5 +19,11 @@ func TestDefaultModelsContainGPT55AheadOfGPT54(t *testing.T) {
 	}
 	if positions["gpt-5.5"] > positions["gpt-5.4"] {
 		t.Fatalf("expected gpt-5.5 to be listed before gpt-5.4")
+	}
+	if positions["gpt-5.4-pro"] > positions["gpt-5.4"] {
+		t.Fatalf("expected gpt-5.4-pro to be listed before gpt-5.4")
+	}
+	if positions["gpt-5.4-pro"] > positions["gpt-5.4-pro-2026-03-05"] {
+		t.Fatalf("expected gpt-5.4-pro alias to be listed before dated snapshot")
 	}
 }
