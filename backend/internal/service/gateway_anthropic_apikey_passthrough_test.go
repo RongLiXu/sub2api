@@ -239,6 +239,65 @@ func TestGatewayService_AnthropicAPIKeyPassthrough_RewritesMessageCacheControlWh
 	require.Equal(t, "5m", gjson.GetBytes(upstream.lastBody, "messages.2.content.0.cache_control.ttl").String())
 }
 
+func TestGatewayService_AnthropicAPIKeyPassthrough_AutoInjectsMessageCacheControlWhenMissing(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/messages", nil)
+	c.Request.Header.Set("User-Agent", "claude-cli/2.1.143 (external, claude-vscode, agent-sdk/0.3.143)")
+
+	body := []byte(`{"model":"claude-opus-4-7","messages":[{"role":"user","content":"long prompt"}]}`)
+	parsed := &ParsedRequest{
+		Body:  body,
+		Model: "claude-opus-4-7",
+	}
+
+	upstream := &anthropicHTTPUpstreamRecorder{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header: http.Header{
+				"Content-Type": []string{"application/json"},
+				"x-request-id": []string{"rid-cache-auto"},
+			},
+			Body: io.NopCloser(strings.NewReader(`{"id":"msg_1","type":"message","usage":{"input_tokens":12,"output_tokens":7}}`)),
+		},
+	}
+
+	svc := &GatewayService{
+		cfg:              &config.Config{},
+		httpUpstream:     upstream,
+		rateLimitService: &RateLimitService{},
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "false",
+		}}, &config.Config{}),
+	}
+
+	result, err := svc.Forward(context.Background(), c, newAnthropicAPIKeyAccountForTest(), parsed)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.True(t, gjson.GetBytes(upstream.lastBody, "messages.0.content").IsArray(), "字符串 content 应升级为 text block 以承载 cache_control")
+	require.Equal(t, "ephemeral", gjson.GetBytes(upstream.lastBody, "messages.0.content.0.cache_control.type").String())
+	require.Equal(t, "5m", gjson.GetBytes(upstream.lastBody, "messages.0.content.0.cache_control.ttl").String())
+}
+
+func TestGatewayService_ManagedClaudeCacheRewritePreservesExistingClientAnchorsWhenDisabled(t *testing.T) {
+	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
+	svc := &GatewayService{
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "false",
+		}}, &config.Config{}),
+	}
+	body := []byte(`{"model":"claude-opus-4-7","messages":[{"role":"user","content":[{"type":"text","text":"stable","cache_control":{"type":"ephemeral","ttl":"1h"}}]},{"role":"user","content":"latest"}]}`)
+
+	out := svc.rewriteManagedClaudeMessageCacheControlIfEnabled(context.Background(), newAnthropicAPIKeyAccountForTest(), body)
+
+	require.JSONEq(t, string(body), string(out))
+	require.Equal(t, "1h", gjson.GetBytes(out, "messages.0.content.0.cache_control.ttl").String())
+	require.False(t, gjson.GetBytes(out, "messages.1.content.0.cache_control").Exists())
+}
+
 func TestGatewayService_ForwardAsChatCompletions_AnthropicAPIKeyRewritesMessageCacheControlWhenEnabled(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})

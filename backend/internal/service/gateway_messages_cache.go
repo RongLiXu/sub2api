@@ -102,7 +102,47 @@ func (s *GatewayService) rewriteManagedClaudeMessageCacheControlIfEnabled(ctx co
 	if account == nil || account.Platform != PlatformAnthropic || account.IsOAuth() {
 		return body
 	}
-	return s.rewriteMessageCacheControlIfEnabled(ctx, body)
+	if s != nil && s.isRewriteMessageCacheControlEnabled(ctx) {
+		return s.rewriteMessageCacheControlIfEnabled(ctx, body)
+	}
+	if hasClaudeCacheControl(body) {
+		return body
+	}
+	return addMessageCacheBreakpoints(body)
+}
+
+func hasClaudeCacheControl(body []byte) bool {
+	if gjson.GetBytes(body, "cache_control").Exists() {
+		return true
+	}
+	if system := gjson.GetBytes(body, "system"); system.IsArray() {
+		for _, item := range system.Array() {
+			if item.Get("cache_control").Exists() {
+				return true
+			}
+		}
+	}
+	if messages := gjson.GetBytes(body, "messages"); messages.IsArray() {
+		for _, msg := range messages.Array() {
+			content := msg.Get("content")
+			if !content.IsArray() {
+				continue
+			}
+			for _, block := range content.Array() {
+				if block.Get("cache_control").Exists() {
+					return true
+				}
+			}
+		}
+	}
+	if tools := gjson.GetBytes(body, "tools"); tools.IsArray() {
+		for _, tool := range tools.Array() {
+			if tool.Get("cache_control").Exists() {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (s *GatewayService) isRewriteMessageCacheControlEnabled(ctx context.Context) bool {
