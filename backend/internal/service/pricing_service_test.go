@@ -389,12 +389,70 @@ func TestBundledPricing_ClaudeLatestUsesOfficialListPrices(t *testing.T) {
 	require.InDelta(t, 15e-6, sonnet46.OutputCostPerToken, 1e-12)       // $15 / 1M tokens
 	require.InDelta(t, 0.3e-6, sonnet46.CacheReadInputTokenCost, 1e-12) // $0.30 / 1M tokens
 	require.InDelta(t, 3.75e-6, sonnet46.CacheCreationInputTokenCost, 1e-12)
+	require.InDelta(t, 6e-6, sonnet46.CacheCreationInputTokenCostAbove1hr, 1e-12)
 
 	haiku45 := pricingData["claude-haiku-4-5"]
 	require.NotNil(t, haiku45)
 	require.InDelta(t, 1e-6, haiku45.InputCostPerToken, 1e-12)         // $1 / 1M tokens
 	require.InDelta(t, 5e-6, haiku45.OutputCostPerToken, 1e-12)        // $5 / 1M tokens
 	require.InDelta(t, 0.1e-6, haiku45.CacheReadInputTokenCost, 1e-12) // $0.10 / 1M tokens
+	require.InDelta(t, 2e-6, haiku45.CacheCreationInputTokenCostAbove1hr, 1e-12)
+
+	haiku35 := pricingData["claude-3-5-haiku-latest"]
+	require.NotNil(t, haiku35)
+	require.InDelta(t, 0.8e-6, haiku35.InputCostPerToken, 1e-12)         // $0.80 / 1M tokens
+	require.InDelta(t, 4e-6, haiku35.OutputCostPerToken, 1e-12)          // $4 / 1M tokens
+	require.InDelta(t, 0.08e-6, haiku35.CacheReadInputTokenCost, 1e-12)  // $0.08 / 1M tokens
+	require.InDelta(t, 1e-6, haiku35.CacheCreationInputTokenCost, 1e-12) // $1 / 1M tokens
+	require.InDelta(t, 1.6e-6, haiku35.CacheCreationInputTokenCostAbove1hr, 1e-12)
+
+	opus3 := pricingData["claude-3-opus-latest"]
+	require.NotNil(t, opus3)
+	require.InDelta(t, 1.5e-5, opus3.InputCostPerToken, 1e-12)             // $15 / 1M tokens
+	require.InDelta(t, 7.5e-5, opus3.OutputCostPerToken, 1e-12)            // $75 / 1M tokens
+	require.InDelta(t, 1.5e-6, opus3.CacheReadInputTokenCost, 1e-12)       // $1.50 / 1M tokens
+	require.InDelta(t, 1.875e-5, opus3.CacheCreationInputTokenCost, 1e-12) // $18.75 / 1M tokens
+	require.InDelta(t, 3e-5, opus3.CacheCreationInputTokenCostAbove1hr, 1e-12)
+}
+
+func TestParsePricingData_NormalizesClaudeOfficialPricing(t *testing.T) {
+	svc := &PricingService{}
+	body := []byte(`{
+		"claude-sonnet-4-6": {
+			"input_cost_per_token": 0.000003,
+			"output_cost_per_token": 0.000015,
+			"cache_creation_input_token_cost": 0.00000375,
+			"cache_read_input_token_cost": 0.0000003,
+			"supports_prompt_caching": true,
+			"litellm_provider": "anthropic",
+			"mode": "chat"
+		},
+		"claude-3-5-haiku-latest": {
+			"input_cost_per_token": 0.000001,
+			"output_cost_per_token": 0.000005,
+			"cache_creation_input_token_cost": 0.00000125,
+			"cache_creation_input_token_cost_above_1hr": 0.000006,
+			"cache_read_input_token_cost": 0.0000001,
+			"supports_prompt_caching": true,
+			"litellm_provider": "anthropic",
+			"mode": "chat"
+		}
+	}`)
+
+	data, err := svc.parsePricingData(body)
+	require.NoError(t, err)
+
+	sonnet46 := data["claude-sonnet-4-6"]
+	require.NotNil(t, sonnet46)
+	require.InDelta(t, 6e-6, sonnet46.CacheCreationInputTokenCostAbove1hr, 1e-12)
+
+	haiku35 := data["claude-3-5-haiku-latest"]
+	require.NotNil(t, haiku35)
+	require.InDelta(t, 0.8e-6, haiku35.InputCostPerToken, 1e-12)
+	require.InDelta(t, 4e-6, haiku35.OutputCostPerToken, 1e-12)
+	require.InDelta(t, 1e-6, haiku35.CacheCreationInputTokenCost, 1e-12)
+	require.InDelta(t, 1.6e-6, haiku35.CacheCreationInputTokenCostAbove1hr, 1e-12)
+	require.InDelta(t, 0.08e-6, haiku35.CacheReadInputTokenCost, 1e-12)
 }
 
 func TestBundledPricing_ZhipuGLMUsesOfficialListPrices(t *testing.T) {

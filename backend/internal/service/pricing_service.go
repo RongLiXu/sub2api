@@ -537,6 +537,7 @@ func (s *PricingService) parsePricingData(body []byte) (map[string]*LiteLLMModel
 		if len(entry.TokenPricingTiers) > 0 {
 			pricing.TokenPricingTiers = append([]LiteLLMTokenPricingTier(nil), entry.TokenPricingTiers...)
 		}
+		normalizeClaudeOfficialPricing(modelName, pricing)
 
 		result[modelName] = pricing
 	}
@@ -550,6 +551,60 @@ func (s *PricingService) parsePricingData(body []byte) (map[string]*LiteLLMModel
 	}
 
 	return result, nil
+}
+
+func normalizeClaudeOfficialPricing(modelName string, pricing *LiteLLMModelPricing) {
+	if pricing == nil {
+		return
+	}
+
+	model := strings.ToLower(strings.TrimSpace(modelName))
+	if !strings.HasPrefix(model, "claude") {
+		return
+	}
+
+	switch {
+	case model == "claude-opus-4-7",
+		model == "claude-opus-4-6",
+		model == "claude-opus-4-6-20260205",
+		model == "claude-opus-4-6-thinking",
+		model == "claude-opus-4-5",
+		model == "claude-opus-4-5-20251101":
+		applyClaudeOfficialPricing(pricing, 5e-06, 2.5e-05, 6.25e-06, 1e-05, 5e-07)
+	case model == "claude-opus-4-1",
+		model == "claude-opus-4-1-20250805",
+		model == "claude-opus-4-20250514",
+		model == "claude-4-opus-20250514",
+		strings.HasPrefix(model, "claude-3-opus-"):
+		applyClaudeOfficialPricing(pricing, 1.5e-05, 7.5e-05, 1.875e-05, 3e-05, 1.5e-06)
+	case model == "claude-sonnet-4-6",
+		model == "claude-sonnet-4-5",
+		model == "claude-sonnet-4-5-20250929",
+		model == "claude-sonnet-4-5-20250929-v1:0",
+		model == "claude-sonnet-4-20250514",
+		model == "claude-4-sonnet-20250514",
+		strings.HasPrefix(model, "claude-3-5-sonnet-"),
+		model == "claude-3-5-sonnet-latest",
+		strings.HasPrefix(model, "claude-3-7-sonnet-"),
+		model == "claude-3-7-sonnet-latest":
+		applyClaudeOfficialPricing(pricing, 3e-06, 1.5e-05, 3.75e-06, 6e-06, 3e-07)
+	case model == "claude-haiku-4-5",
+		model == "claude-haiku-4-5-20251001":
+		applyClaudeOfficialPricing(pricing, 1e-06, 5e-06, 1.25e-06, 2e-06, 1e-07)
+	case model == "claude-3-5-haiku-20241022",
+		model == "claude-3-5-haiku-latest":
+		applyClaudeOfficialPricing(pricing, 8e-07, 4e-06, 1e-06, 1.6e-06, 8e-08)
+	case model == "claude-3-haiku-20240307":
+		applyClaudeOfficialPricing(pricing, 2.5e-07, 1.25e-06, 3e-07, 5e-07, 3e-08)
+	}
+}
+
+func applyClaudeOfficialPricing(pricing *LiteLLMModelPricing, input, output, cache5m, cache1h, cacheRead float64) {
+	pricing.InputCostPerToken = input
+	pricing.OutputCostPerToken = output
+	pricing.CacheCreationInputTokenCost = cache5m
+	pricing.CacheCreationInputTokenCostAbove1hr = cache1h
+	pricing.CacheReadInputTokenCost = cacheRead
 }
 
 // loadPricingData 从本地文件加载价格数据
