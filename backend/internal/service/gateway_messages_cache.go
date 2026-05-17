@@ -105,44 +105,148 @@ func (s *GatewayService) rewriteManagedClaudeMessageCacheControlIfEnabled(ctx co
 	if s != nil && s.isRewriteMessageCacheControlEnabled(ctx) {
 		return s.rewriteMessageCacheControlIfEnabled(ctx, body)
 	}
-	if hasClaudeCacheControl(body) {
-		return body
-	}
-	return addMessageCacheBreakpoints(body)
+	return addManagedClaudeCacheBreakpoints(body)
 }
 
-func hasClaudeCacheControl(body []byte) bool {
-	if gjson.GetBytes(body, "cache_control").Exists() {
-		return true
+// augmentClaudeClientCacheBreakpoints keeps a real claude-cli request intact
+// while adding stable cache anchors when the client only anchors dynamic turns
+// or omits anchors completely.
+func augmentClaudeClientCacheBreakpoints(body []byte) []byte {
+	return addManagedClaudeCacheBreakpoints(body)
+}
+
+func addManagedClaudeCacheBreakpoints(body []byte) []byte {
+	if len(body) == 0 {
+		return body
 	}
-	if system := gjson.GetBytes(body, "system"); system.IsArray() {
-		for _, item := range system.Array() {
-			if item.Get("cache_control").Exists() {
-				return true
-			}
+
+	body, hasStableAnchor := addSystemCacheBreakpointIfMissing(body)
+	body, toolAnchorAdded := addToolsCacheBreakpointIfMissing(body)
+	hasStableAnchor = hasStableAnchor || toolAnchorAdded
+
+	if idx, ok := stableMessageCacheBreakpointIndex(body, hasStableAnchor); ok {
+		msg := gjson.GetBytes(body, fmt.Sprintf("messages.%d", idx))
+		body = injectCacheControlOnLastContentBlock(body, idx, &msg)
+	}
+
+	return body
+}
+
+func addSystemCacheBreakpointIfMissing(body []byte) ([]byte, bool) {
+	system := gjson.GetBytes(body, "system")
+	if !system.IsArray() {
+		return body, false
+	}
+	arr := system.Array()
+	if len(arr) == 0 {
+		return body, false
+	}
+	anchor := false
+	for _, item := range arr {
+		if item.Get("cache_control").Exists() {
+			anchor = true
 		}
 	}
-	if messages := gjson.GetBytes(body, "messages"); messages.IsArray() {
-		for _, msg := range messages.Array() {
-			content := msg.Get("content")
-			if !content.IsArray() {
-				continue
-			}
-			for _, block := range content.Array() {
-				if block.Get("cache_control").Exists() {
-					return true
-				}
-			}
+	if anchor {
+		return body, true
+	}
+	for i := len(arr) - 1; i >= 0; i-- {
+		item := arr[i]
+		if !item.IsObject() || item.Get("type").String() == "thinking" || item.Get("type").String() == "redacted_thinking" {
+			continue
+		}
+		if next, err := sjson.SetRawBytes(body, fmt.Sprintf("system.%d.cache_control", i), []byte(fmt.Sprintf(`{"type":"ephemeral","ttl":%q}`, claude.DefaultCacheControlTTL))); err == nil {
+			return next, true
+		}
+		return body, false
+	}
+	return body, false
+}
+
+func addToolsCacheBreakpointIfMissing(body []byte) ([]byte, bool) {
+	tools := gjson.GetBytes(body, "tools")
+	if !tools.IsArray() {
+		return body, false
+	}
+	arr := tools.Array()
+	if len(arr) == 0 {
+		return body, false
+	}
+	anchor := false
+	for _, tool := range arr {
+		if tool.Get("cache_control").Exists() {
+			anchor = true
 		}
 	}
-	if tools := gjson.GetBytes(body, "tools"); tools.IsArray() {
-		for _, tool := range tools.Array() {
-			if tool.Get("cache_control").Exists() {
-				return true
+	if anchor {
+		return body, true
+	}
+	next := applyToolsLastCacheBreakpoint(body)
+	return next, gjson.GetBytes(next, fmt.Sprintf("tools.%d.cache_control", len(arr)-1)).Exists()
+}
+
+func stableMessageCacheBreakpointIndex(body []byte, hasStableAnchor bool) (int, bool) {
+	messages := gjson.GetBytes(body, "messages")
+	if !messages.IsArray() {
+		return 0, false
+	}
+	arr := messages.Array()
+	if len(arr) == 0 {
+		return 0, false
+	}
+	for _, msg := range arr {
+		if messageHasCacheControl(msg) && msg.Get("role").String() != "user" {
+			return 0, false
+		}
+	}
+
+	lastIdx := len(arr) - 1
+	lastRole := arr[lastIdx].Get("role").String()
+	if lastRole == "user" {
+		for i := lastIdx - 1; i >= 0; i-- {
+			if messageHasCacheControl(arr[i]) {
+				return i, false
 			}
+			if messageCanCarryCacheControl(arr[i]) {
+				return i, true
+			}
+		}
+		if hasStableAnchor {
+			return 0, false
+		}
+		return lastIdx, messageCanCarryCacheControl(arr[lastIdx])
+	}
+
+	for i := lastIdx; i >= 0; i-- {
+		if messageHasCacheControl(arr[i]) {
+			return i, false
+		}
+		if messageCanCarryCacheControl(arr[i]) {
+			return i, true
+		}
+	}
+	return 0, false
+}
+
+func messageHasCacheControl(msg gjson.Result) bool {
+	content := msg.Get("content")
+	if !content.IsArray() {
+		return false
+	}
+	for _, block := range content.Array() {
+		if block.Get("cache_control").Exists() {
+			return true
 		}
 	}
 	return false
+}
+
+func messageCanCarryCacheControl(msg gjson.Result) bool {
+	content := msg.Get("content")
+	if content.Type == gjson.String {
+		return true
+	}
+	return content.IsArray() && len(content.Array()) > 0
 }
 
 func (s *GatewayService) isRewriteMessageCacheControlEnabled(ctx context.Context) bool {

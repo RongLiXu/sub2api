@@ -4454,6 +4454,8 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 		} else {
 			body = applyToolsLastCacheBreakpoint(body)
 		}
+	} else if account.Platform == PlatformAnthropic && isClaudeCode {
+		body = augmentClaudeClientCacheBreakpoints(body)
 	}
 
 	// 强制执行 cache_control 块数量限制（最多 4 个）

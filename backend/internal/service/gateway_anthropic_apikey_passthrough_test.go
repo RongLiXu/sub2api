@@ -298,6 +298,51 @@ func TestGatewayService_ManagedClaudeCacheRewritePreservesExistingClientAnchorsW
 	require.False(t, gjson.GetBytes(out, "messages.1.content.0.cache_control").Exists())
 }
 
+func TestGatewayService_ManagedClaudeCacheRewriteAddsStableSystemAndToolAnchors(t *testing.T) {
+	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
+	svc := &GatewayService{
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "false",
+		}}, &config.Config{}),
+	}
+	body := []byte(`{"model":"claude-opus-4-7","system":[{"type":"text","text":"stable system prompt"}],"tools":[{"name":"read","input_schema":{}},{"name":"write","input_schema":{}}],"messages":[{"role":"user","content":"dynamic current task"}]}`)
+
+	out := svc.rewriteManagedClaudeMessageCacheControlIfEnabled(context.Background(), newAnthropicAPIKeyAccountForTest(), body)
+
+	require.Equal(t, "ephemeral", gjson.GetBytes(out, "system.0.cache_control.type").String())
+	require.Equal(t, "5m", gjson.GetBytes(out, "system.0.cache_control.ttl").String())
+	require.Equal(t, "ephemeral", gjson.GetBytes(out, "tools.1.cache_control.type").String())
+	require.Equal(t, "5m", gjson.GetBytes(out, "tools.1.cache_control.ttl").String())
+	require.False(t, gjson.GetBytes(out, "messages.0.content.0.cache_control").Exists(), "当前动态 user 消息前已有稳定断点时不应再缓存当前任务")
+}
+
+func TestGatewayService_ManagedClaudeCacheRewriteUsesPreviousTurnForCurrentUser(t *testing.T) {
+	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
+	svc := &GatewayService{
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "false",
+		}}, &config.Config{}),
+	}
+	body := []byte(`{"model":"claude-opus-4-7","messages":[{"role":"user","content":"stable first task"},{"role":"assistant","content":"stable answer"},{"role":"user","content":"dynamic current task"}]}`)
+
+	out := svc.rewriteManagedClaudeMessageCacheControlIfEnabled(context.Background(), newAnthropicAPIKeyAccountForTest(), body)
+
+	require.Equal(t, "ephemeral", gjson.GetBytes(out, "messages.1.content.0.cache_control.type").String())
+	require.Equal(t, "5m", gjson.GetBytes(out, "messages.1.content.0.cache_control.ttl").String())
+	require.False(t, gjson.GetBytes(out, "messages.2.content.0.cache_control").Exists(), "不应把断点打在当前动态 user 消息")
+}
+
+func TestGatewayService_AugmentClaudeClientCacheBreakpointsAddsStableAnchors(t *testing.T) {
+	body := []byte(`{"model":"claude-opus-4-7","system":[{"type":"text","text":"stable cli system"}],"tools":[{"name":"read","input_schema":{}}],"messages":[{"role":"user","content":"previous task"},{"role":"assistant","content":"previous answer"},{"role":"user","content":[{"type":"text","text":"dynamic current task","cache_control":{"type":"ephemeral","ttl":"5m"}}]}]}`)
+
+	out := augmentClaudeClientCacheBreakpoints(body)
+
+	require.Equal(t, "ephemeral", gjson.GetBytes(out, "system.0.cache_control.type").String())
+	require.Equal(t, "ephemeral", gjson.GetBytes(out, "tools.0.cache_control.type").String())
+	require.Equal(t, "ephemeral", gjson.GetBytes(out, "messages.1.content.0.cache_control.type").String())
+	require.Equal(t, "ephemeral", gjson.GetBytes(out, "messages.2.content.0.cache_control.type").String(), "保留客户端当前消息断点")
+}
+
 func TestGatewayService_ForwardAsChatCompletions_AnthropicAPIKeyRewritesMessageCacheControlWhenEnabled(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
