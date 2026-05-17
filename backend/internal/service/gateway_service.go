@@ -4358,6 +4358,8 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 				passthroughModel = mappedModel
 			}
 		}
+		passthroughBody = s.rewriteManagedClaudeMessageCacheControlIfEnabled(ctx, account, passthroughBody)
+		passthroughBody = enforceCacheControlLimit(passthroughBody)
 		return s.forwardAnthropicAPIKeyPassthroughWithInput(ctx, c, account, anthropicPassthroughForwardInput{
 			Body:          passthroughBody,
 			RequestModel:  passthroughModel,
@@ -4492,6 +4494,11 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 		body = s.replaceModelInBody(body, mappedModel)
 		reqModel = mappedModel
 		logger.LegacyPrintf("service.gateway", "Model mapping applied: %s -> %s (account: %s, source=%s)", originalModel, mappedModel, account.Name, mappingSource)
+	}
+
+	if account.Platform == PlatformAnthropic {
+		body = s.rewriteManagedClaudeMessageCacheControlIfEnabled(ctx, account, body)
+		body = enforceCacheControlLimit(body)
 	}
 
 	if s.shouldInjectAnthropicCacheTTL1h(ctx, account) {
@@ -5631,6 +5638,8 @@ func (s *GatewayService) forwardBedrock(
 	}
 
 	// 准备请求体（注入 anthropic_version/anthropic_beta，移除 Bedrock 不支持的字段，清理 cache_control）
+	body = s.rewriteManagedClaudeMessageCacheControlIfEnabled(ctx, account, body)
+	body = enforceCacheControlLimit(body)
 	betaTokens, err := s.resolveBedrockBetaTokensForRequest(ctx, account, betaHeader, body, mappedModel)
 	if err != nil {
 		return nil, err

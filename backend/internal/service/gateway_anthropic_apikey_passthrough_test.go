@@ -195,6 +195,125 @@ func TestGatewayService_AnthropicAPIKeyPassthrough_ForwardStreamPreservesBodyAnd
 	require.Equal(t, "claude-3-haiku-20240307", gjson.GetBytes(bodyBytes, "model").String(), "缓存的上游请求体应包含映射后的模型")
 }
 
+func TestGatewayService_AnthropicAPIKeyPassthrough_RewritesMessageCacheControlWhenEnabled(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/messages", nil)
+
+	body := []byte(`{"model":"claude-opus-4-7","messages":[{"role":"user","content":[{"type":"text","text":"stable","cache_control":{"type":"ephemeral","ttl":"1h"}}]},{"role":"assistant","content":[{"type":"text","text":"ok"}]},{"role":"user","content":"latest"}]}`)
+	parsed := &ParsedRequest{
+		Body:  body,
+		Model: "claude-opus-4-7",
+	}
+
+	upstream := &anthropicHTTPUpstreamRecorder{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header: http.Header{
+				"Content-Type": []string{"application/json"},
+				"x-request-id": []string{"rid-cache-rewrite"},
+			},
+			Body: io.NopCloser(strings.NewReader(`{"id":"msg_1","type":"message","usage":{"input_tokens":12,"output_tokens":7}}`)),
+		},
+	}
+
+	svc := &GatewayService{
+		cfg:              &config.Config{},
+		httpUpstream:     upstream,
+		rateLimitService: &RateLimitService{},
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "true",
+		}}, &config.Config{}),
+	}
+
+	result, err := svc.Forward(context.Background(), c, newAnthropicAPIKeyAccountForTest(), parsed)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	require.False(t, gjson.GetBytes(upstream.lastBody, "messages.0.content.0.cache_control").Exists(), "旧消息上的客户端断点应被清理")
+	require.True(t, gjson.GetBytes(upstream.lastBody, "messages.2.content").IsArray(), "字符串 content 应升级为 text block 以承载 cache_control")
+	require.Equal(t, "ephemeral", gjson.GetBytes(upstream.lastBody, "messages.2.content.0.cache_control.type").String())
+	require.Equal(t, "5m", gjson.GetBytes(upstream.lastBody, "messages.2.content.0.cache_control.ttl").String())
+}
+
+func TestGatewayService_ForwardAsChatCompletions_AnthropicAPIKeyRewritesMessageCacheControlWhenEnabled(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", nil)
+
+	body := []byte(`{"model":"claude-opus-4-7","messages":[{"role":"user","content":"hello"}],"stream":false}`)
+	upstreamSSE := strings.Join([]string{
+		`event: message_start`,
+		`data: {"type":"message_start","message":{"id":"msg_1","type":"message","role":"assistant","model":"claude-opus-4-7","content":[],"usage":{"input_tokens":12}}}`,
+		"",
+		`event: content_block_start`,
+		`data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":"ok"}}`,
+		"",
+		`event: message_delta`,
+		`data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":7}}`,
+		"",
+		`event: message_stop`,
+		`data: {"type":"message_stop"}`,
+		"",
+	}, "\n")
+	upstream := &anthropicHTTPUpstreamRecorder{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header: http.Header{
+				"Content-Type": []string{"text/event-stream"},
+				"x-request-id": []string{"rid-cc-cache-rewrite"},
+			},
+			Body: io.NopCloser(strings.NewReader(upstreamSSE)),
+		},
+	}
+
+	svc := &GatewayService{
+		cfg:              &config.Config{},
+		httpUpstream:     upstream,
+		rateLimitService: &RateLimitService{},
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "true",
+		}}, &config.Config{}),
+	}
+
+	result, err := svc.ForwardAsChatCompletions(context.Background(), c, newAnthropicAPIKeyAccountForTest(), body, nil)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Equal(t, "ephemeral", gjson.GetBytes(upstream.lastBody, "messages.0.content.0.cache_control.type").String())
+	require.Equal(t, "5m", gjson.GetBytes(upstream.lastBody, "messages.0.content.0.cache_control.ttl").String())
+}
+
+func TestGatewayService_ManagedClaudeCacheRewriteCoversVertexAndBedrock(t *testing.T) {
+	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
+	svc := &GatewayService{
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "true",
+		}}, &config.Config{}),
+	}
+	body := []byte(`{"model":"claude-opus-4-7","messages":[{"role":"user","content":"hello"}]}`)
+
+	vertexBody := svc.rewriteManagedClaudeMessageCacheControlIfEnabled(context.Background(), &Account{
+		Platform: PlatformAnthropic,
+		Type:     AccountTypeServiceAccount,
+	}, body)
+	require.Equal(t, "ephemeral", gjson.GetBytes(vertexBody, "messages.0.content.0.cache_control.type").String())
+
+	bedrockBody := svc.rewriteManagedClaudeMessageCacheControlIfEnabled(context.Background(), &Account{
+		Platform: PlatformAnthropic,
+		Type:     AccountTypeBedrock,
+	}, body)
+	bedrockBody = enforceCacheControlLimit(bedrockBody)
+	prepared, err := PrepareBedrockRequestBodyWithTokens(bedrockBody, "us.anthropic.claude-opus-4-7-v1", nil)
+	require.NoError(t, err)
+	require.Equal(t, "ephemeral", gjson.GetBytes(prepared, "messages.0.content.0.cache_control.type").String())
+}
+
 func TestGatewayService_AnthropicAPIKeyPassthrough_ForwardCountTokensPreservesBody(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

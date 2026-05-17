@@ -1301,6 +1301,17 @@ func TestExtractSSEUsage(t *testing.T) {
 			line:     `data: {"usage":{"input_tokens":10,"output_tokens":20,"cache_read_input_tokens":5,"cache_creation_input_tokens":3}}`,
 			expected: ClaudeUsage{InputTokens: 10, OutputTokens: 20, CacheReadInputTokens: 5, CacheCreationInputTokens: 3},
 		},
+		{
+			name: "message_start message usage with cached_tokens fallback and cache creation details",
+			line: `data: {"type":"message_start","message":{"usage":{"input_tokens":12,"cache_read_input_tokens":0,"cached_tokens":9,"cache_creation":{"ephemeral_5m_input_tokens":3,"ephemeral_1h_input_tokens":4}}}}`,
+			expected: ClaudeUsage{
+				InputTokens:              12,
+				CacheReadInputTokens:     9,
+				CacheCreationInputTokens: 7,
+				CacheCreation5mTokens:    3,
+				CacheCreation1hTokens:    4,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1309,6 +1320,18 @@ func TestExtractSSEUsage(t *testing.T) {
 			require.Equal(t, tt.expected, *usage)
 		})
 	}
+}
+
+func TestAntigravityGatewayService_ExtractClaudeUsageFallbacks(t *testing.T) {
+	svc := &AntigravityGatewayService{}
+	usage := svc.extractClaudeUsage([]byte(`{"usage":{"input_tokens":21,"output_tokens":34,"cache_read_input_tokens":0,"cached_tokens":13,"cache_creation":{"ephemeral_5m_input_tokens":5,"ephemeral_1h_input_tokens":8}}}`))
+
+	require.Equal(t, 21, usage.InputTokens)
+	require.Equal(t, 34, usage.OutputTokens)
+	require.Equal(t, 13, usage.CacheReadInputTokens)
+	require.Equal(t, 13, usage.CacheCreationInputTokens)
+	require.Equal(t, 5, usage.CacheCreation5mTokens)
+	require.Equal(t, 8, usage.CacheCreation1hTokens)
 }
 
 // TestAntigravityClientWriter 验证 antigravityClientWriter 的断开检测

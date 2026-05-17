@@ -95,6 +95,16 @@ func (s *GatewayService) rewriteMessageCacheControlIfEnabled(ctx context.Context
 	return addMessageCacheBreakpoints(body)
 }
 
+// rewriteManagedClaudeMessageCacheControlIfEnabled applies gateway-managed
+// message cache breakpoints for Anthropic account types that do not run the
+// Claude Code OAuth mimicry pipeline.
+func (s *GatewayService) rewriteManagedClaudeMessageCacheControlIfEnabled(ctx context.Context, account *Account, body []byte) []byte {
+	if account == nil || account.Platform != PlatformAnthropic || account.IsOAuth() {
+		return body
+	}
+	return s.rewriteMessageCacheControlIfEnabled(ctx, body)
+}
+
 func (s *GatewayService) isRewriteMessageCacheControlEnabled(ctx context.Context) bool {
 	if s == nil {
 		return false

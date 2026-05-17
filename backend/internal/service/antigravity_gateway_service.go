@@ -4329,6 +4329,8 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 			OutputTokens:             usage.OutputTokens,
 			CacheReadInputTokens:     usage.CacheReadInputTokens,
 			CacheCreationInputTokens: usage.CacheCreationInputTokens,
+			CacheCreation5mTokens:    usage.CacheCreation5mTokens,
+			CacheCreation1hTokens:    usage.CacheCreation1hTokens,
 		},
 	}, nil
 }
@@ -4477,31 +4479,11 @@ func (s *AntigravityGatewayService) extractSSEUsage(line string, usage *ClaudeUs
 	if json.Unmarshal([]byte(dataStr), &event) != nil {
 		return
 	}
-	u, ok := event["usage"].(map[string]any)
-	if !ok {
+	u := antigravityClaudeUsageObject(event)
+	if u == nil {
 		return
 	}
-	if v, ok := u["input_tokens"].(float64); ok && int(v) > 0 {
-		usage.InputTokens = int(v)
-	}
-	if v, ok := u["output_tokens"].(float64); ok && int(v) > 0 {
-		usage.OutputTokens = int(v)
-	}
-	if v, ok := u["cache_read_input_tokens"].(float64); ok && int(v) > 0 {
-		usage.CacheReadInputTokens = int(v)
-	}
-	if v, ok := u["cache_creation_input_tokens"].(float64); ok && int(v) > 0 {
-		usage.CacheCreationInputTokens = int(v)
-	}
-	// 解析嵌套的 cache_creation 对象中的 5m/1h 明细
-	if cc, ok := u["cache_creation"].(map[string]any); ok {
-		if v, ok := cc["ephemeral_5m_input_tokens"].(float64); ok {
-			usage.CacheCreation5mTokens = int(v)
-		}
-		if v, ok := cc["ephemeral_1h_input_tokens"].(float64); ok {
-			usage.CacheCreation1hTokens = int(v)
-		}
-	}
+	mergeAntigravityClaudeUsage(usage, u, true)
 }
 
 // extractClaudeUsage 从非流式 Claude 响应提取 usage
@@ -4512,27 +4494,55 @@ func (s *AntigravityGatewayService) extractClaudeUsage(body []byte) *ClaudeUsage
 		return usage
 	}
 	if u, ok := resp["usage"].(map[string]any); ok {
-		if v, ok := u["input_tokens"].(float64); ok {
-			usage.InputTokens = int(v)
-		}
-		if v, ok := u["output_tokens"].(float64); ok {
-			usage.OutputTokens = int(v)
-		}
-		if v, ok := u["cache_read_input_tokens"].(float64); ok {
-			usage.CacheReadInputTokens = int(v)
-		}
-		if v, ok := u["cache_creation_input_tokens"].(float64); ok {
-			usage.CacheCreationInputTokens = int(v)
-		}
-		// 解析嵌套的 cache_creation 对象中的 5m/1h 明细
-		if cc, ok := u["cache_creation"].(map[string]any); ok {
-			if v, ok := cc["ephemeral_5m_input_tokens"].(float64); ok {
-				usage.CacheCreation5mTokens = int(v)
-			}
-			if v, ok := cc["ephemeral_1h_input_tokens"].(float64); ok {
-				usage.CacheCreation1hTokens = int(v)
-			}
-		}
+		mergeAntigravityClaudeUsage(usage, u, false)
 	}
 	return usage
+}
+
+func antigravityClaudeUsageObject(event map[string]any) map[string]any {
+	if u, ok := event["usage"].(map[string]any); ok {
+		return u
+	}
+	if msg, ok := event["message"].(map[string]any); ok {
+		if u, ok := msg["usage"].(map[string]any); ok {
+			return u
+		}
+	}
+	return nil
+}
+
+func mergeAntigravityClaudeUsage(usage *ClaudeUsage, u map[string]any, stream bool) {
+	if usage == nil || u == nil {
+		return
+	}
+	if v, ok := parseSSEUsageInt(u["input_tokens"]); ok && (!stream || v > 0) {
+		usage.InputTokens = v
+	}
+	if v, ok := parseSSEUsageInt(u["output_tokens"]); ok && (!stream || v > 0) {
+		usage.OutputTokens = v
+	}
+	if v, ok := parseSSEUsageInt(u["cache_read_input_tokens"]); ok && (!stream || v > 0) {
+		usage.CacheReadInputTokens = v
+	}
+	if usage.CacheReadInputTokens == 0 {
+		if v, ok := parseSSEUsageInt(u["cached_tokens"]); ok && v > 0 {
+			usage.CacheReadInputTokens = v
+		}
+	}
+	if v, ok := parseSSEUsageInt(u["cache_creation_input_tokens"]); ok && (!stream || v > 0) {
+		usage.CacheCreationInputTokens = v
+	}
+	if cc, ok := u["cache_creation"].(map[string]any); ok {
+		if v, exists := parseSSEUsageInt(cc["ephemeral_5m_input_tokens"]); exists && (!stream || v > 0) {
+			usage.CacheCreation5mTokens = v
+		}
+		if v, exists := parseSSEUsageInt(cc["ephemeral_1h_input_tokens"]); exists && (!stream || v > 0) {
+			usage.CacheCreation1hTokens = v
+		}
+	}
+	if usage.CacheCreationInputTokens == 0 {
+		if total := usage.CacheCreation5mTokens + usage.CacheCreation1hTokens; total > 0 {
+			usage.CacheCreationInputTokens = total
+		}
+	}
 }
