@@ -316,6 +316,24 @@ func TestGatewayService_ManagedClaudeCacheRewriteAddsStableSystemAndToolAnchors(
 	require.False(t, gjson.GetBytes(out, "messages.0.content.0.cache_control").Exists(), "当前动态 user 消息前已有稳定断点时不应再缓存当前任务")
 }
 
+func TestGatewayService_ManagedClaudeCacheRewritePromotesStringSystemToStableAnchor(t *testing.T) {
+	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
+	svc := &GatewayService{
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "false",
+		}}, &config.Config{}),
+	}
+	body := []byte(`{"model":"claude-opus-4-7","system":"stable system prompt","messages":[{"role":"user","content":"dynamic current task"}]}`)
+
+	out := svc.rewriteManagedClaudeMessageCacheControlIfEnabled(context.Background(), newAnthropicAPIKeyAccountForTest(), body)
+
+	require.True(t, gjson.GetBytes(out, "system").IsArray(), "字符串 system 应升级为 text block 数组以承载 cache_control")
+	require.Equal(t, "stable system prompt", gjson.GetBytes(out, "system.0.text").String())
+	require.Equal(t, "ephemeral", gjson.GetBytes(out, "system.0.cache_control.type").String())
+	require.Equal(t, "5m", gjson.GetBytes(out, "system.0.cache_control.ttl").String())
+	require.False(t, gjson.GetBytes(out, "messages.0.content.0.cache_control").Exists(), "已有稳定 system 断点时不应再缓存当前动态 user 消息")
+}
+
 func TestGatewayService_ManagedClaudeCacheRewriteUsesPreviousTurnForCurrentUser(t *testing.T) {
 	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
 	svc := &GatewayService{
@@ -341,6 +359,49 @@ func TestGatewayService_AugmentClaudeClientCacheBreakpointsAddsStableAnchors(t *
 	require.Equal(t, "ephemeral", gjson.GetBytes(out, "tools.0.cache_control.type").String())
 	require.Equal(t, "ephemeral", gjson.GetBytes(out, "messages.1.content.0.cache_control.type").String())
 	require.Equal(t, "ephemeral", gjson.GetBytes(out, "messages.2.content.0.cache_control.type").String(), "保留客户端当前消息断点")
+}
+
+func TestGatewayService_AnthropicAPIKeyPassthrough_AddsStableAnchorForStringSystem(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	gatewayForwardingCache.Store(&cachedGatewayForwardingSettings{})
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/messages", nil)
+
+	body := []byte(`{"model":"claude-opus-4-7","system":"stable system prompt","messages":[{"role":"user","content":"dynamic current task"}]}`)
+	parsed := &ParsedRequest{
+		Body:  body,
+		Model: "claude-opus-4-7",
+	}
+
+	upstream := &anthropicHTTPUpstreamRecorder{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header: http.Header{
+				"Content-Type": []string{"application/json"},
+				"x-request-id": []string{"rid-string-system-cache"},
+			},
+			Body: io.NopCloser(strings.NewReader(`{"id":"msg_1","type":"message","usage":{"input_tokens":12,"output_tokens":7}}`)),
+		},
+	}
+
+	svc := &GatewayService{
+		cfg:              &config.Config{},
+		httpUpstream:     upstream,
+		rateLimitService: &RateLimitService{},
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "false",
+		}}, &config.Config{}),
+	}
+
+	result, err := svc.Forward(context.Background(), c, newAnthropicAPIKeyAccountForTest(), parsed)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.True(t, gjson.GetBytes(upstream.lastBody, "system").IsArray())
+	require.Equal(t, "stable system prompt", gjson.GetBytes(upstream.lastBody, "system.0.text").String())
+	require.Equal(t, "ephemeral", gjson.GetBytes(upstream.lastBody, "system.0.cache_control.type").String())
+	require.Equal(t, "5m", gjson.GetBytes(upstream.lastBody, "system.0.cache_control.ttl").String())
 }
 
 func TestGatewayService_ForwardAsChatCompletions_AnthropicAPIKeyRewritesMessageCacheControlWhenEnabled(t *testing.T) {

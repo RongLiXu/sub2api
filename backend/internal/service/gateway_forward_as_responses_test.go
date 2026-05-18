@@ -10,8 +10,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Wei-Shaw/sub2api/internal/config"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/gjson"
 )
 
 func TestExtractResponsesReasoningEffortFromBody(t *testing.T) {
@@ -99,4 +101,65 @@ func TestHandleResponsesStreamingResponse_PreservesMessageStartCacheUsage(t *tes
 	require.Equal(t, 11, result.Usage.CacheReadInputTokens)
 	require.Equal(t, 4, result.Usage.CacheCreationInputTokens)
 	require.Contains(t, rec.Body.String(), `response.completed`)
+}
+
+func TestForwardAsResponses_AnthropicAPIKey_PromotesStringSystemToStableCacheAnchor(t *testing.T) {
+	t.Parallel()
+	gin.SetMode(gin.TestMode)
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/responses", nil)
+
+	body := []byte(`{
+		"model":"claude-opus-4-7",
+		"input":[
+			{"role":"system","content":"stable system prompt"},
+			{"role":"user","content":"dynamic current task"}
+		],
+		"stream":false
+	}`)
+
+	upstreamSSE := strings.Join([]string{
+		`event: message_start`,
+		`data: {"type":"message_start","message":{"id":"msg_1","type":"message","role":"assistant","model":"claude-opus-4-7","content":[],"usage":{"input_tokens":12}}}`,
+		"",
+		`event: content_block_start`,
+		`data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":"ok"}}`,
+		"",
+		`event: message_delta`,
+		`data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":7}}`,
+		"",
+		`event: message_stop`,
+		`data: {"type":"message_stop"}`,
+		"",
+	}, "\n")
+	upstream := &anthropicHTTPUpstreamRecorder{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header: http.Header{
+				"Content-Type": []string{"text/event-stream"},
+				"x-request-id": []string{"rid-responses-system-string-cache"},
+			},
+			Body: io.NopCloser(strings.NewReader(upstreamSSE)),
+		},
+	}
+
+	svc := &GatewayService{
+		cfg:              &config.Config{},
+		httpUpstream:     upstream,
+		rateLimitService: &RateLimitService{},
+		settingService: NewSettingService(&gatewayTTLSettingRepo{data: map[string]string{
+			SettingKeyRewriteMessageCacheControl: "false",
+		}}, &config.Config{}),
+		tlsFPProfileService: &TLSFingerprintProfileService{},
+	}
+
+	result, err := svc.ForwardAsResponses(t.Context(), c, newAnthropicAPIKeyAccountForTest(), body, nil)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.True(t, gjson.GetBytes(upstream.lastBody, "system").IsArray())
+	require.Equal(t, "stable system prompt", gjson.GetBytes(upstream.lastBody, "system.0.text").String())
+	require.Equal(t, "ephemeral", gjson.GetBytes(upstream.lastBody, "system.0.cache_control.type").String())
+	require.Equal(t, "5m", gjson.GetBytes(upstream.lastBody, "system.0.cache_control.ttl").String())
 }

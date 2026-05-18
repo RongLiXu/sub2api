@@ -134,6 +134,19 @@ func addManagedClaudeCacheBreakpoints(body []byte) []byte {
 
 func addSystemCacheBreakpointIfMissing(body []byte) ([]byte, bool) {
 	system := gjson.GetBytes(body, "system")
+	if !system.Exists() {
+		return body, false
+	}
+	if system.Type == gjson.String {
+		blockRaw := fmt.Sprintf(
+			`[{"type":"text","text":%s,"cache_control":{"type":"ephemeral","ttl":%q}}]`,
+			mustJSONString(system.String()), claude.DefaultCacheControlTTL,
+		)
+		if next, err := sjson.SetRawBytes(body, "system", []byte(blockRaw)); err == nil {
+			return next, true
+		}
+		return body, false
+	}
 	if !system.IsArray() {
 		return body, false
 	}
