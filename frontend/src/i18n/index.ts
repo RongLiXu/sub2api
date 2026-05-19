@@ -22,6 +22,8 @@ const localeLoaders: Record<LocaleCode, () => Promise<{ default: LocaleMessages 
 }
 
 const localePatchLoaders: Partial<Record<LocaleCode, () => Promise<{ default: LocaleMessages }>>> = {
+  ja: () => import('./locales/ja.extra'),
+  vn: () => import('./locales/vi.extra'),
   fr: () => import('./locales/fr.extra'),
   ru: () => import('./locales/ru.extra'),
   ko: () => import('./locales/ko.extra'),

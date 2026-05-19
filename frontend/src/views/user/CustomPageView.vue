@@ -316,16 +316,16 @@ function injectCopyButtons() {
     if (pre.querySelector('.copy-btn')) return
     const btn = document.createElement('button')
     btn.className = 'copy-btn'
-    btn.textContent = '复制'
+    btn.textContent = t('customPage.copyCode')
     btn.addEventListener('click', async () => {
       const code = pre.querySelector('code')?.textContent ?? pre.textContent ?? ''
       try {
         await navigator.clipboard.writeText(code)
-        btn.textContent = '已复制 ✓'
-        setTimeout(() => { btn.textContent = '复制' }, 2000)
+        btn.textContent = t('customPage.copiedCode')
+        setTimeout(() => { btn.textContent = t('customPage.copyCode') }, 2000)
       } catch {
-        btn.textContent = '失败'
-        setTimeout(() => { btn.textContent = '复制' }, 2000)
+        btn.textContent = t('common.copyFailed')
+        setTimeout(() => { btn.textContent = t('customPage.copyCode') }, 2000)
       }
     })
     pre.style.position = 'relative'

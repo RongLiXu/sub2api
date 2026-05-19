@@ -1,4 +1,6 @@
-export default {
+import { mergeLocaleMessages } from './mergeLocaleMessages'
+
+const messages = {
   common: {
     logoAlt: 'Logo',
     closeModal: 'Fermer la fenêtre',
@@ -92,3 +94,65 @@ export default {
     }
   }
 }
+
+const recentI18nPatch = {
+  auth: {
+    oauthFlow: {
+      wechatNativeAppRequired: 'Ce site ne configure que la connexion WeChat via application mobile. Continuez depuis l’application native via le SDK WeChat.'
+    },
+    dingtalkProviderName: 'DingTalk'
+  },
+  customPage: {
+    copyCode: 'Copier',
+    copiedCode: 'Copié ✓'
+  },
+  admin: {
+    groups: {
+      rateMultiplierBadge: 'Tarif {rate}x',
+      copyAccounts: {
+        groupOptionLabel: '{name} ({count} comptes)'
+      }
+    },
+    channels: {
+      noGroupsSelected: 'Aucun groupe sélectionné pour la plateforme {platform}. Sélectionnez au moins un groupe ou désactivez cette plateforme.',
+      emptyModelsInPricing: 'Une règle de tarification de la plateforme {platform} ne contient aucun modèle. Ajoutez des modèles ou supprimez cette règle.',
+      form: {
+        minTokens: 'Min',
+        maxTokens: 'Max',
+        inclusive: '(incl.)'
+      },
+      validation: {
+        minTokensNegative: 'Intervalle #{index} : le nombre minimal de tokens ({min}) ne peut pas être négatif',
+        maxTokensPositive: 'Intervalle #{index} : le nombre maximal de tokens ({max}) doit être supérieur à 0',
+        maxTokensGreaterThanMin: 'Intervalle #{index} : le nombre maximal de tokens ({max}) doit être supérieur au minimum ({min})',
+        priceNegative: 'Intervalle #{index} : {name} ne peut pas être négatif',
+        unlimitedLast: 'Intervalle #{index} : l’intervalle sans limite (maximum vide) doit être le dernier',
+        overlap: 'Les intervalles #{prevIndex} et #{currentIndex} se chevauchent : la borne supérieure précédente ({prevMax}) est supérieure à la borne inférieure actuelle ({currentMin})',
+        priceFields: {
+          input: 'Prix d’entrée',
+          output: 'Prix de sortie',
+          cacheWrite: 'Prix d’écriture cache',
+          cacheRead: 'Prix de lecture cache',
+          perRequest: 'Prix par requête'
+        }
+      }
+    },
+    settings: {
+      dingtalk: {
+        defaultDisplayNameAttrName: 'Nom DingTalk',
+        defaultCorpEmailAttrName: 'E-mail professionnel DingTalk',
+        defaultDeptAttrName: 'Département DingTalk'
+      },
+      authSourceDefaults: {
+        sources: {
+          dingtalk: {
+            title: 'Connexion DingTalk',
+            description: 'Droits par défaut accordés aux inscriptions via DingTalk.'
+          }
+        }
+      }
+    }
+  }
+}
+
+export default mergeLocaleMessages(messages as Record<string, any>, recentI18nPatch)

@@ -1,4 +1,6 @@
-export default {
+import { mergeLocaleMessages } from './mergeLocaleMessages'
+
+const messages = {
   common: {
     logoAlt: 'Логотип',
     closeModal: 'Закрыть окно',
@@ -92,3 +94,65 @@ export default {
     }
   }
 }
+
+const recentI18nPatch = {
+  auth: {
+    oauthFlow: {
+      wechatNativeAppRequired: 'На этом сайте настроен только вход WeChat через мобильное приложение. Продолжите из нативного приложения через WeChat SDK.'
+    },
+    dingtalkProviderName: 'DingTalk'
+  },
+  customPage: {
+    copyCode: 'Копировать',
+    copiedCode: 'Скопировано ✓'
+  },
+  admin: {
+    groups: {
+      rateMultiplierBadge: 'Тариф {rate}x',
+      copyAccounts: {
+        groupOptionLabel: '{name} ({count} аккаунтов)'
+      }
+    },
+    channels: {
+      noGroupsSelected: 'Для платформы {platform} не выбраны группы. Выберите хотя бы одну группу или отключите платформу.',
+      emptyModelsInPricing: 'В платформе {platform} есть правило тарификации без моделей. Добавьте модели или удалите это правило.',
+      form: {
+        minTokens: 'Min',
+        maxTokens: 'Max',
+        inclusive: '(вкл.)'
+      },
+      validation: {
+        minTokensNegative: 'Интервал #{index}: минимальное число токенов ({min}) не может быть отрицательным',
+        maxTokensPositive: 'Интервал #{index}: максимальное число токенов ({max}) должно быть больше 0',
+        maxTokensGreaterThanMin: 'Интервал #{index}: максимальное число токенов ({max}) должно быть больше минимального ({min})',
+        priceNegative: 'Интервал #{index}: {name} не может быть отрицательной',
+        unlimitedLast: 'Интервал #{index}: интервал без верхней границы (пустой максимум токенов) должен быть последним',
+        overlap: 'Интервалы #{prevIndex} и #{currentIndex} пересекаются: предыдущая верхняя граница ({prevMax}) больше текущей нижней границы ({currentMin})',
+        priceFields: {
+          input: 'Цена входа',
+          output: 'Цена выхода',
+          cacheWrite: 'Цена записи кэша',
+          cacheRead: 'Цена чтения кэша',
+          perRequest: 'Цена за запрос'
+        }
+      }
+    },
+    settings: {
+      dingtalk: {
+        defaultDisplayNameAttrName: 'Имя DingTalk',
+        defaultCorpEmailAttrName: 'Корпоративная почта DingTalk',
+        defaultDeptAttrName: 'Отдел DingTalk'
+      },
+      authSourceDefaults: {
+        sources: {
+          dingtalk: {
+            title: 'Вход через DingTalk',
+            description: 'Права по умолчанию для регистраций через DingTalk.'
+          }
+        }
+      }
+    }
+  }
+}
+
+export default mergeLocaleMessages(messages as Record<string, any>, recentI18nPatch)

@@ -31,7 +31,7 @@
           <span class="font-bold">{{ userRateMultiplier }}x</span>
         </template>
         <template v-else>
-          {{ rateMultiplier }}x 倍率
+          {{ t('admin.groups.rateMultiplierBadge', { rate: rateMultiplier }) }}
         </template>
       </span>
       <!-- Checkmark -->
@@ -51,6 +51,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import GroupBadge from './GroupBadge.vue'
 import type { SubscriptionType, GroupPlatform } from '@/types'
 
@@ -64,6 +65,8 @@ interface Props {
   selected?: boolean
   showCheckmark?: boolean
 }
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps<Props>(), {
   subscriptionType: 'standard',

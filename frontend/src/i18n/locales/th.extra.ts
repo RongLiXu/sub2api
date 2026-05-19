@@ -1,4 +1,6 @@
-export default {
+import { mergeLocaleMessages } from './mergeLocaleMessages'
+
+const messages = {
   common: {
     logoAlt: 'โลโก้',
     closeModal: 'ปิดหน้าต่าง',
@@ -92,3 +94,65 @@ export default {
     }
   }
 }
+
+const recentI18nPatch = {
+  auth: {
+    oauthFlow: {
+      wechatNativeAppRequired: 'ไซต์นี้ตั้งค่าเฉพาะการเข้าสู่ระบบ WeChat ผ่านแอปมือถือ โปรดดำเนินการต่อจากแอป native ผ่าน WeChat SDK'
+    },
+    dingtalkProviderName: 'DingTalk'
+  },
+  customPage: {
+    copyCode: 'คัดลอก',
+    copiedCode: 'คัดลอกแล้ว ✓'
+  },
+  admin: {
+    groups: {
+      rateMultiplierBadge: 'อัตรา {rate}x',
+      copyAccounts: {
+        groupOptionLabel: '{name} ({count} บัญชี)'
+      }
+    },
+    channels: {
+      noGroupsSelected: 'แพลตฟอร์ม {platform} ยังไม่ได้เลือกกลุ่ม โปรดเลือกอย่างน้อยหนึ่งกลุ่มหรือปิดใช้งานแพลตฟอร์มนี้',
+      emptyModelsInPricing: 'แพลตฟอร์ม {platform} มีรายการราคาที่ไม่มีโมเดล โปรดเพิ่มโมเดลหรือลบรายการนั้น',
+      form: {
+        minTokens: 'Min',
+        maxTokens: 'Max',
+        inclusive: '(รวม)'
+      },
+      validation: {
+        minTokensNegative: 'ช่วง #{index}: จำนวน token ต่ำสุด ({min}) ต้องไม่ติดลบ',
+        maxTokensPositive: 'ช่วง #{index}: จำนวน token สูงสุด ({max}) ต้องมากกว่า 0',
+        maxTokensGreaterThanMin: 'ช่วง #{index}: จำนวน token สูงสุด ({max}) ต้องมากกว่าจำนวนต่ำสุด ({min})',
+        priceNegative: 'ช่วง #{index}: {name} ต้องไม่ติดลบ',
+        unlimitedLast: 'ช่วง #{index}: ช่วงไม่จำกัด (เว้นค่า token สูงสุดว่าง) ต้องอยู่เป็นรายการสุดท้าย',
+        overlap: 'ช่วง #{prevIndex} และ #{currentIndex} ซ้อนทับกัน: ขอบเขตบนก่อนหน้า ({prevMax}) มากกว่าขอบเขตล่างปัจจุบัน ({currentMin})',
+        priceFields: {
+          input: 'ราคา input',
+          output: 'ราคา output',
+          cacheWrite: 'ราคาเขียน cache',
+          cacheRead: 'ราคาอ่าน cache',
+          perRequest: 'ราคาต่อ request'
+        }
+      }
+    },
+    settings: {
+      dingtalk: {
+        defaultDisplayNameAttrName: 'ชื่อ DingTalk',
+        defaultCorpEmailAttrName: 'อีเมลองค์กร DingTalk',
+        defaultDeptAttrName: 'แผนก DingTalk'
+      },
+      authSourceDefaults: {
+        sources: {
+          dingtalk: {
+            title: 'เข้าสู่ระบบด้วย DingTalk',
+            description: 'สิทธิ์เริ่มต้นสำหรับการสมัครผ่าน DingTalk'
+          }
+        }
+      }
+    }
+  }
+}
+
+export default mergeLocaleMessages(messages as Record<string, any>, recentI18nPatch)

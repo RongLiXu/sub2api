@@ -1,4 +1,6 @@
-export default {
+import { mergeLocaleMessages } from './mergeLocaleMessages'
+
+const messages = {
   common: {
     logoAlt: '로고',
     closeModal: '모달 닫기',
@@ -92,3 +94,65 @@ export default {
     }
   }
 }
+
+const recentI18nPatch = {
+  auth: {
+    oauthFlow: {
+      wechatNativeAppRequired: '이 사이트에는 WeChat 모바일 앱 로그인만 설정되어 있습니다. 네이티브 앱에서 WeChat SDK를 통해 계속하세요.'
+    },
+    dingtalkProviderName: 'DingTalk'
+  },
+  customPage: {
+    copyCode: '복사',
+    copiedCode: '복사됨 ✓'
+  },
+  admin: {
+    groups: {
+      rateMultiplierBadge: '{rate}x 요율',
+      copyAccounts: {
+        groupOptionLabel: '{name} ({count}개 계정)'
+      }
+    },
+    channels: {
+      noGroupsSelected: '{platform} 플랫폼에 선택된 그룹이 없습니다. 하나 이상의 그룹을 선택하거나 이 플랫폼을 비활성화하세요.',
+      emptyModelsInPricing: '{platform} 플랫폼에 모델이 없는 가격 항목이 있습니다. 모델을 추가하거나 해당 항목을 삭제하세요.',
+      form: {
+        minTokens: 'Min',
+        maxTokens: 'Max',
+        inclusive: '(포함)'
+      },
+      validation: {
+        minTokensNegative: '구간 #{index}: 최소 토큰 수({min})는 음수일 수 없습니다',
+        maxTokensPositive: '구간 #{index}: 최대 토큰 수({max})는 0보다 커야 합니다',
+        maxTokensGreaterThanMin: '구간 #{index}: 최대 토큰 수({max})는 최소 토큰 수({min})보다 커야 합니다',
+        priceNegative: '구간 #{index}: {name}은(는) 음수일 수 없습니다',
+        unlimitedLast: '구간 #{index}: 상한 없는 구간(최대 토큰 수 비움)은 마지막에만 둘 수 있습니다',
+        overlap: '구간 #{prevIndex}와 #{currentIndex}가 겹칩니다: 이전 상한({prevMax})이 현재 하한({currentMin})보다 큽니다',
+        priceFields: {
+          input: '입력 가격',
+          output: '출력 가격',
+          cacheWrite: '캐시 쓰기 가격',
+          cacheRead: '캐시 읽기 가격',
+          perRequest: '요청당 가격'
+        }
+      }
+    },
+    settings: {
+      dingtalk: {
+        defaultDisplayNameAttrName: 'DingTalk 이름',
+        defaultCorpEmailAttrName: 'DingTalk 회사 이메일',
+        defaultDeptAttrName: 'DingTalk 부서'
+      },
+      authSourceDefaults: {
+        sources: {
+          dingtalk: {
+            title: 'DingTalk 로그인',
+            description: 'DingTalk 가입에 적용되는 기본 권한입니다.'
+          }
+        }
+      }
+    }
+  }
+}
+
+export default mergeLocaleMessages(messages as Record<string, any>, recentI18nPatch)

@@ -3024,7 +3024,7 @@ const copyAccountsGroupOptions = computed(() => {
   );
   return eligibleGroups.map((g) => ({
     value: g.id,
-    label: `${g.name} (${g.account_count || 0} 个账号)`,
+    label: t('admin.groups.copyAccounts.groupOptionLabel', { name: g.name, count: g.account_count || 0 }),
   }));
 });
 
@@ -3039,7 +3039,7 @@ const copyAccountsGroupOptionsForEdit = computed(() => {
   );
   return eligibleGroups.map((g) => ({
     value: g.id,
-    label: `${g.name} (${g.account_count || 0} 个账号)`,
+    label: t('admin.groups.copyAccounts.groupOptionLabel', { name: g.name, count: g.account_count || 0 }),
   }));
 });
 

@@ -122,9 +122,30 @@ export function findModelConflict(models: string[]): [string, string] | null {
  * - per_request / image：区间是按 tier_label 分层（1K/2K/4K 等），后端按 label
  *   匹配，不依赖 min/max，因此跳过重叠 / last-unlimited 校验
  */
+export type IntervalValidationMessages = {
+  minTokensNegative: (params: { index: number; min: number }) => string
+  maxTokensPositive: (params: { index: number; max: number }) => string
+  maxTokensGreaterThanMin: (params: { index: number; max: number; min: number }) => string
+  priceNegative: (params: { index: number; name: string }) => string
+  unlimitedLast: (params: { index: number }) => string
+  overlap: (params: { prevIndex: number; currentIndex: number; prevMax: string; currentMin: number }) => string
+}
+
+const defaultIntervalValidationMessages: IntervalValidationMessages = {
+  minTokensNegative: ({ index, min }) => `Interval #${index}: minimum tokens (${min}) cannot be negative`,
+  maxTokensPositive: ({ index, max }) => `Interval #${index}: maximum tokens (${max}) must be greater than 0`,
+  maxTokensGreaterThanMin: ({ index, max, min }) =>
+    `Interval #${index}: maximum tokens (${max}) must be greater than minimum tokens (${min})`,
+  priceNegative: ({ index, name }) => `Interval #${index}: ${name} cannot be negative`,
+  unlimitedLast: ({ index }) => `Interval #${index}: unlimited interval (empty maximum tokens) must be the last one`,
+  overlap: ({ prevIndex, currentIndex, prevMax, currentMin }) =>
+    `Intervals #${prevIndex} and #${currentIndex} overlap: previous upper bound (${prevMax}) is greater than current lower bound (${currentMin})`,
+}
+
 export function validateIntervals(
   intervals: IntervalFormEntry[],
   mode: BillingMode = 'token',
+  messages: IntervalValidationMessages = defaultIntervalValidationMessages,
 ): string | null {
   if (!intervals || intervals.length === 0) return null
 
@@ -132,58 +153,75 @@ export function validateIntervals(
   const sorted = [...intervals].sort((a, b) => a.min_tokens - b.min_tokens)
 
   for (let i = 0; i < sorted.length; i++) {
-    const err = validateSingleInterval(sorted[i], i)
+    const err = validateSingleInterval(sorted[i], i, messages)
     if (err) return err
   }
 
   // per_request / image 模式按 tier_label 匹配，不做 token 区间重叠校验
   if (mode !== 'token') return null
-  return checkIntervalOverlap(sorted)
+  return checkIntervalOverlap(sorted, messages)
 }
 
-function validateSingleInterval(iv: IntervalFormEntry, idx: number): string | null {
+function validateSingleInterval(
+  iv: IntervalFormEntry,
+  idx: number,
+  messages: IntervalValidationMessages,
+): string | null {
+  const index = idx + 1
   if (iv.min_tokens < 0) {
-    return `区间 #${idx + 1}: 最小 token 数 (${iv.min_tokens}) 不能为负数`
+    return messages.minTokensNegative({ index, min: iv.min_tokens })
   }
   if (iv.max_tokens != null) {
     if (iv.max_tokens <= 0) {
-      return `区间 #${idx + 1}: 最大 token 数 (${iv.max_tokens}) 必须大于 0`
+      return messages.maxTokensPositive({ index, max: iv.max_tokens })
     }
     if (iv.max_tokens <= iv.min_tokens) {
-      return `区间 #${idx + 1}: 最大 token 数 (${iv.max_tokens}) 必须大于最小 token 数 (${iv.min_tokens})`
+      return messages.maxTokensGreaterThanMin({ index, max: iv.max_tokens, min: iv.min_tokens })
     }
   }
-  return validateIntervalPrices(iv, idx)
+  return validateIntervalPrices(iv, idx, messages)
 }
 
-function validateIntervalPrices(iv: IntervalFormEntry, idx: number): string | null {
+function validateIntervalPrices(
+  iv: IntervalFormEntry,
+  idx: number,
+  messages: IntervalValidationMessages,
+): string | null {
   const prices: [string, number | string | null][] = [
-    ['输入价格', iv.input_price],
-    ['输出价格', iv.output_price],
-    ['缓存写入价格', iv.cache_write_price],
-    ['缓存读取价格', iv.cache_read_price],
-    ['单次价格', iv.per_request_price],
+    ['input', iv.input_price],
+    ['output', iv.output_price],
+    ['cacheWrite', iv.cache_write_price],
+    ['cacheRead', iv.cache_read_price],
+    ['perRequest', iv.per_request_price],
   ]
   for (const [name, val] of prices) {
     if (val != null && val !== '' && Number(val) < 0) {
-      return `区间 #${idx + 1}: ${name}不能为负数`
+      return messages.priceNegative({ index: idx + 1, name })
     }
   }
   return null
 }
 
-function checkIntervalOverlap(sorted: IntervalFormEntry[]): string | null {
+function checkIntervalOverlap(
+  sorted: IntervalFormEntry[],
+  messages: IntervalValidationMessages,
+): string | null {
   for (let i = 0; i < sorted.length; i++) {
     // 无上限区间必须是最后一个
     if (sorted[i].max_tokens == null && i < sorted.length - 1) {
-      return `区间 #${i + 1}: 无上限区间（最大 token 数为空）只能是最后一个`
+      return messages.unlimitedLast({ index: i + 1 })
     }
     if (i === 0) continue
     const prev = sorted[i - 1]
     // (min, max] 语义：前一个区间上界 > 当前区间下界则重叠
     if (prev.max_tokens == null || prev.max_tokens > sorted[i].min_tokens) {
       const prevMax = prev.max_tokens == null ? '∞' : String(prev.max_tokens)
-      return `区间 #${i} 和 #${i + 1} 重叠：前一个区间上界 (${prevMax}) 大于当前区间下界 (${sorted[i].min_tokens})`
+      return messages.overlap({
+        prevIndex: i,
+        currentIndex: i + 1,
+        prevMax,
+        currentMin: sorted[i].min_tokens,
+      })
     }
   }
   return null

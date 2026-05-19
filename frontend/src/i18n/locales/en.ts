@@ -639,6 +639,7 @@ export default {
       wechatAvailabilityUnknown: 'WeChat sign-in availability could not be confirmed. Refresh and retry.',
       wechatSystemBrowserOnly: 'This WeChat sign-in flow is only available in your system browser.',
       wechatBrowserOnly: 'This WeChat sign-in flow is only available inside the WeChat browser.',
+      wechatNativeAppRequired: 'This site only has WeChat mobile app login configured. Continue from the native app through the WeChat SDK.',
       wechatNotConfigured: 'WeChat sign-in is not configured yet.'
     },
     linuxdoCallbackPageTitle: 'LinuxDo Sign-In Callback',
@@ -646,6 +647,7 @@ export default {
     oidcCallbackPageTitle: 'OIDC Sign-In Callback',
     oauthCallbackPageTitle: 'OAuth Callback',
     wechatProviderName: 'WeChat',
+    dingtalkProviderName: 'DingTalk',
     wechatCallbackPageTitle: 'WeChat Sign-In Callback',
     wechatPaymentCallbackPageTitle: 'WeChat Payment Callback',
     wechatPayment: {
@@ -2277,7 +2279,9 @@ export default {
         hint: 'Triggered only when upstream explicitly returns prompt too long. Leave empty to disable fallback.',
         noFallback: 'No Fallback'
       },
+      rateMultiplierBadge: '{rate}x rate',
       copyAccounts: {
+        groupOptionLabel: '{name} ({count} accounts)',
         title: 'Copy Accounts from Groups',
         tooltip: 'Select one or more groups of the same platform. After creation, all accounts from these groups will be automatically bound to the new group (deduplicated).',
         tooltipEdit: 'Select one or more groups of the same platform. After saving, current group accounts will be replaced with accounts from these groups (deduplicated).',
@@ -2395,6 +2399,8 @@ export default {
       duplicateModels: 'Model "{0}" appears in multiple pricing entries',
       modelConflict: "Model patterns '{model1}' and '{model2}' conflict: overlapping match range",
       mappingConflict: "Mapping source patterns '{model1}' and '{model2}' conflict: overlapping match range",
+      noGroupsSelected: '{platform} platform has no groups selected. Select at least one group or disable this platform.',
+      emptyModelsInPricing: '{platform} platform has a pricing entry without models. Add models or delete the entry.',
       deleteConfirm: 'Are you sure you want to delete channel "{name}"? This cannot be undone.',
       columns: {
         name: 'Name',
@@ -2432,6 +2438,9 @@ export default {
         imageTokenPrice: 'Image Output',
         imageOutputPrice: 'Image Output Price',
         pricePlaceholder: 'Default',
+        minTokens: 'Min',
+        maxTokens: 'Max',
+        inclusive: '(incl.)',
         intervals: 'Context Intervals (optional)',
         addInterval: 'Add Interval',
         requestTiers: 'Request Tiers',
@@ -2485,6 +2494,21 @@ export default {
         ruleModelPricing: 'Model Pricing',
         noGroupsInChannel: 'No groups selected in platform tabs above',
         unnamed: 'Unnamed'
+      },
+      validation: {
+        minTokensNegative: 'Interval #{index}: minimum tokens ({min}) cannot be negative',
+        maxTokensPositive: 'Interval #{index}: maximum tokens ({max}) must be greater than 0',
+        maxTokensGreaterThanMin: 'Interval #{index}: maximum tokens ({max}) must be greater than minimum tokens ({min})',
+        priceNegative: 'Interval #{index}: {name} cannot be negative',
+        unlimitedLast: 'Interval #{index}: unlimited interval (empty maximum tokens) must be the last one',
+        overlap: 'Intervals #{prevIndex} and #{currentIndex} overlap: previous upper bound ({prevMax}) is greater than current lower bound ({currentMin})',
+        priceFields: {
+          input: 'Input price',
+          output: 'Output price',
+          cacheWrite: 'Cache write price',
+          cacheRead: 'Cache read price',
+          perRequest: 'Per-request price'
+        }
       }
     },
 
@@ -5575,7 +5599,10 @@ export default {
         syncCorpEmailTargetHint: 'Defaults to dingtalk_email / DingTalk Corporate Email. Saving settings auto-creates the user attribute by the key and display name above (existing definition only has its display name synced).',
         syncDeptTarget: 'Attribute key',
         syncDeptTargetHint: 'Defaults to dingtalk_department / DingTalk Department. Saving settings auto-creates the user attribute by the key and display name above (existing definition only has its display name synced).',
-        syncAttrDisplayName: 'Display name'
+        syncAttrDisplayName: 'Display name',
+        defaultDisplayNameAttrName: 'DingTalk Name',
+        defaultCorpEmailAttrName: 'DingTalk Corporate Email',
+        defaultDeptAttrName: 'DingTalk Department'
       },
       oidc: {
         title: 'OIDC Login',
@@ -6360,6 +6387,10 @@ export default {
           google: {
             title: 'Google signup',
             description: 'Applied on first signup or first bind through a verified Google email.'
+          },
+          dingtalk: {
+            title: 'DingTalk signup',
+            description: 'Default quota grants for DingTalk signups.'
           }
         },
         grantOnFirstBindLabel: 'Grant on first bind',
@@ -6587,6 +6618,8 @@ export default {
     notConfiguredTitle: 'Page URL not configured',
     notConfiguredDesc: 'The URL for this custom page has not been properly configured.',
     loadFailed: 'Failed to load page',
+    copyCode: 'Copy',
+    copiedCode: 'Copied ✓',
   },
 
   // Announcements Page

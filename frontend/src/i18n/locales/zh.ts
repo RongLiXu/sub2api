@@ -632,6 +632,7 @@ export default {
       wechatAvailabilityUnknown: '暂时无法确认微信登录可用性，请刷新后重试。',
       wechatSystemBrowserOnly: '当前微信登录流程仅支持在系统浏览器中继续。',
       wechatBrowserOnly: '当前微信登录流程仅支持在微信内置浏览器中继续。',
+      wechatNativeAppRequired: '当前仅配置微信移动应用登录，需要在原生 App 中通过微信 SDK 发起授权。',
       wechatNotConfigured: '微信登录尚未配置。'
     },
     linuxdoCallbackPageTitle: 'LinuxDo 登录回调',
@@ -639,6 +640,7 @@ export default {
     oidcCallbackPageTitle: 'OIDC 登录回调',
     oauthCallbackPageTitle: 'OAuth 回调',
     wechatProviderName: '微信',
+    dingtalkProviderName: '钉钉',
     wechatCallbackPageTitle: '微信登录回调',
     wechatPaymentCallbackPageTitle: '微信支付回调',
     wechatPayment: {
@@ -2367,7 +2369,9 @@ export default {
         hint: '仅当上游明确返回 prompt too long 时才会触发，留空表示不兜底',
         noFallback: '不兜底'
       },
+      rateMultiplierBadge: '{rate}x 倍率',
       copyAccounts: {
+        groupOptionLabel: '{name} ({count} 个账号)',
         title: '从分组复制账号',
         tooltip: '选择一个或多个相同平台的分组，创建后会自动将这些分组的所有账号绑定到新分组（去重）。',
         tooltipEdit: '选择一个或多个相同平台的分组，保存后当前分组的账号会被替换为这些分组的账号（去重）。',
@@ -2486,6 +2490,8 @@ export default {
       duplicateModels: '模型「{0}」在多个定价条目中重复',
       modelConflict: "模型模式 '{model1}' 和 '{model2}' 冲突：匹配范围重叠",
       mappingConflict: "模型映射源 '{model1}' 和 '{model2}' 冲突：匹配范围重叠",
+      noGroupsSelected: '{platform} 平台未选择分组，请至少选择一个分组或禁用该平台',
+      emptyModelsInPricing: '{platform} 平台下有定价条目未添加模型，请添加模型或删除该条目',
       deleteConfirm: '确定要删除渠道「{name}」吗？此操作不可撤销。',
       columns: {
         name: '名称',
@@ -2523,6 +2529,9 @@ export default {
         imageTokenPrice: '图片输出',
         imageOutputPrice: '图片输出价格',
         pricePlaceholder: '默认',
+        minTokens: 'Min',
+        maxTokens: 'Max',
+        inclusive: '（含）',
         intervals: '上下文区间定价（可选）',
         addInterval: '添加区间',
         requestTiers: '按次计费层级',
@@ -2576,6 +2585,21 @@ export default {
         ruleModelPricing: '模型定价',
         noGroupsInChannel: '上方平台标签页中未选择分组',
         unnamed: '未命名'
+      },
+      validation: {
+        minTokensNegative: '区间 #{index}: 最小 token 数 ({min}) 不能为负数',
+        maxTokensPositive: '区间 #{index}: 最大 token 数 ({max}) 必须大于 0',
+        maxTokensGreaterThanMin: '区间 #{index}: 最大 token 数 ({max}) 必须大于最小 token 数 ({min})',
+        priceNegative: '区间 #{index}: {name}不能为负数',
+        unlimitedLast: '区间 #{index}: 无上限区间（最大 token 数为空）只能是最后一个',
+        overlap: '区间 #{prevIndex} 和 #{currentIndex} 重叠：前一个区间上界 ({prevMax}) 大于当前区间下界 ({currentMin})',
+        priceFields: {
+          input: '输入价格',
+          output: '输出价格',
+          cacheWrite: '缓存写入价格',
+          cacheRead: '缓存读取价格',
+          perRequest: '单次价格'
+        }
       }
     },
 
@@ -5751,7 +5775,10 @@ export default {
         syncCorpEmailTargetHint: '默认 dingtalk_email / 钉钉企业邮箱；保存设置时按上述属性键和显示名称自动创建用户属性（已存在则仅同步显示名称）',
         syncDeptTarget: '属性键',
         syncDeptTargetHint: '默认 dingtalk_department / 钉钉部门；保存设置时按上述属性键和显示名称自动创建用户属性（已存在则仅同步显示名称）',
-        syncAttrDisplayName: '显示名称'
+        syncAttrDisplayName: '显示名称',
+        defaultDisplayNameAttrName: '钉钉姓名',
+        defaultCorpEmailAttrName: '钉钉企业邮箱',
+        defaultDeptAttrName: '钉钉部门'
       },
       oidc: {
         title: 'OIDC 登录',
@@ -6533,6 +6560,10 @@ export default {
           google: {
             title: 'Google 登录',
             description: '通过 Google 已验证邮箱首次注册或首次绑定时应用。'
+          },
+          dingtalk: {
+            title: '钉钉登录',
+            description: '适用于钉钉第三方注册的新用户默认配额。'
           }
         },
         grantOnFirstBindLabel: '首次绑定时授权',
@@ -6759,6 +6790,8 @@ export default {
     notConfiguredTitle: '页面链接未配置',
     notConfiguredDesc: '该自定义页面的 URL 未正确配置。',
     loadFailed: '页面加载失败',
+    copyCode: '复制',
+    copiedCode: '已复制 ✓',
   },
 
   // Announcements Page
