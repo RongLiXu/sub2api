@@ -6872,10 +6872,7 @@ const authSourceDefaultsMeta = computed(() => [
   {
     source: "dingtalk" as AuthSourceType,
     title: "钉钉",
-    description: localText(
-      "通过钉钉首次注册或首次绑定时应用。",
-      "Applied on first signup or first bind through DingTalk.",
-    ),
+    description: t('admin.settings.authSourceDefaults.sources.dingtalk.description'),
   },
 ]);
 

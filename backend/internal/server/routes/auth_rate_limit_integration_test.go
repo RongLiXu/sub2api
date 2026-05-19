@@ -7,14 +7,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
+	testcontainers "github.com/testcontainers/testcontainers-go"
 	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
 )
 
@@ -72,40 +70,5 @@ func startAuthRouteRedis(t *testing.T, ctx context.Context) *redis.Client {
 
 func ensureAuthRouteDockerAvailable(t *testing.T) {
 	t.Helper()
-	if authRouteDockerAvailable() {
-		return
-	}
-	t.Skip("Docker 未启用，跳过认证限流集成测试")
-}
-
-func authRouteDockerAvailable() bool {
-	if os.Getenv("DOCKER_HOST") != "" {
-		return true
-	}
-
-	socketCandidates := []string{
-		"/var/run/docker.sock",
-		filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "docker.sock"),
-		filepath.Join(authRouteUserHomeDir(), ".docker", "run", "docker.sock"),
-		filepath.Join(authRouteUserHomeDir(), ".docker", "desktop", "docker.sock"),
-		filepath.Join("/run/user", strconv.Itoa(os.Getuid()), "docker.sock"),
-	}
-
-	for _, socket := range socketCandidates {
-		if socket == "" {
-			continue
-		}
-		if _, err := os.Stat(socket); err == nil {
-			return true
-		}
-	}
-	return false
-}
-
-func authRouteUserHomeDir() string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return ""
-	}
-	return home
+	testcontainers.SkipIfProviderIsNotHealthy(t)
 }
