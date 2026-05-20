@@ -116,6 +116,11 @@ const recentI18nPatch = {
     channels: {
       noGroupsSelected: '{platform} 플랫폼에 선택된 그룹이 없습니다. 하나 이상의 그룹을 선택하거나 이 플랫폼을 비활성화하세요.',
       emptyModelsInPricing: '{platform} 플랫폼에 모델이 없는 가격 항목이 있습니다. 모델을 추가하거나 해당 항목을 삭제하세요.',
+      syncLatestModels: '최신 모델 동기화',
+      syncingModels: '동기화 중...',
+      syncModelsSuccess: '새 모델 {count}개를 동기화했습니다',
+      syncModelsAlreadyUpToDate: '모델 목록이 이미 최신입니다',
+      syncModelsError: '모델 동기화에 실패했습니다',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
@@ -138,6 +143,10 @@ const recentI18nPatch = {
       }
     },
     settings: {
+      payment: {
+        alipayForceQRCode: 'Alipay QR 코드 강제',
+        alipayForceQRCodeHint: '활성화하면 모바일 Alipay 사용자도 모바일 결제 페이지로 이동하지 않고 항상 QR 코드를 보게 됩니다'
+      },
       dingtalk: {
         defaultDisplayNameAttrName: 'DingTalk 이름',
         defaultCorpEmailAttrName: 'DingTalk 회사 이메일',
@@ -150,6 +159,39 @@ const recentI18nPatch = {
             description: 'DingTalk 가입에 적용되는 기본 권한입니다.'
           }
         }
+      }
+    },
+    riskControl: {
+      tabs: {
+        keywords: '키워드 차단'
+      },
+      blockedKeywords: '차단 키워드',
+      blockedKeywordsPlaceholder: '한 줄에 하나의 키워드\n예:\n금칙어1\n금칙어2',
+      blockedKeywordsDescription: '대소문자를 구분하지 않고 매칭됩니다. 일치 후 업스트림 검열 API를 호출할지는 아래 전략에 따라 달라집니다.',
+      blockedKeywordsPreBlockHint: '키워드 차단은 "사전 차단" 모드에서만 동작합니다.',
+      blockedKeywordsModeWarning: '현재 모드는 "{mode}"입니다. "사전 차단"으로 전환하기 전에는 키워드 차단이 실행되지 않습니다.',
+      blockedKeywordCount: '설정된 키워드 {count}개',
+      blockedKeywordsLimit: '최대 {max}개의 키워드를 저장할 수 있으며, 각 키워드는 200자를 넘을 수 없습니다. 중복 항목은 자동으로 제거됩니다.',
+      keywordBlockingMode: '검열 전략',
+      keywordModeKeywordAndApi: '키워드 + API',
+      keywordModeKeywordAndApiDesc: '키워드가 일치하면 즉시 차단하고, 일치하지 않으면 업스트림 검열 API로 넘깁니다.',
+      keywordModeKeywordOnly: '키워드만',
+      keywordModeKeywordOnlyDesc: '키워드만으로 판단하며, 일치하지 않으면 API를 호출하지 않고 통과시켜 업스트림 비용을 절약합니다.',
+      keywordModeKeywordOnlyNotice: '"키워드만" 전략이 적용 중입니다. 어떤 키워드와도 일치하지 않는 요청은 업스트림 검열 API 호출 없이 통과됩니다.',
+      keywordModeApiOnly: 'API만',
+      keywordModeApiOnlyDesc: '업스트림 검열 API만 사용하며, 여기서 설정한 키워드 목록은 참조하지 않습니다.',
+      keywordModeApiOnlyNotice: '"API만" 전략이 적용 중입니다. 키워드 목록은 사용되지 않으며 모든 요청이 업스트림 검열 API로 전달됩니다.',
+      action: {
+        keywordBlock: '키워드 차단'
+      }
+    },
+    channelMonitor: {
+      form: {
+        apiMode: 'OpenAI 프로토콜',
+        apiModeChatCompletions: 'OpenAI Compatible',
+        apiModeChatCompletionsHint: '/v1/chat/completions 로 messages 를 전송합니다. 대부분의 호환 제공자에서 사용할 수 있습니다.',
+        apiModeResponses: 'Responses API',
+        apiModeResponsesHint: '/v1/responses 를 사용하고 기본 instructions + input 을 함께 보냅니다. 자체 점검 / Codex 경로에 적합합니다.'
       }
     }
   }

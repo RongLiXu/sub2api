@@ -807,8 +807,31 @@ function generateOpenCodeConfig(platform: string, baseUrl: string, apiKey: strin
         output: 65536
       },
       modalities: {
-        input: ['text', 'image', 'pdf'],
+        input: ['text', 'image', 'audio', 'video', 'pdf'],
         output: ['text']
+      },
+      options: {
+        thinking: {
+          budgetTokens: 24576,
+          type: 'enabled'
+        }
+      }
+    },
+    'gemini-3.1-flash-lite': {
+      name: 'Gemini 3.1 Flash-Lite',
+      limit: {
+        context: 1048576,
+        output: 65536
+      },
+      modalities: {
+        input: ['text', 'image', 'audio', 'video', 'pdf'],
+        output: ['text']
+      },
+      options: {
+        thinking: {
+          budgetTokens: 24576,
+          type: 'enabled'
+        }
       }
     },
     'gemini-3-flash-preview': {

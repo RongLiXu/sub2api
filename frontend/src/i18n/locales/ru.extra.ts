@@ -116,6 +116,11 @@ const recentI18nPatch = {
     channels: {
       noGroupsSelected: 'Для платформы {platform} не выбраны группы. Выберите хотя бы одну группу или отключите платформу.',
       emptyModelsInPricing: 'В платформе {platform} есть правило тарификации без моделей. Добавьте модели или удалите это правило.',
+      syncLatestModels: 'Синхронизировать последние модели',
+      syncingModels: 'Синхронизация...',
+      syncModelsSuccess: 'Синхронизировано новых моделей: {count}',
+      syncModelsAlreadyUpToDate: 'Список моделей уже актуален',
+      syncModelsError: 'Не удалось синхронизировать модели',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
@@ -138,6 +143,10 @@ const recentI18nPatch = {
       }
     },
     settings: {
+      payment: {
+        alipayForceQRCode: 'Всегда показывать QR-код Alipay',
+        alipayForceQRCodeHint: 'Если включено, мобильные пользователи Alipay всегда будут видеть QR-код вместо перехода на мобильную страницу оплаты'
+      },
       dingtalk: {
         defaultDisplayNameAttrName: 'Имя DingTalk',
         defaultCorpEmailAttrName: 'Корпоративная почта DingTalk',
@@ -150,6 +159,39 @@ const recentI18nPatch = {
             description: 'Права по умолчанию для регистраций через DingTalk.'
           }
         }
+      }
+    },
+    riskControl: {
+      tabs: {
+        keywords: 'Блокировка по ключевым словам'
+      },
+      blockedKeywords: 'Блокируемые ключевые слова',
+      blockedKeywordsPlaceholder: 'По одному слову в строке\nНапример:\nслово1\nслово2',
+      blockedKeywordsDescription: 'Совпадение без учёта регистра. Будет ли вызван upstream API модерации после совпадения, зависит от стратегии ниже.',
+      blockedKeywordsPreBlockHint: 'Блокировка по ключевым словам работает только в режиме «Предварительная блокировка».',
+      blockedKeywordsModeWarning: 'Текущий режим — «{mode}». Блокировка по ключевым словам начнёт работать только после переключения на «Предварительную блокировку».',
+      blockedKeywordCount: 'Настроено ключевых слов: {count}',
+      blockedKeywordsLimit: 'Можно сохранить до {max} ключевых слов, каждое не длиннее 200 символов. Дубликаты удаляются автоматически.',
+      keywordBlockingMode: 'Стратегия модерации',
+      keywordModeKeywordAndApi: 'Ключевые слова + API',
+      keywordModeKeywordAndApiDesc: 'Сразу блокировать при совпадении, иначе передавать запрос в upstream API модерации.',
+      keywordModeKeywordOnly: 'Только ключевые слова',
+      keywordModeKeywordOnlyDesc: 'Решение принимается только по ключевым словам; если совпадений нет, запрос проходит без вызова API, что снижает стоимость upstream.',
+      keywordModeKeywordOnlyNotice: 'Стратегия «Только ключевые слова»: запросы без совпадений проходят без вызова upstream API модерации.',
+      keywordModeApiOnly: 'Только API',
+      keywordModeApiOnlyDesc: 'Используется только upstream API модерации; список ключевых слов, настроенный здесь, не учитывается.',
+      keywordModeApiOnlyNotice: 'Стратегия «Только API»: список ключевых слов игнорируется; все запросы отправляются в upstream API модерации.',
+      action: {
+        keywordBlock: 'Заблокировано по ключевому слову'
+      }
+    },
+    channelMonitor: {
+      form: {
+        apiMode: 'Протокол OpenAI',
+        apiModeChatCompletions: 'OpenAI Compatible',
+        apiModeChatCompletionsHint: 'Использует /v1/chat/completions с messages; подходит для большинства совместимых провайдеров.',
+        apiModeResponses: 'Responses API',
+        apiModeResponsesHint: 'Использует /v1/responses с instructions + input по умолчанию; подходит для самопроверки и путей Codex.'
       }
     }
   }

@@ -240,6 +240,54 @@ func TestGetModelPricing_ImageModelDoesNotFallbackToTextModel(t *testing.T) {
 	require.Same(t, imagePricing, got)
 }
 
+func TestDefaultPricingIncludesGemini35FlashOfficialPricing(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "resources", "model-pricing", "model_prices_and_context_window.json"))
+	require.NoError(t, err)
+
+	svc := &PricingService{}
+	pricingData, err := svc.parsePricingData(data)
+	require.NoError(t, err)
+
+	pricing := pricingData["gemini-3.5-flash"]
+	require.NotNil(t, pricing)
+	require.InDelta(t, 1.5e-6, pricing.InputCostPerToken, 1e-12)
+	require.InDelta(t, 2.7e-6, pricing.InputCostPerTokenPriority, 1e-12)
+	require.InDelta(t, 7.5e-7, pricing.InputCostPerTokenFlex, 1e-12)
+	require.InDelta(t, 7.5e-6, pricing.OutputCostPerToken, 1e-12)
+	require.InDelta(t, 13.5e-6, pricing.OutputCostPerTokenPriority, 1e-12)
+	require.InDelta(t, 3.75e-6, pricing.OutputCostPerTokenFlex, 1e-12)
+	require.InDelta(t, 2.5e-7, pricing.CacheReadInputTokenCost, 1e-12)
+	require.InDelta(t, 4.5e-7, pricing.CacheReadInputTokenCostPriority, 1e-12)
+	require.InDelta(t, 1.25e-7, pricing.CacheReadInputTokenCostFlex, 1e-12)
+	require.True(t, pricing.SupportsServiceTier)
+	require.Equal(t, 1048576, pricing.MaxInputTokens)
+	require.Equal(t, 65536, pricing.MaxOutputTokens)
+}
+
+func TestDefaultPricingIncludesGemini31FlashLiteOfficialPricing(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "..", "resources", "model-pricing", "model_prices_and_context_window.json"))
+	require.NoError(t, err)
+
+	svc := &PricingService{}
+	pricingData, err := svc.parsePricingData(data)
+	require.NoError(t, err)
+
+	pricing := pricingData["gemini-3.1-flash-lite"]
+	require.NotNil(t, pricing)
+	require.InDelta(t, 3e-7, pricing.InputCostPerToken, 1e-12)
+	require.InDelta(t, 5.4e-7, pricing.InputCostPerTokenPriority, 1e-12)
+	require.InDelta(t, 1.5e-7, pricing.InputCostPerTokenFlex, 1e-12)
+	require.InDelta(t, 2.5e-6, pricing.OutputCostPerToken, 1e-12)
+	require.InDelta(t, 4.5e-6, pricing.OutputCostPerTokenPriority, 1e-12)
+	require.InDelta(t, 1.25e-6, pricing.OutputCostPerTokenFlex, 1e-12)
+	require.InDelta(t, 2.5e-8, pricing.CacheReadInputTokenCost, 1e-12)
+	require.InDelta(t, 4.5e-8, pricing.CacheReadInputTokenCostPriority, 1e-12)
+	require.InDelta(t, 1.25e-8, pricing.CacheReadInputTokenCostFlex, 1e-12)
+	require.True(t, pricing.SupportsServiceTier)
+	require.Equal(t, 1048576, pricing.MaxInputTokens)
+	require.Equal(t, 65536, pricing.MaxOutputTokens)
+}
+
 func TestParsePricingData_PreservesPriorityAndServiceTierFields(t *testing.T) {
 	raw := map[string]any{
 		"gpt-5.4": map[string]any{

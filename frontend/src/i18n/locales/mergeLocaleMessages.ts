@@ -51,3 +51,34 @@ export function mergeLocaleMessages<T extends LocaleObject>(base: T, overrides: 
 
   return result as T
 }
+
+export function pruneLocaleMessagePaths<T extends LocaleObject>(source: T, paths: string[]): T {
+  const result = mergeLocaleMessages({} as T, source as DeepPartial<T>)
+
+  for (const path of paths) {
+    const segments = path
+      .split('.')
+      .map((segment) => segment.trim())
+      .filter(Boolean)
+    if (segments.length === 0) {
+      continue
+    }
+
+    let current: LocaleObject | undefined = result
+    for (let index = 0; index < segments.length - 1; index += 1) {
+      const next: LocaleValue = current?.[segments[index]]
+      if (!isPlainObject(next)) {
+        current = undefined
+        break
+      }
+      current = next
+    }
+
+    if (!current) {
+      continue
+    }
+    delete current[segments[segments.length - 1]]
+  }
+
+  return result
+}

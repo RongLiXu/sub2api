@@ -116,6 +116,11 @@ const recentI18nPatch = {
     channels: {
       noGroupsSelected: 'แพลตฟอร์ม {platform} ยังไม่ได้เลือกกลุ่ม โปรดเลือกอย่างน้อยหนึ่งกลุ่มหรือปิดใช้งานแพลตฟอร์มนี้',
       emptyModelsInPricing: 'แพลตฟอร์ม {platform} มีรายการราคาที่ไม่มีโมเดล โปรดเพิ่มโมเดลหรือลบรายการนั้น',
+      syncLatestModels: 'ซิงก์โมเดลล่าสุด',
+      syncingModels: 'กำลังซิงก์...',
+      syncModelsSuccess: 'ซิงก์โมเดลใหม่แล้ว {count} รายการ',
+      syncModelsAlreadyUpToDate: 'รายการโมเดลเป็นเวอร์ชันล่าสุดแล้ว',
+      syncModelsError: 'ซิงก์โมเดลไม่สำเร็จ',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
@@ -138,6 +143,10 @@ const recentI18nPatch = {
       }
     },
     settings: {
+      payment: {
+        alipayForceQRCode: 'บังคับใช้ QR Code สำหรับ Alipay',
+        alipayForceQRCodeHint: 'เมื่อเปิดใช้งาน ผู้ใช้ Alipay บนมือถือจะเห็น QR code เสมอแทนการถูกพาไปยังหน้าชำระเงินบนมือถือ'
+      },
       dingtalk: {
         defaultDisplayNameAttrName: 'ชื่อ DingTalk',
         defaultCorpEmailAttrName: 'อีเมลองค์กร DingTalk',
@@ -150,6 +159,39 @@ const recentI18nPatch = {
             description: 'สิทธิ์เริ่มต้นสำหรับการสมัครผ่าน DingTalk'
           }
         }
+      }
+    },
+    riskControl: {
+      tabs: {
+        keywords: 'บล็อกคีย์เวิร์ด'
+      },
+      blockedKeywords: 'คีย์เวิร์ดที่บล็อก',
+      blockedKeywordsPlaceholder: 'หนึ่งคีย์เวิร์ดต่อหนึ่งบรรทัด\nตัวอย่าง:\nคำต้องห้าม1\nคำต้องห้าม2',
+      blockedKeywordsDescription: 'จับคู่แบบไม่แยกตัวพิมพ์เล็ก-ใหญ่ การจะเรียก upstream moderation API หลังจากจับคู่ได้หรือไม่ขึ้นอยู่กับกลยุทธ์ด้านล่าง',
+      blockedKeywordsPreBlockHint: 'การบล็อกคีย์เวิร์ดจะมีผลเฉพาะในโหมด "บล็อกล่วงหน้า" เท่านั้น',
+      blockedKeywordsModeWarning: 'โหมดปัจจุบันคือ "{mode}" การบล็อกคีย์เวิร์ดจะยังไม่ทำงานจนกว่าคุณจะสลับเป็น "บล็อกล่วงหน้า"',
+      blockedKeywordCount: 'ตั้งค่าคีย์เวิร์ดแล้ว {count} รายการ',
+      blockedKeywordsLimit: 'บันทึกได้สูงสุด {max} คีย์เวิร์ด แต่ละคำยาวไม่เกิน 200 อักขระ และรายการซ้ำจะถูกลบอัตโนมัติ',
+      keywordBlockingMode: 'กลยุทธ์การกลั่นกรอง',
+      keywordModeKeywordAndApi: 'คีย์เวิร์ด + API',
+      keywordModeKeywordAndApiDesc: 'บล็อกทันทีเมื่อคีย์เวิร์ดตรงกัน มิฉะนั้นจึงส่งต่อไปยัง upstream moderation API',
+      keywordModeKeywordOnly: 'คีย์เวิร์ดเท่านั้น',
+      keywordModeKeywordOnlyDesc: 'ตัดสินจากคีย์เวิร์ดเท่านั้น หากไม่ตรงกันจะปล่อยผ่านโดยไม่เรียก API ช่วยลดต้นทุน upstream',
+      keywordModeKeywordOnlyNotice: 'กำลังใช้กลยุทธ์ "คีย์เวิร์ดเท่านั้น": คำขอที่ไม่ตรงกับคีย์เวิร์ดใด ๆ จะถูกปล่อยผ่านโดยไม่เรียก upstream moderation API',
+      keywordModeApiOnly: 'API เท่านั้น',
+      keywordModeApiOnlyDesc: 'ใช้เฉพาะ upstream moderation API โดยจะไม่อ้างอิงรายการคีย์เวิร์ดที่ตั้งค่าไว้ที่นี่',
+      keywordModeApiOnlyNotice: 'กำลังใช้กลยุทธ์ "API เท่านั้น": รายการคีย์เวิร์ดจะไม่ถูกใช้ และทุกคำขอจะถูกส่งไปยัง upstream moderation API',
+      action: {
+        keywordBlock: 'บล็อกด้วยคีย์เวิร์ด'
+      }
+    },
+    channelMonitor: {
+      form: {
+        apiMode: 'โปรโตคอล OpenAI',
+        apiModeChatCompletions: 'OpenAI Compatible',
+        apiModeChatCompletionsHint: 'ใช้ /v1/chat/completions พร้อม messages; ใช้งานได้กับผู้ให้บริการที่เข้ากันได้ส่วนใหญ่',
+        apiModeResponses: 'Responses API',
+        apiModeResponsesHint: 'ใช้ /v1/responses พร้อม instructions + input โดยค่าเริ่มต้น; เหมาะกับเส้นทาง self-check / Codex'
       }
     }
   }

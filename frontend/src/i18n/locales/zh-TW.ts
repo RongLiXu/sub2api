@@ -1,5 +1,6 @@
 import zh from './zh'
-import { mergeLocaleMessages } from './mergeLocaleMessages'
+import { mergeLocaleMessages, pruneLocaleMessagePaths } from './mergeLocaleMessages'
+import { removedLocalePathsFromEnglish } from './legacyRemovedLocalePaths'
 
 const messages = {
   "home": {
@@ -6728,4 +6729,4 @@ const messages = {
   }
 }
 
-export default mergeLocaleMessages(zh, messages)
+export default pruneLocaleMessagePaths(mergeLocaleMessages(zh, messages), [...removedLocalePathsFromEnglish])

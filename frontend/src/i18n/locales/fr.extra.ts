@@ -116,6 +116,11 @@ const recentI18nPatch = {
     channels: {
       noGroupsSelected: 'Aucun groupe sélectionné pour la plateforme {platform}. Sélectionnez au moins un groupe ou désactivez cette plateforme.',
       emptyModelsInPricing: 'Une règle de tarification de la plateforme {platform} ne contient aucun modèle. Ajoutez des modèles ou supprimez cette règle.',
+      syncLatestModels: 'Synchroniser les derniers modèles',
+      syncingModels: 'Synchronisation...',
+      syncModelsSuccess: '{count} nouveau(x) modèle(s) synchronisé(s)',
+      syncModelsAlreadyUpToDate: 'La liste des modèles est déjà à jour',
+      syncModelsError: 'Échec de la synchronisation des modèles',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
@@ -138,6 +143,10 @@ const recentI18nPatch = {
       }
     },
     settings: {
+      payment: {
+        alipayForceQRCode: 'Forcer le QR Code Alipay',
+        alipayForceQRCodeHint: 'Une fois activé, les utilisateurs mobiles Alipay verront toujours un QR code au lieu d’être redirigés vers la page de paiement mobile'
+      },
       dingtalk: {
         defaultDisplayNameAttrName: 'Nom DingTalk',
         defaultCorpEmailAttrName: 'E-mail professionnel DingTalk',
@@ -150,6 +159,39 @@ const recentI18nPatch = {
             description: 'Droits par défaut accordés aux inscriptions via DingTalk.'
           }
         }
+      }
+    },
+    riskControl: {
+      tabs: {
+        keywords: 'Blocage par mots-clés'
+      },
+      blockedKeywords: 'Mots-clés bloqués',
+      blockedKeywordsPlaceholder: 'Un mot-clé par ligne\nExemple :\nmot1\nmot2',
+      blockedKeywordsDescription: 'La correspondance est insensible à la casse. L’appel à l’API de modération en amont après une correspondance dépend de la stratégie ci-dessous.',
+      blockedKeywordsPreBlockHint: 'Le blocage par mots-clés ne prend effet qu’en mode « Blocage préalable ».',
+      blockedKeywordsModeWarning: 'Le mode actuel est « {mode} ». Le blocage par mots-clés ne sera exécuté qu’après passage en mode « Blocage préalable ».',
+      blockedKeywordCount: '{count} mot(s)-clé(s) configuré(s)',
+      blockedKeywordsLimit: 'Jusqu’à {max} mots-clés, chacun limité à 200 caractères. Les doublons sont supprimés automatiquement.',
+      keywordBlockingMode: 'Stratégie de modération',
+      keywordModeKeywordAndApi: 'Mot-clé + API',
+      keywordModeKeywordAndApiDesc: 'Bloque immédiatement en cas de correspondance, sinon passe à l’API de modération en amont.',
+      keywordModeKeywordOnly: 'Mots-clés seulement',
+      keywordModeKeywordOnlyDesc: 'Décide uniquement par mots-clés ; sans correspondance, la requête est autorisée sans appeler l’API, ce qui réduit le coût amont.',
+      keywordModeKeywordOnlyNotice: 'Stratégie « Mots-clés seulement » : les requêtes sans correspondance sont autorisées sans appel à l’API de modération en amont.',
+      keywordModeApiOnly: 'API seulement',
+      keywordModeApiOnlyDesc: 'Utilise uniquement l’API de modération en amont ; la liste de mots-clés configurée ici n’est pas utilisée.',
+      keywordModeApiOnlyNotice: 'Stratégie « API seulement » : la liste de mots-clés est ignorée ; toutes les requêtes passent par l’API de modération en amont.',
+      action: {
+        keywordBlock: 'Bloqué par mot-clé'
+      }
+    },
+    channelMonitor: {
+      form: {
+        apiMode: 'Protocole OpenAI',
+        apiModeChatCompletions: 'OpenAI Compatible',
+        apiModeChatCompletionsHint: 'Utilise /v1/chat/completions avec messages ; fonctionne avec la plupart des fournisseurs compatibles.',
+        apiModeResponses: 'Responses API',
+        apiModeResponsesHint: 'Utilise /v1/responses avec instructions + input par défaut ; idéal pour les chemins d’auto-test / Codex.'
       }
     }
   }
