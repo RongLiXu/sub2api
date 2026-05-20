@@ -4,7 +4,9 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -112,4 +114,25 @@ func TestValidatedTransport_ValidationErrorStopsRoundTrip(t *testing.T) {
 	_, err = transport.RoundTrip(req)
 	require.ErrorIs(t, err, expectedErr)
 	require.Equal(t, int32(0), atomic.LoadInt32(&baseCalls))
+}
+
+func TestGetClient_EvictsSharedClientCache(t *testing.T) {
+	sharedClients = sync.Map{}
+	t.Cleanup(func() { sharedClients = sync.Map{} })
+
+	for i := 0; i < defaultMaxSharedClients+5; i++ {
+		client, err := GetClient(Options{
+			Timeout:  time.Duration(i+1) * time.Millisecond,
+			ProxyURL: "",
+		})
+		require.NoError(t, err, strconv.Itoa(i))
+		require.NotNil(t, client)
+	}
+
+	count := 0
+	sharedClients.Range(func(_, _ any) bool {
+		count++
+		return true
+	})
+	require.LessOrEqual(t, count, defaultMaxSharedClients)
 }

@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/proxyurl"
@@ -36,6 +37,7 @@ const (
 	defaultDialTimeout         = 5 * time.Second  // TCP 连接超时（含代理握手），代理不通时快速失败
 	defaultTLSHandshakeTimeout = 5 * time.Second  // TLS 握手超时
 	validatedHostTTL           = 30 * time.Second // DNS Rebinding 校验缓存 TTL
+	defaultMaxSharedClients    = 256              // 共享客户端缓存上限，避免不同代理/参数组合无限增长
 )
 
 // Options 定义共享 HTTP 客户端的构建参数
@@ -53,8 +55,15 @@ type Options struct {
 	MaxConnsPerHost     int // 每主机最大连接数（默认 0 无限制）
 }
 
-// sharedClients 存储按配置参数缓存的 http.Client 实例
+type sharedClientEntry struct {
+	client   *http.Client
+	lastUsed int64
+}
+
+// sharedClients 存储按配置参数缓存的 http.Client 实例。
+// 条目按 LRU 上限淘汰；淘汰时只关闭空闲连接，不会中断已发出的请求。
 var sharedClients sync.Map
+var sharedClientEvictMu sync.Mutex
 
 // 允许测试替换校验函数，生产默认指向真实实现。
 var validateResolvedIP = urlvalidator.ValidateResolvedIP
@@ -65,8 +74,9 @@ var validateResolvedIP = urlvalidator.ValidateResolvedIP
 func GetClient(opts Options) (*http.Client, error) {
 	key := buildClientKey(opts)
 	if cached, ok := sharedClients.Load(key); ok {
-		if client, ok := cached.(*http.Client); ok {
-			return client, nil
+		if entry, ok := cached.(*sharedClientEntry); ok && entry.client != nil {
+			atomic.StoreInt64(&entry.lastUsed, time.Now().UnixNano())
+			return entry.client, nil
 		}
 	}
 
@@ -75,11 +85,58 @@ func GetClient(opts Options) (*http.Client, error) {
 		return nil, err
 	}
 
-	actual, _ := sharedClients.LoadOrStore(key, client)
-	if c, ok := actual.(*http.Client); ok {
-		return c, nil
+	entry := &sharedClientEntry{
+		client:   client,
+		lastUsed: time.Now().UnixNano(),
 	}
+	actual, loaded := sharedClients.LoadOrStore(key, entry)
+	if loaded {
+		if c, ok := actual.(*sharedClientEntry); ok && c.client != nil {
+			atomic.StoreInt64(&c.lastUsed, time.Now().UnixNano())
+			return c.client, nil
+		}
+	}
+	evictSharedClients(defaultMaxSharedClients)
 	return client, nil
+}
+
+func evictSharedClients(maxEntries int) {
+	if maxEntries <= 0 {
+		return
+	}
+	sharedClientEvictMu.Lock()
+	defer sharedClientEvictMu.Unlock()
+
+	for {
+		count := 0
+		var oldestKey string
+		var oldestEntry *sharedClientEntry
+		var oldestUsed int64
+		sharedClients.Range(func(key, value any) bool {
+			entry, ok := value.(*sharedClientEntry)
+			if !ok || entry == nil {
+				sharedClients.Delete(key)
+				return true
+			}
+			count++
+			lastUsed := atomic.LoadInt64(&entry.lastUsed)
+			if oldestEntry == nil || lastUsed < oldestUsed {
+				if keyStr, ok := key.(string); ok {
+					oldestKey = keyStr
+					oldestEntry = entry
+					oldestUsed = lastUsed
+				}
+			}
+			return true
+		})
+		if count <= maxEntries || oldestEntry == nil {
+			return
+		}
+		sharedClients.Delete(oldestKey)
+		if oldestEntry.client != nil {
+			oldestEntry.client.CloseIdleConnections()
+		}
+	}
 }
 
 func buildClient(opts Options) (*http.Client, error) {

@@ -242,7 +242,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, nextTick } from 'vue'
+import { computed, onUnmounted, ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 import Select from '@/components/common/Select.vue'
@@ -390,6 +390,10 @@ const abortStream = () => {
     abortController = null
   }
 }
+
+onUnmounted(() => {
+  abortStream()
+})
 
 const addLine = (text: string, className: string = 'text-gray-300') => {
   outputLines.value.push({ text, class: className })
