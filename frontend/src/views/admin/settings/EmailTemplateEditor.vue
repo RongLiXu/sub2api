@@ -67,7 +67,7 @@
                 :key="option.value"
                 :value="option.value"
               >
-                {{ option.label || option.value }}
+                {{ getLocalizedEventLabel(option) }}
               </option>
             </select>
             <p v-if="selectedEventDescription" class="input-hint">
@@ -211,6 +211,78 @@ import { extractApiErrorMessage } from "@/utils/apiError";
 const { t, locale } = useI18n();
 const appStore = useAppStore();
 
+const EMAIL_TEMPLATE_EVENT_TRANSLATIONS: Record<
+  string,
+  { labelKey: string; descriptionKey: string }
+> = {
+  "auth.verify_code": {
+    labelKey: "admin.settings.emailTemplates.eventLabels.authVerifyCode",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.authVerifyCode",
+  },
+  "auth.password_reset": {
+    labelKey: "admin.settings.emailTemplates.eventLabels.authPasswordReset",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.authPasswordReset",
+  },
+  "notification_email.verify_code": {
+    labelKey:
+      "admin.settings.emailTemplates.eventLabels.notificationEmailVerifyCode",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.notificationEmailVerifyCode",
+  },
+  "subscription.purchase_success": {
+    labelKey:
+      "admin.settings.emailTemplates.eventLabels.subscriptionPurchaseSuccess",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.subscriptionPurchaseSuccess",
+  },
+  "subscription.expiry_reminder": {
+    labelKey:
+      "admin.settings.emailTemplates.eventLabels.subscriptionExpiryReminder",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.subscriptionExpiryReminder",
+  },
+  "balance.low": {
+    labelKey: "admin.settings.emailTemplates.eventLabels.balanceLow",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.balanceLow",
+  },
+  "balance.recharge_success": {
+    labelKey:
+      "admin.settings.emailTemplates.eventLabels.balanceRechargeSuccess",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.balanceRechargeSuccess",
+  },
+  "account.quota_alert": {
+    labelKey: "admin.settings.emailTemplates.eventLabels.accountQuotaAlert",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.accountQuotaAlert",
+  },
+  "content_moderation.violation_notice": {
+    labelKey:
+      "admin.settings.emailTemplates.eventLabels.contentModerationViolation",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.contentModerationViolation",
+  },
+  "content_moderation.account_disabled": {
+    labelKey:
+      "admin.settings.emailTemplates.eventLabels.contentModerationDisabled",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.contentModerationDisabled",
+  },
+  "ops.alert": {
+    labelKey: "admin.settings.emailTemplates.eventLabels.opsAlert",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.opsAlert",
+  },
+  "ops.scheduled_report": {
+    labelKey: "admin.settings.emailTemplates.eventLabels.opsScheduledReport",
+    descriptionKey:
+      "admin.settings.emailTemplates.eventDescriptions.opsScheduledReport",
+  },
+};
+
 const fallbackPlaceholders = [
   "{{site_name}}",
   "{{recipient_name}}",
@@ -281,10 +353,27 @@ function normalizeEventOption(option: EmailTemplateEventOption): EmailTemplateOp
   return option;
 }
 
+function getLocalizedEventLabel(option: EmailTemplateOption): string {
+  const translation = EMAIL_TEMPLATE_EVENT_TRANSLATIONS[option.value];
+  if (translation) {
+    return t(translation.labelKey);
+  }
+  return option.label || option.value;
+}
+
+function getLocalizedEventDescription(option: EmailTemplateOption | undefined): string {
+  if (!option) return "";
+
+  const translation = EMAIL_TEMPLATE_EVENT_TRANSLATIONS[option.value];
+  if (translation) {
+    return t(translation.descriptionKey);
+  }
+  return option.description || "";
+}
+
 const selectedEventDescription = computed(() => {
-  return (
-    eventOptions.value.find((option) => option.value === selectedEvent.value)
-      ?.description || ""
+  return getLocalizedEventDescription(
+    eventOptions.value.find((option) => option.value === selectedEvent.value),
   );
 });
 

@@ -6240,7 +6240,35 @@ export default {
         validationRequired: '主题和 HTML 模板不能为空',
         empty: '暂无可用的邮件模板事件或语言。',
         noPreview: '刷新预览后查看渲染后的邮件主题。',
-        customized: '已自定义'
+        customized: '已自定义',
+        eventLabels: {
+          authVerifyCode: '邮箱验证码',
+          authPasswordReset: '密码重置',
+          notificationEmailVerifyCode: '通知邮箱验证码',
+          subscriptionPurchaseSuccess: '订阅购买成功',
+          subscriptionExpiryReminder: '订阅到期提醒',
+          balanceLow: '余额不足提醒',
+          balanceRechargeSuccess: '余额充值成功',
+          accountQuotaAlert: '账号配额提醒',
+          contentModerationViolation: '风控违规通知',
+          contentModerationDisabled: '风控封禁通知',
+          opsAlert: '运维告警',
+          opsScheduledReport: '运维定时报表'
+        },
+        eventDescriptions: {
+          authVerifyCode: '用于注册、邮箱绑定、OAuth 待补邮箱和 TOTP 验证等流程。',
+          authPasswordReset: '当用户请求密码重置链接时发送。',
+          notificationEmailVerifyCode: '当用户验证额外通知邮箱地址时发送。',
+          subscriptionPurchaseSuccess: '在订阅购买完成后发送。',
+          subscriptionExpiryReminder: '可选提醒，在有效订阅到期前发送。',
+          balanceLow: '可选提醒，当余额低于配置阈值时发送。',
+          balanceRechargeSuccess: '在余额充值订单完成后发送。',
+          accountQuotaAlert: '当上游账号配额触发阈值时，发送给已配置的管理员通知邮箱。',
+          contentModerationViolation: '当请求触发内容审核或风控规则时发送给用户。',
+          contentModerationDisabled: '当内容审核自动禁用用户账号时发送给用户。',
+          opsAlert: '当运维告警规则触发时发送给已配置的运维收件人。',
+          opsScheduledReport: '按计划向已配置的运维收件人发送日报、周报、错误报表或账号健康报表。'
+        }
       },
       opsMonitoring: {
         title: '运维监控',

@@ -6066,7 +6066,35 @@ export default {
         validationRequired: 'Subject and HTML template are required',
         empty: 'No email template events or locales are available yet.',
         noPreview: 'Refresh the preview to see the rendered email subject.',
-        customized: 'Customized'
+        customized: 'Customized',
+        eventLabels: {
+          authVerifyCode: 'Email verification code',
+          authPasswordReset: 'Password reset',
+          notificationEmailVerifyCode: 'Notification email verification code',
+          subscriptionPurchaseSuccess: 'Subscription purchase success',
+          subscriptionExpiryReminder: 'Subscription expiry reminder',
+          balanceLow: 'Low balance alert',
+          balanceRechargeSuccess: 'Balance recharge success',
+          accountQuotaAlert: 'Account quota alert',
+          contentModerationViolation: 'Risk control violation notice',
+          contentModerationDisabled: 'Risk control account disabled',
+          opsAlert: 'Ops alert',
+          opsScheduledReport: 'Ops scheduled report'
+        },
+        eventDescriptions: {
+          authVerifyCode: 'Sent for registration, email binding, OAuth pending email, and TOTP verification flows.',
+          authPasswordReset: 'Sent when a user requests a password reset link.',
+          notificationEmailVerifyCode: 'Sent when a user verifies an extra notification email address.',
+          subscriptionPurchaseSuccess: 'Sent after a subscription purchase is fulfilled.',
+          subscriptionExpiryReminder: 'Optional reminder sent before an active subscription expires.',
+          balanceLow: 'Optional alert sent when balance crosses the configured low-balance threshold.',
+          balanceRechargeSuccess: 'Sent after a balance recharge order is fulfilled.',
+          accountQuotaAlert: 'Sent to configured admin notification emails when an upstream account quota threshold is crossed.',
+          contentModerationViolation: 'Sent to users when a request triggers content moderation or risk control rules.',
+          contentModerationDisabled: 'Sent to users when content moderation automatically disables their account.',
+          opsAlert: 'Sent to configured operations recipients when an ops alert rule fires.',
+          opsScheduledReport: 'Sent to configured operations recipients for scheduled daily, weekly, error, or account health reports.'
+        }
       },
       opsMonitoring: {
         title: 'Ops Monitoring',
