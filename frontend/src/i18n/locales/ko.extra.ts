@@ -96,6 +96,13 @@ const messages = {
 }
 
 const recentI18nPatch = {
+  keyUsage: {
+    dateRange90d: '90일',
+    dailyDetail: '일별 상세',
+    date: '날짜',
+    cacheWriteTokens: '캐시 쓰기',
+    noDailyUsage: '일별 사용량 데이터가 없습니다'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: '이 사이트에는 WeChat 모바일 앱 로그인만 설정되어 있습니다. 네이티브 앱에서 WeChat SDK를 통해 계속하세요.'
@@ -107,6 +114,24 @@ const recentI18nPatch = {
     copiedCode: '복사됨 ✓'
   },
   admin: {
+    redeem: {
+      batchUpdate: '일괄 수정',
+      batchUpdateTitle: '교환 코드 일괄 수정',
+      selectedCount: '교환 코드 {count}개 선택됨',
+      clearSelection: '선택 해제',
+      selectCodesFirst: '먼저 교환 코드를 선택하세요',
+      noBatchFieldsSelected: '수정할 필드를 하나 이상 선택하세요',
+      batchUpdateSuccess: '교환 코드 {count}개를 수정했습니다',
+      failedToBatchUpdate: '교환 코드 일괄 수정에 실패했습니다',
+      batchFields: {
+        status: '상태',
+        expiresAt: '만료 시간',
+        notes: '메모',
+        group: '그룹'
+      },
+      batchNotesPlaceholder: '새 메모를 입력하세요. 비워 두면 메모를 지웁니다',
+      clearGroup: '그룹 비우기'
+    },
     groups: {
       rateMultiplierBadge: '{rate}x 요율',
       copyAccounts: {

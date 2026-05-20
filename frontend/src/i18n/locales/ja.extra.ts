@@ -1,4 +1,11 @@
 export default {
+  keyUsage: {
+    dateRange90d: '90日',
+    dailyDetail: '日次明細',
+    date: '日付',
+    cacheWriteTokens: 'キャッシュ書き込み',
+    noDailyUsage: '日次使用量データがありません'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'このサイトでは WeChat モバイルアプリログインのみが設定されています。ネイティブアプリから WeChat SDK 経由で続行してください。'
@@ -10,6 +17,24 @@ export default {
     copiedCode: 'コピーしました ✓'
   },
   admin: {
+    redeem: {
+      batchUpdate: '一括更新',
+      batchUpdateTitle: '引き換えコードを一括更新',
+      selectedCount: '{count} 件の引き換えコードを選択中',
+      clearSelection: '選択を解除',
+      selectCodesFirst: '先に引き換えコードを選択してください',
+      noBatchFieldsSelected: '更新する項目を少なくとも 1 つ選択してください',
+      batchUpdateSuccess: '{count} 件の引き換えコードを更新しました',
+      failedToBatchUpdate: '引き換えコードの一括更新に失敗しました',
+      batchFields: {
+        status: '状態',
+        expiresAt: '有効期限',
+        notes: '備考',
+        group: 'グループ'
+      },
+      batchNotesPlaceholder: '新しいメモを入力してください。空欄でメモをクリアします',
+      clearGroup: 'グループをクリア'
+    },
     groups: {
       rateMultiplierBadge: 'レート {rate}x',
       copyAccounts: {

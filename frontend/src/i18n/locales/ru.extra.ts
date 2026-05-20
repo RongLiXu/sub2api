@@ -96,6 +96,13 @@ const messages = {
 }
 
 const recentI18nPatch = {
+  keyUsage: {
+    dateRange90d: '90 дней',
+    dailyDetail: 'Детализация по дням',
+    date: 'Дата',
+    cacheWriteTokens: 'Запись кэша',
+    noDailyUsage: 'Нет данных по ежедневному использованию'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'На этом сайте настроен только вход WeChat через мобильное приложение. Продолжите из нативного приложения через WeChat SDK.'
@@ -107,6 +114,24 @@ const recentI18nPatch = {
     copiedCode: 'Скопировано ✓'
   },
   admin: {
+    redeem: {
+      batchUpdate: 'Массовое обновление',
+      batchUpdateTitle: 'Массовое обновление кодов погашения',
+      selectedCount: 'Выбрано кодов погашения: {count}',
+      clearSelection: 'Очистить выбор',
+      selectCodesFirst: 'Сначала выберите коды погашения',
+      noBatchFieldsSelected: 'Выберите хотя бы одно поле для обновления',
+      batchUpdateSuccess: 'Обновлено кодов погашения: {count}',
+      failedToBatchUpdate: 'Не удалось массово обновить коды погашения',
+      batchFields: {
+        status: 'Статус',
+        expiresAt: 'Срок действия',
+        notes: 'Примечания',
+        group: 'Группа'
+      },
+      batchNotesPlaceholder: 'Введите новую заметку или оставьте пустым, чтобы очистить ее',
+      clearGroup: 'Очистить группу'
+    },
     groups: {
       rateMultiplierBadge: 'Тариф {rate}x',
       copyAccounts: {

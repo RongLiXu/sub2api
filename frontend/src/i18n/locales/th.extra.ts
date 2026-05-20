@@ -96,6 +96,13 @@ const messages = {
 }
 
 const recentI18nPatch = {
+  keyUsage: {
+    dateRange90d: '90 วัน',
+    dailyDetail: 'รายละเอียดรายวัน',
+    date: 'วันที่',
+    cacheWriteTokens: 'เขียนแคช',
+    noDailyUsage: 'ยังไม่มีข้อมูลการใช้งานรายวัน'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'ไซต์นี้ตั้งค่าเฉพาะการเข้าสู่ระบบ WeChat ผ่านแอปมือถือ โปรดดำเนินการต่อจากแอป native ผ่าน WeChat SDK'
@@ -107,6 +114,24 @@ const recentI18nPatch = {
     copiedCode: 'คัดลอกแล้ว ✓'
   },
   admin: {
+    redeem: {
+      batchUpdate: 'แก้ไขเป็นชุด',
+      batchUpdateTitle: 'แก้ไขรหัสแลกเป็นชุด',
+      selectedCount: 'เลือกแล้ว {count} รหัสแลก',
+      clearSelection: 'ล้างการเลือก',
+      selectCodesFirst: 'กรุณาเลือกรหัสแลกก่อน',
+      noBatchFieldsSelected: 'กรุณาเลือกอย่างน้อยหนึ่งฟิลด์ที่ต้องการแก้ไข',
+      batchUpdateSuccess: 'แก้ไขรหัสแลกสำเร็จ {count} รายการ',
+      failedToBatchUpdate: 'แก้ไขรหัสแลกเป็นชุดไม่สำเร็จ',
+      batchFields: {
+        status: 'สถานะ',
+        expiresAt: 'เวลาหมดอายุ',
+        notes: 'หมายเหตุ',
+        group: 'กลุ่ม'
+      },
+      batchNotesPlaceholder: 'กรอกหมายเหตุใหม่ หรือเว้นว่างเพื่อล้างหมายเหตุ',
+      clearGroup: 'ล้างกลุ่ม'
+    },
     groups: {
       rateMultiplierBadge: 'อัตรา {rate}x',
       copyAccounts: {

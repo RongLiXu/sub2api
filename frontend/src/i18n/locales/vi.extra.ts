@@ -1,4 +1,11 @@
 export default {
+  keyUsage: {
+    dateRange90d: '90 ngay',
+    dailyDetail: 'Chi tiet theo ngay',
+    date: 'Ngay',
+    cacheWriteTokens: 'Ghi cache',
+    noDailyUsage: 'Khong co du lieu su dung theo ngay'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'Trang này chỉ cấu hình đăng nhập WeChat bằng ứng dụng di động. Vui lòng tiếp tục từ ứng dụng native qua WeChat SDK.'
@@ -10,6 +17,24 @@ export default {
     copiedCode: 'Đã sao chép ✓'
   },
   admin: {
+    redeem: {
+      batchUpdate: 'Cap nhat hang loat',
+      batchUpdateTitle: 'Cap nhat hang loat ma doi',
+      selectedCount: 'Da chon {count} ma doi',
+      clearSelection: 'Bo chon',
+      selectCodesFirst: 'Hay chon ma doi truoc',
+      noBatchFieldsSelected: 'Hay chon it nhat mot truong can cap nhat',
+      batchUpdateSuccess: 'Da cap nhat {count} ma doi',
+      failedToBatchUpdate: 'Cap nhat hang loat ma doi that bai',
+      batchFields: {
+        status: 'Trang thai',
+        expiresAt: 'Ngay het han',
+        notes: 'Ghi chu',
+        group: 'Nhom'
+      },
+      batchNotesPlaceholder: 'Nhap ghi chu moi, de trong de xoa ghi chu',
+      clearGroup: 'Xoa nhom'
+    },
     groups: {
       rateMultiplierBadge: 'Hệ số {rate}x',
       copyAccounts: {

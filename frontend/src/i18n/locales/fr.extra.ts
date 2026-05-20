@@ -96,6 +96,13 @@ const messages = {
 }
 
 const recentI18nPatch = {
+  keyUsage: {
+    dateRange90d: '90 jours',
+    dailyDetail: 'Detail quotidien',
+    date: 'Date',
+    cacheWriteTokens: 'Ecriture cache',
+    noDailyUsage: 'Aucune donnee d usage quotidienne'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'Ce site ne configure que la connexion WeChat via application mobile. Continuez depuis l’application native via le SDK WeChat.'
@@ -107,6 +114,24 @@ const recentI18nPatch = {
     copiedCode: 'Copié ✓'
   },
   admin: {
+    redeem: {
+      batchUpdate: 'Mise a jour en lot',
+      batchUpdateTitle: 'Mise a jour en lot des codes de recharge',
+      selectedCount: '{count} code(s) de recharge selectionne(s)',
+      clearSelection: 'Effacer la selection',
+      selectCodesFirst: 'Selectionnez d abord des codes de recharge',
+      noBatchFieldsSelected: 'Selectionnez au moins un champ a mettre a jour',
+      batchUpdateSuccess: '{count} code(s) de recharge mis a jour',
+      failedToBatchUpdate: 'Echec de la mise a jour en lot des codes de recharge',
+      batchFields: {
+        status: 'Statut',
+        expiresAt: 'Date d expiration',
+        notes: 'Notes',
+        group: 'Groupe'
+      },
+      batchNotesPlaceholder: 'Saisissez la nouvelle note, ou laissez vide pour la supprimer',
+      clearGroup: 'Effacer le groupe'
+    },
     groups: {
       rateMultiplierBadge: 'Tarif {rate}x',
       copyAccounts: {
