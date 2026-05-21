@@ -506,6 +506,7 @@ func (h *GatewayHandler) Messages(c *gin.Context) {
 			if result.ReasoningEffort == nil {
 				result.ReasoningEffort = service.NormalizeClaudeOutputEffort(parsedReq.OutputEffort)
 			}
+			stampUsageRequestID(c.Request.Context(), result)
 
 			// 使用量记录通过有界 worker 池提交，避免请求热路径创建无界 goroutine。
 			h.submitUsageRecordTask(func(ctx context.Context) {
@@ -896,6 +897,7 @@ func (h *GatewayHandler) Messages(c *gin.Context) {
 			if result.ReasoningEffort == nil {
 				result.ReasoningEffort = service.NormalizeClaudeOutputEffort(parsedReq.OutputEffort)
 			}
+			stampUsageRequestID(c.Request.Context(), result)
 
 			// 使用量记录通过有界 worker 池提交，避免请求热路径创建无界 goroutine。
 			h.submitUsageRecordTask(func(ctx context.Context) {
@@ -1896,6 +1898,36 @@ func (h *GatewayHandler) submitUsageRecordTask(task service.UsageRecordTask) {
 		}
 	}()
 	task(ctx)
+}
+
+func stableUsageRequestIDFromContext(ctx context.Context, fallback string) string {
+	if ctx != nil {
+		if clientRequestID, _ := ctx.Value(ctxkey.ClientRequestID).(string); strings.TrimSpace(clientRequestID) != "" {
+			return "client:" + strings.TrimSpace(clientRequestID)
+		}
+		if requestID, _ := ctx.Value(ctxkey.RequestID).(string); strings.TrimSpace(requestID) != "" {
+			return "local:" + strings.TrimSpace(requestID)
+		}
+	}
+	return strings.TrimSpace(fallback)
+}
+
+func stampUsageRequestID(ctx context.Context, result *service.ForwardResult) {
+	if result == nil {
+		return
+	}
+	if requestID := stableUsageRequestIDFromContext(ctx, result.RequestID); requestID != "" {
+		result.RequestID = requestID
+	}
+}
+
+func stampOpenAIUsageRequestID(ctx context.Context, result *service.OpenAIForwardResult) {
+	if result == nil {
+		return
+	}
+	if requestID := stableUsageRequestIDFromContext(ctx, result.RequestID); requestID != "" {
+		result.RequestID = requestID
+	}
 }
 
 // getUserMsgQueueMode 获取当前请求的 UMQ 模式

@@ -2966,6 +2966,7 @@ type antigravityStreamResult struct {
 	usage            *ClaudeUsage
 	firstTokenMs     *int
 	clientDisconnect bool // 客户端是否在流式传输过程中断开
+	text             string
 }
 
 // antigravityClientWriter 封装流式响应的客户端写入，自动检测断开并标记。
@@ -4270,15 +4271,14 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 		c.Status(resp.StatusCode)
 		_, _ = c.Writer.Write(respBody)
 
-		return &ForwardResult{
-			Model: originalModel,
-		}, nil
+		return nil, fmt.Errorf("upstream returned error status %d", resp.StatusCode)
 	}
 
 	// 处理成功响应（流式/非流式）
 	var usage *ClaudeUsage
 	var firstTokenMs *int
 	var clientDisconnect bool
+	responseText := ""
 
 	if claudeReq.Stream {
 		// 流式响应：透传
@@ -4292,6 +4292,7 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 		usage = streamRes.usage
 		firstTokenMs = streamRes.firstTokenMs
 		clientDisconnect = streamRes.clientDisconnect
+		responseText = streamRes.text
 	} else {
 		// 非流式响应：直接透传
 		respBody, err := io.ReadAll(resp.Body)
@@ -4301,17 +4302,20 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 
 		// 提取 usage
 		usage = s.extractClaudeUsage(respBody)
+		responseText = extractClaudeResponseText(respBody)
 
 		c.Header("Content-Type", resp.Header.Get("Content-Type"))
 		c.Status(http.StatusOK)
 		_, _ = c.Writer.Write(respBody)
 	}
+	usage = estimateMissingClaudeUsage(usage, body, responseText)
 
 	// 构建计费结果
 	duration := time.Since(startTime)
 	logger.LegacyPrintf("service.antigravity_gateway", "%s status=success duration_ms=%d", prefix, duration.Milliseconds())
 
 	return &ForwardResult{
+		RequestID:        resp.Header.Get("x-request-id"),
 		Model:            originalModel,
 		Stream:           claudeReq.Stream,
 		Duration:         duration,
@@ -4332,6 +4336,7 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 func (s *AntigravityGatewayService) streamUpstreamResponse(c *gin.Context, resp *http.Response, startTime time.Time) *antigravityStreamResult {
 	usage := &ClaudeUsage{}
 	var firstTokenMs *int
+	var text strings.Builder
 
 	scanner := bufio.NewScanner(resp.Body)
 	maxLineSize := defaultMaxLineSize
@@ -4407,14 +4412,14 @@ func (s *AntigravityGatewayService) streamUpstreamResponse(c *gin.Context, resp 
 		select {
 		case ev, ok := <-events:
 			if !ok {
-				return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs, clientDisconnect: cw.Disconnected()}
+				return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs, clientDisconnect: cw.Disconnected(), text: text.String()}
 			}
 			if ev.err != nil {
 				if disconnect, handled := handleStreamReadError(ev.err, cw.Disconnected(), "antigravity upstream"); handled {
-					return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs, clientDisconnect: disconnect}
+					return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs, clientDisconnect: disconnect, text: text.String()}
 				}
 				logger.LegacyPrintf("service.antigravity_gateway", "Stream read error (antigravity upstream): %v", ev.err)
-				return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs}
+				return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs, text: text.String()}
 			}
 
 			lastDataAt = time.Now()
@@ -4429,6 +4434,9 @@ func (s *AntigravityGatewayService) streamUpstreamResponse(c *gin.Context, resp 
 
 			// 尝试从 message_delta 或 message_stop 事件提取 usage
 			s.extractSSEUsage(line, usage)
+			if delta := extractClaudeSSEText(line); delta != "" {
+				text.WriteString(delta)
+			}
 
 			// 透传行
 			cw.Fprintf("%s\n", line)
@@ -4440,10 +4448,10 @@ func (s *AntigravityGatewayService) streamUpstreamResponse(c *gin.Context, resp 
 			}
 			if cw.Disconnected() {
 				logger.LegacyPrintf("service.antigravity_gateway", "Upstream timeout after client disconnect (antigravity upstream), returning collected usage")
-				return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs, clientDisconnect: true}
+				return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs, clientDisconnect: true, text: text.String()}
 			}
 			logger.LegacyPrintf("service.antigravity_gateway", "Stream data interval timeout (antigravity upstream)")
-			return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs}
+			return &antigravityStreamResult{usage: usage, firstTokenMs: firstTokenMs, text: text.String()}
 
 		case <-keepaliveCh:
 			if cw.Disconnected() {
@@ -4538,4 +4546,111 @@ func mergeAntigravityClaudeUsage(usage *ClaudeUsage, u map[string]any, stream bo
 			usage.CacheCreationInputTokens = total
 		}
 	}
+}
+
+func estimateMissingClaudeUsage(usage *ClaudeUsage, requestBody []byte, responseText string) *ClaudeUsage {
+	if usage == nil {
+		usage = &ClaudeUsage{}
+	}
+	if claudeUsageTotalTokens(usage) > 0 {
+		return usage
+	}
+	usage.InputTokens = estimateClaudeRequestTokens(requestBody)
+	usage.OutputTokens = estimateTokensForText(responseText)
+	return usage
+}
+
+func claudeUsageTotalTokens(usage *ClaudeUsage) int {
+	if usage == nil {
+		return 0
+	}
+	return usage.InputTokens + usage.OutputTokens + usage.CacheCreationInputTokens + usage.CacheReadInputTokens
+}
+
+func estimateClaudeRequestTokens(body []byte) int {
+	total := 0
+	addText := func(text string) {
+		total += estimateTokensForText(text)
+	}
+
+	system := gjson.GetBytes(body, "system")
+	switch {
+	case system.IsArray():
+		system.ForEach(func(_, item gjson.Result) bool {
+			addText(item.Get("text").String())
+			return true
+		})
+	case system.Type == gjson.String:
+		addText(system.String())
+	}
+
+	gjson.GetBytes(body, "messages").ForEach(func(_, msg gjson.Result) bool {
+		estimateClaudeContentTokens(msg.Get("content"), addText)
+		return true
+	})
+	return total
+}
+
+func estimateClaudeContentTokens(content gjson.Result, addText func(string)) {
+	switch {
+	case content.IsArray():
+		content.ForEach(func(_, block gjson.Result) bool {
+			switch block.Get("type").String() {
+			case "text":
+				addText(block.Get("text").String())
+			case "tool_use":
+				addText(block.Get("name").String())
+				addText(block.Get("input").Raw)
+			case "tool_result":
+				estimateClaudeContentTokens(block.Get("content"), addText)
+			}
+			return true
+		})
+	case content.Type == gjson.String:
+		addText(content.String())
+	}
+}
+
+func extractClaudeResponseText(body []byte) string {
+	var out strings.Builder
+	gjson.GetBytes(body, "content").ForEach(func(_, block gjson.Result) bool {
+		switch block.Get("type").String() {
+		case "text":
+			out.WriteString(block.Get("text").String())
+		case "tool_use":
+			out.WriteString(block.Get("name").String())
+			out.WriteString(block.Get("input").Raw)
+		}
+		return true
+	})
+	return out.String()
+}
+
+func extractClaudeSSEText(line string) string {
+	if !strings.HasPrefix(line, "data: ") {
+		return ""
+	}
+	dataStr := strings.TrimPrefix(line, "data: ")
+	var event map[string]any
+	if json.Unmarshal([]byte(dataStr), &event) != nil {
+		return ""
+	}
+	if delta, ok := event["delta"].(map[string]any); ok {
+		if text, _ := delta["text"].(string); text != "" {
+			return text
+		}
+		if partial, _ := delta["partial_json"].(string); partial != "" {
+			return partial
+		}
+	}
+	if block, ok := event["content_block"].(map[string]any); ok {
+		if text, _ := block["text"].(string); text != "" {
+			return text
+		}
+		if input, ok := block["input"]; ok {
+			raw, _ := json.Marshal(input)
+			return string(raw)
+		}
+	}
+	return ""
 }

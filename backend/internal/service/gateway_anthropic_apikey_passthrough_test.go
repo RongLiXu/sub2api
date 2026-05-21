@@ -469,7 +469,7 @@ func TestGatewayService_ManagedClaudeCacheRewriteCoversVertexAndBedrock(t *testi
 		Type:     AccountTypeBedrock,
 	}, body)
 	bedrockBody = enforceCacheControlLimit(bedrockBody)
-	prepared, err := PrepareBedrockRequestBodyWithTokens(bedrockBody, "us.anthropic.claude-opus-4-7-v1", nil)
+	prepared, err := PrepareBedrockRequestBodyWithTokens(bedrockBody, "us.anthropic.claude-opus-4-7-v1", nil, false)
 	require.NoError(t, err)
 	require.Equal(t, "ephemeral", gjson.GetBytes(prepared, "messages.0.content.0.cache_control.type").String())
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Wei-Shaw/sub2api/internal/pkg/ctxkey"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 	"github.com/stretchr/testify/require"
 )
@@ -158,6 +159,25 @@ func TestOpenAIGatewayHandlerSubmitMandatoryUsageRecordTask_DroppedTaskSyncFallb
 	close(release)
 
 	require.True(t, called.Load(), "mandatory usage task must run synchronously when async submit is dropped")
+}
+
+func TestStampUsageRequestIDPrefersRequestContext(t *testing.T) {
+	ctx := context.WithValue(context.Background(), ctxkey.RequestID, "local-1")
+	ctx = context.WithValue(ctx, ctxkey.ClientRequestID, "client-1")
+	result := &service.ForwardResult{RequestID: "upstream-1"}
+
+	stampUsageRequestID(ctx, result)
+
+	require.Equal(t, "client:client-1", result.RequestID)
+}
+
+func TestStampOpenAIUsageRequestIDUsesLocalFallback(t *testing.T) {
+	ctx := context.WithValue(context.Background(), ctxkey.RequestID, "local-openai-1")
+	result := &service.OpenAIForwardResult{RequestID: "upstream-openai-1"}
+
+	stampOpenAIUsageRequestID(ctx, result)
+
+	require.Equal(t, "local:local-openai-1", result.RequestID)
 }
 
 func TestOpenAIGatewayHandlerSubmitOpenAIUsageRecordTask_ImageResultUsesMandatoryFallback(t *testing.T) {

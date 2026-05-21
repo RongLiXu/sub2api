@@ -1334,6 +1334,77 @@ func TestAntigravityGatewayService_ExtractClaudeUsageFallbacks(t *testing.T) {
 	require.Equal(t, 8, usage.CacheCreation1hTokens)
 }
 
+func TestAntigravityGatewayService_ForwardUpstreamErrorDoesNotReturnUsageResult(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	svc := newAntigravityTestService(&config.Config{})
+	svc.httpUpstream = &httpUpstreamStub{
+		resp: &http.Response{
+			StatusCode: http.StatusBadGateway,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body:       io.NopCloser(strings.NewReader(`{"error":{"message":"bad gateway"}}`)),
+		},
+	}
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/messages", nil)
+	account := &Account{
+		ID:       1,
+		Name:     "upstream",
+		Type:     AccountTypeUpstream,
+		Platform: PlatformAntigravity,
+		Credentials: map[string]any{
+			"base_url": "https://upstream.example",
+			"api_key":  "sk-test",
+		},
+	}
+	body := []byte(`{"model":"claude-sonnet-4-6","messages":[{"role":"user","content":"hello"}]}`)
+
+	result, err := svc.ForwardUpstream(context.Background(), c, account, body)
+
+	require.Error(t, err)
+	require.Nil(t, result)
+	require.Equal(t, http.StatusBadGateway, rec.Code)
+}
+
+func TestAntigravityGatewayService_ForwardUpstreamEstimatesMissingUsage(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	svc := newAntigravityTestService(&config.Config{})
+	svc.httpUpstream = &httpUpstreamStub{
+		resp: &http.Response{
+			StatusCode: http.StatusOK,
+			Header: http.Header{
+				"Content-Type": []string{"application/json"},
+				"X-Request-Id": []string{"req-upstream-1"},
+			},
+			Body: io.NopCloser(strings.NewReader(`{"id":"msg_1","type":"message","role":"assistant","model":"claude-sonnet-4-6","content":[{"type":"text","text":"hello back"}],"usage":{"input_tokens":0,"output_tokens":0}}`)),
+		},
+	}
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/messages", nil)
+	account := &Account{
+		ID:       1,
+		Name:     "upstream",
+		Type:     AccountTypeUpstream,
+		Platform: PlatformAntigravity,
+		Credentials: map[string]any{
+			"base_url": "https://upstream.example",
+			"api_key":  "sk-test",
+		},
+	}
+	body := []byte(`{"model":"claude-sonnet-4-6","system":"be brief","messages":[{"role":"user","content":"hello there"}]}`)
+
+	result, err := svc.ForwardUpstream(context.Background(), c, account, body)
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Equal(t, "req-upstream-1", result.RequestID)
+	require.Greater(t, result.Usage.InputTokens, 0)
+	require.Greater(t, result.Usage.OutputTokens, 0)
+}
+
 // TestAntigravityClientWriter 验证 antigravityClientWriter 的断开检测
 func TestAntigravityClientWriter(t *testing.T) {
 	t.Run("normal write succeeds", func(t *testing.T) {

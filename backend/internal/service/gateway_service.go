@@ -7736,6 +7736,11 @@ func mergeSSEUsagePatch(usage *ClaudeUsage, patch *sseUsagePatch) {
 	if patch.hasCacheCreation1h {
 		usage.CacheCreation1hTokens = patch.cacheCreation1hTokens
 	}
+	if usage.CacheCreationInputTokens == 0 {
+		if total := usage.CacheCreation5mTokens + usage.CacheCreation1hTokens; total > 0 {
+			usage.CacheCreationInputTokens = total
+		}
+	}
 }
 
 func parseSSEUsageInt(value any) (int, bool) {
@@ -7860,6 +7865,11 @@ func (s *GatewayService) handleNonStreamingResponse(ctx context.Context, resp *h
 	if cc5m.Exists() || cc1h.Exists() {
 		response.Usage.CacheCreation5mTokens = int(cc5m.Int())
 		response.Usage.CacheCreation1hTokens = int(cc1h.Int())
+	}
+	if response.Usage.CacheCreationInputTokens == 0 {
+		if total := response.Usage.CacheCreation5mTokens + response.Usage.CacheCreation1hTokens; total > 0 {
+			response.Usage.CacheCreationInputTokens = total
+		}
 	}
 
 	// 兼容 Kimi cached_tokens → cache_read_input_tokens

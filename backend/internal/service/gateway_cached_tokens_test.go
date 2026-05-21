@@ -68,6 +68,20 @@ func TestReconcileCachedTokens_MissingCacheReadField(t *testing.T) {
 	assert.Equal(t, float64(42), usage["cache_read_input_tokens"])
 }
 
+func TestMergeSSEUsagePatch_AggregatesCacheCreationDetails(t *testing.T) {
+	usage := &ClaudeUsage{}
+	mergeSSEUsagePatch(usage, &sseUsagePatch{
+		cacheCreation5mTokens: 12,
+		hasCacheCreation5m:    true,
+		cacheCreation1hTokens: 8,
+		hasCacheCreation1h:    true,
+	})
+
+	require.Equal(t, 20, usage.CacheCreationInputTokens)
+	require.Equal(t, 12, usage.CacheCreation5mTokens)
+	require.Equal(t, 8, usage.CacheCreation1hTokens)
+}
+
 // ---------- 流式 message_start 事件 reconcile 测试 ----------
 
 func TestStreamingReconcile_MessageStart(t *testing.T) {

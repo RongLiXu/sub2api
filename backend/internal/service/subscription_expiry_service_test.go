@@ -75,15 +75,15 @@ func (r *subscriptionExpiryRepoStub) ActivateWindows(context.Context, int64, tim
 	return nil
 }
 
-func (r *subscriptionExpiryRepoStub) ResetDailyUsage(context.Context, int64, time.Time) error {
+func (r *subscriptionExpiryRepoStub) ResetDailyUsage(context.Context, int64, time.Time, float64) error {
 	return nil
 }
 
-func (r *subscriptionExpiryRepoStub) ResetWeeklyUsage(context.Context, int64, time.Time) error {
+func (r *subscriptionExpiryRepoStub) ResetWeeklyUsage(context.Context, int64, time.Time, float64) error {
 	return nil
 }
 
-func (r *subscriptionExpiryRepoStub) ResetMonthlyUsage(context.Context, int64, time.Time) error {
+func (r *subscriptionExpiryRepoStub) ResetMonthlyUsage(context.Context, int64, time.Time, float64) error {
 	return nil
 }
 
