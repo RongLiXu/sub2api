@@ -7647,6 +7647,9 @@ func (s *GatewayService) extractSSEUsagePatch(event map[string]any) *sseUsagePat
 		msg, _ := event["message"].(map[string]any)
 		usageObj, _ := msg["usage"].(map[string]any)
 		if len(usageObj) == 0 {
+			usageObj, _ = event["usage"].(map[string]any)
+		}
+		if len(usageObj) == 0 {
 			return nil
 		}
 
@@ -7711,7 +7714,46 @@ func (s *GatewayService) extractSSEUsagePatch(event map[string]any) *sseUsagePat
 		return patch
 	}
 
-	return nil
+	usageObj, _ := event["usage"].(map[string]any)
+	if len(usageObj) == 0 {
+		return nil
+	}
+	patch := &sseUsagePatch{}
+	if v, ok := parseSSEUsageInt(usageObj["input_tokens"]); ok && v > 0 {
+		patch.inputTokens = v
+		patch.hasInputTokens = true
+	}
+	if v, ok := parseSSEUsageInt(usageObj["output_tokens"]); ok && v > 0 {
+		patch.outputTokens = v
+		patch.hasOutputTokens = true
+	}
+	if v, ok := parseSSEUsageInt(usageObj["cache_creation_input_tokens"]); ok && v > 0 {
+		patch.cacheCreationInputTokens = v
+		patch.hasCacheCreationInput = true
+	}
+	if v, ok := parseSSEUsageInt(usageObj["cache_read_input_tokens"]); ok && v > 0 {
+		patch.cacheReadInputTokens = v
+		patch.hasCacheReadInput = true
+	} else if v, ok := parseSSEUsageInt(usageObj["cached_tokens"]); ok && v > 0 {
+		patch.cacheReadInputTokens = v
+		patch.hasCacheReadInput = true
+	}
+	if cc, ok := usageObj["cache_creation"].(map[string]any); ok {
+		if v, exists := parseSSEUsageInt(cc["ephemeral_5m_input_tokens"]); exists && v > 0 {
+			patch.cacheCreation5mTokens = v
+			patch.hasCacheCreation5m = true
+		}
+		if v, exists := parseSSEUsageInt(cc["ephemeral_1h_input_tokens"]); exists && v > 0 {
+			patch.cacheCreation1hTokens = v
+			patch.hasCacheCreation1h = true
+		}
+	}
+	if !patch.hasInputTokens && !patch.hasOutputTokens && !patch.hasCacheCreationInput &&
+		!patch.hasCacheReadInput && !patch.hasCacheCreation5m && !patch.hasCacheCreation1h {
+		return nil
+	}
+	return patch
+
 }
 
 func mergeSSEUsagePatch(usage *ClaudeUsage, patch *sseUsagePatch) {

@@ -118,6 +118,20 @@ func TestParseSSEUsage_UnknownType(t *testing.T) {
 	require.Equal(t, 0, usage.OutputTokens)
 }
 
+func TestParseSSEUsage_TopLevelUsageOnTerminalEvent(t *testing.T) {
+	svc := newMinimalGatewayService()
+	usage := &ClaudeUsage{}
+
+	svc.parseSSEUsage(`{"type":"message_stop","usage":{"input_tokens":14,"output_tokens":9,"cached_tokens":5,"cache_creation":{"ephemeral_5m_input_tokens":2,"ephemeral_1h_input_tokens":1}}}`, usage)
+
+	require.Equal(t, 14, usage.InputTokens)
+	require.Equal(t, 9, usage.OutputTokens)
+	require.Equal(t, 5, usage.CacheReadInputTokens)
+	require.Equal(t, 3, usage.CacheCreationInputTokens)
+	require.Equal(t, 2, usage.CacheCreation5mTokens)
+	require.Equal(t, 1, usage.CacheCreation1hTokens)
+}
+
 func TestParseSSEUsage_EmptyString(t *testing.T) {
 	svc := newMinimalGatewayService()
 	usage := &ClaudeUsage{}
