@@ -4435,7 +4435,7 @@ func (s *AntigravityGatewayService) streamUpstreamResponse(c *gin.Context, resp 
 			// 尝试从 message_delta 或 message_stop 事件提取 usage
 			s.extractSSEUsage(line, usage)
 			if delta := extractClaudeSSEText(line); delta != "" {
-				text.WriteString(delta)
+				_, _ = text.WriteString(delta)
 			}
 
 			// 透传行
@@ -4616,10 +4616,10 @@ func extractClaudeResponseText(body []byte) string {
 	gjson.GetBytes(body, "content").ForEach(func(_, block gjson.Result) bool {
 		switch block.Get("type").String() {
 		case "text":
-			out.WriteString(block.Get("text").String())
+			_, _ = out.WriteString(block.Get("text").String())
 		case "tool_use":
-			out.WriteString(block.Get("name").String())
-			out.WriteString(block.Get("input").Raw)
+			_, _ = out.WriteString(block.Get("name").String())
+			_, _ = out.WriteString(block.Get("input").Raw)
 		}
 		return true
 	})
