@@ -112,6 +112,11 @@ type CreateAccountRequest struct {
 	ConfirmMixedChannelRisk *bool          `json:"confirm_mixed_channel_risk"` // 用户确认混合渠道风险
 }
 
+// CloneAccountRequest represents clone account request.
+type CloneAccountRequest struct {
+	Name *string `json:"name"`
+}
+
 // UpdateAccountRequest represents update account request
 // 使用指针类型来区分"未提供"和"设置为0"
 type UpdateAccountRequest struct {
@@ -586,6 +591,146 @@ func (h *AccountHandler) Create(c *gin.Context) {
 	// 探测失败不影响账号创建响应。
 	h.scheduleOpenAIResponsesProbe(createdAccount)
 	response.Success(c, result.Data)
+}
+
+// Clone handles creating a new account from an existing account's stored configuration.
+// POST /api/v1/admin/accounts/:id/clone
+func (h *AccountHandler) Clone(c *gin.Context) {
+	accountID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid account ID")
+		return
+	}
+
+	var req CloneAccountRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	var createdAccount *service.Account
+	idempotencyPayload := struct {
+		SourceID int64               `json:"source_id"`
+		Request  CloneAccountRequest `json:"request"`
+	}{SourceID: accountID, Request: req}
+	result, err := executeAdminIdempotent(c, "admin.accounts.clone", idempotencyPayload, service.DefaultWriteIdempotencyTTL(), func(ctx context.Context) (any, error) {
+		source, getErr := h.adminService.GetAccount(ctx, accountID)
+		if getErr != nil {
+			return nil, getErr
+		}
+
+		name := strings.TrimSpace(source.Name + " Copy")
+		if req.Name != nil && strings.TrimSpace(*req.Name) != "" {
+			name = strings.TrimSpace(*req.Name)
+		}
+
+		clone, createErr := h.adminService.CreateAccount(ctx, &service.CreateAccountInput{
+			Name:                  name,
+			Notes:                 cloneStringPtr(source.Notes),
+			Platform:              source.Platform,
+			Type:                  source.Type,
+			Credentials:           cloneJSONMap(source.Credentials),
+			Extra:                 cloneJSONMap(source.Extra),
+			ProxyID:               cloneInt64Ptr(source.ProxyID),
+			Concurrency:           source.Concurrency,
+			Priority:              source.Priority,
+			RateMultiplier:        cloneFloat64Ptr(source.RateMultiplier),
+			LoadFactor:            cloneIntPtr(source.LoadFactor),
+			GroupIDs:              append([]int64(nil), source.GroupIDs...),
+			ExpiresAt:             unixPtrFromTimePtr(source.ExpiresAt),
+			AutoPauseOnExpired:    boolPtr(source.AutoPauseOnExpired),
+			SkipDefaultGroupBind:  true,
+			SkipMixedChannelCheck: true,
+		})
+		if createErr != nil {
+			return nil, createErr
+		}
+		createdAccount = clone
+		h.adminService.ForceAntigravityPrivacy(ctx, clone)
+		h.adminService.ForceOpenAIPrivacy(ctx, clone)
+		return h.buildAccountResponseWithRuntime(ctx, clone), nil
+	})
+	if err != nil {
+		if retryAfter := service.RetryAfterSecondsFromError(err); retryAfter > 0 {
+			c.Header("Retry-After", strconv.Itoa(retryAfter))
+		}
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	if result != nil && result.Replayed {
+		c.Header("X-Idempotency-Replayed", "true")
+	}
+	h.scheduleOpenAIResponsesProbe(createdAccount)
+	response.Success(c, result.Data)
+}
+
+func cloneJSONMap(in map[string]any) map[string]any {
+	if in == nil {
+		return nil
+	}
+	raw, err := json.Marshal(in)
+	if err != nil {
+		out := make(map[string]any, len(in))
+		for k, v := range in {
+			out[k] = v
+		}
+		return out
+	}
+	var out map[string]any
+	if err := json.Unmarshal(raw, &out); err != nil {
+		fallback := make(map[string]any, len(in))
+		for k, v := range in {
+			fallback[k] = v
+		}
+		return fallback
+	}
+	return out
+}
+
+func cloneStringPtr(in *string) *string {
+	if in == nil {
+		return nil
+	}
+	out := *in
+	return &out
+}
+
+func cloneInt64Ptr(in *int64) *int64 {
+	if in == nil {
+		return nil
+	}
+	out := *in
+	return &out
+}
+
+func cloneIntPtr(in *int) *int {
+	if in == nil {
+		return nil
+	}
+	out := *in
+	return &out
+}
+
+func cloneFloat64Ptr(in *float64) *float64 {
+	if in == nil {
+		return nil
+	}
+	out := *in
+	return &out
+}
+
+func boolPtr(in bool) *bool {
+	out := in
+	return &out
+}
+
+func unixPtrFromTimePtr(in *time.Time) *int64 {
+	if in == nil {
+		return nil
+	}
+	out := in.Unix()
+	return &out
 }
 
 // Update handles updating an account

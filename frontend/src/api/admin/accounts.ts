@@ -18,6 +18,7 @@ import type {
   AdminDataImportResult,
   CodexSessionImportRequest,
   CodexSessionImportResult,
+  CloneAccountRequest,
   CheckMixedChannelRequest,
   CheckMixedChannelResponse
 } from '@/types'
@@ -132,6 +133,17 @@ export async function getById(id: number): Promise<Account> {
  */
 export async function create(accountData: CreateAccountRequest): Promise<Account> {
   const { data } = await apiClient.post<Account>('/admin/accounts', accountData)
+  return data
+}
+
+/**
+ * Clone an existing account using server-side stored credentials.
+ * @param id - Source account ID
+ * @param payload - Optional cloned account name
+ * @returns Created cloned account
+ */
+export async function clone(id: number, payload: CloneAccountRequest = {}): Promise<Account> {
+  const { data } = await apiClient.post<Account>(`/admin/accounts/${id}/clone`, payload)
   return data
 }
 
@@ -659,6 +671,7 @@ export const accountsAPI = {
   listWithEtag,
   getById,
   create,
+  clone,
   update,
   checkMixedChannelRisk,
   delete: deleteAccount,

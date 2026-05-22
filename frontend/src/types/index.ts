@@ -1009,6 +1009,10 @@ export interface CreateAccountRequest {
   confirm_mixed_channel_risk?: boolean
 }
 
+export interface CloneAccountRequest {
+  name?: string
+}
+
 export interface UpdateAccountRequest {
   name?: string
   notes?: string | null
