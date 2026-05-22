@@ -1322,6 +1322,19 @@ func TestGatewayService_ParseSSEUsagePassthrough_FallbackFromUsageNode(t *testin
 	require.Equal(t, 3, usage.CacheCreationInputTokens)
 }
 
+func TestGatewayService_ParseSSEUsagePassthrough_TopLevelUsageOnTerminalEvent(t *testing.T) {
+	svc := &GatewayService{}
+	usage := &ClaudeUsage{}
+	data := `{"type":"message_stop","usage":{"input_tokens":14,"output_tokens":9,"cache_read_input_tokens":5,"cache_creation_input_tokens":3}}`
+
+	svc.parseSSEUsagePassthrough(data, usage)
+
+	require.Equal(t, 14, usage.InputTokens)
+	require.Equal(t, 9, usage.OutputTokens)
+	require.Equal(t, 5, usage.CacheReadInputTokens)
+	require.Equal(t, 3, usage.CacheCreationInputTokens)
+}
+
 func TestParseClaudeUsageFromResponseBody(t *testing.T) {
 	t.Run("empty or missing usage", func(t *testing.T) {
 		got := parseClaudeUsageFromResponseBody(nil)
@@ -1350,6 +1363,58 @@ func TestParseClaudeUsageFromResponseBody(t *testing.T) {
 		require.Equal(t, 9, got.CacheCreationInputTokens, "已显式提供聚合字段时不应被明细覆盖")
 		require.Equal(t, 7, got.CacheReadInputTokens, "已显式提供 cache_read_input_tokens 时不应回退 cached_tokens")
 	})
+}
+
+func TestParseClaudeUsageFromSSEBody(t *testing.T) {
+	body := []byte(strings.Join([]string{
+		`event: message_start`,
+		`data: {"type":"message_start","usage":{"input_tokens":18,"cache_read_input_tokens":4}}`,
+		``,
+		`event: message_stop`,
+		`data: {"type":"message_stop","usage":{"output_tokens":11}}`,
+		``,
+	}, "\n"))
+
+	got := parseClaudeUsageFromSSEBody(body)
+
+	require.Equal(t, 18, got.InputTokens)
+	require.Equal(t, 11, got.OutputTokens)
+	require.Equal(t, 4, got.CacheReadInputTokens)
+}
+
+func TestGatewayService_AnthropicAPIKeyPassthrough_NonStreamingSSEParsesUsage(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/messages", nil)
+
+	upstreamSSE := strings.Join([]string{
+		`event: message_start`,
+		`data: {"type":"message_start","message":{"usage":{"input_tokens":22,"cached_tokens":6}}}`,
+		``,
+		`event: message_delta`,
+		`data: {"type":"message_delta","usage":{"output_tokens":13}}`,
+		``,
+		`event: message_stop`,
+		`data: {"type":"message_stop"}`,
+		``,
+	}, "\n")
+	resp := &http.Response{
+		StatusCode: http.StatusOK,
+		Header: http.Header{
+			"Content-Type": []string{"text/event-stream"},
+		},
+		Body: io.NopCloser(strings.NewReader(upstreamSSE)),
+	}
+	svc := &GatewayService{cfg: &config.Config{}}
+
+	usage, err := svc.handleNonStreamingResponseAnthropicAPIKeyPassthrough(context.Background(), resp, c, &Account{ID: 1})
+
+	require.NoError(t, err)
+	require.Equal(t, 22, usage.InputTokens)
+	require.Equal(t, 13, usage.OutputTokens)
+	require.Equal(t, 6, usage.CacheReadInputTokens)
+	require.Contains(t, rec.Body.String(), "message_start")
 }
 
 func TestGatewayService_AnthropicAPIKeyPassthrough_StreamingErrTooLong(t *testing.T) {

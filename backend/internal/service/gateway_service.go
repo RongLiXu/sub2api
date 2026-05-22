@@ -5515,63 +5515,61 @@ func (s *GatewayService) parseSSEUsagePassthrough(data string, usage *ClaudeUsag
 	case "message_start":
 		msgUsage := parsed.Get("message.usage")
 		if msgUsage.Exists() {
-			usage.InputTokens = int(msgUsage.Get("input_tokens").Int())
-			usage.CacheCreationInputTokens = int(msgUsage.Get("cache_creation_input_tokens").Int())
-			usage.CacheReadInputTokens = int(msgUsage.Get("cache_read_input_tokens").Int())
-
-			// 保持与通用解析一致：message_start 允许覆盖 5m/1h 明细（包括 0）。
-			cc5m := msgUsage.Get("cache_creation.ephemeral_5m_input_tokens")
-			cc1h := msgUsage.Get("cache_creation.ephemeral_1h_input_tokens")
-			if cc5m.Exists() || cc1h.Exists() {
-				usage.CacheCreation5mTokens = int(cc5m.Int())
-				usage.CacheCreation1hTokens = int(cc1h.Int())
-			}
+			mergeClaudeUsageNode(usage, msgUsage, true)
+		} else if topUsage := parsed.Get("usage"); topUsage.Exists() {
+			mergeClaudeUsageNode(usage, topUsage, true)
 		}
 	case "message_delta":
 		deltaUsage := parsed.Get("usage")
 		if deltaUsage.Exists() {
-			if v := deltaUsage.Get("input_tokens").Int(); v > 0 {
-				usage.InputTokens = int(v)
-			}
-			if v := deltaUsage.Get("output_tokens").Int(); v > 0 {
-				usage.OutputTokens = int(v)
-			}
-			if v := deltaUsage.Get("cache_creation_input_tokens").Int(); v > 0 {
-				usage.CacheCreationInputTokens = int(v)
-			}
-			if v := deltaUsage.Get("cache_read_input_tokens").Int(); v > 0 {
-				usage.CacheReadInputTokens = int(v)
-			}
-
-			cc5m := deltaUsage.Get("cache_creation.ephemeral_5m_input_tokens")
-			cc1h := deltaUsage.Get("cache_creation.ephemeral_1h_input_tokens")
-			if cc5m.Exists() && cc5m.Int() > 0 {
-				usage.CacheCreation5mTokens = int(cc5m.Int())
-			}
-			if cc1h.Exists() && cc1h.Int() > 0 {
-				usage.CacheCreation1hTokens = int(cc1h.Int())
-			}
+			mergeClaudeUsageNode(usage, deltaUsage, false)
 		}
 	}
 
+	if genericUsage := parsed.Get("usage"); genericUsage.Exists() {
+		mergeClaudeUsageNode(usage, genericUsage, false)
+	}
+}
+
+func mergeClaudeUsageNode(usage *ClaudeUsage, node gjson.Result, overwrite bool) {
+	if usage == nil || !node.Exists() {
+		return
+	}
+	setInt := func(dst *int, field string) {
+		v := node.Get(field)
+		if !v.Exists() {
+			return
+		}
+		n := int(v.Int())
+		if overwrite || n > 0 {
+			*dst = n
+		}
+	}
+
+	setInt(&usage.InputTokens, "input_tokens")
+	setInt(&usage.OutputTokens, "output_tokens")
+	setInt(&usage.CacheCreationInputTokens, "cache_creation_input_tokens")
+	setInt(&usage.CacheReadInputTokens, "cache_read_input_tokens")
 	if usage.CacheReadInputTokens == 0 {
-		if cached := parsed.Get("message.usage.cached_tokens").Int(); cached > 0 {
+		if cached := node.Get("cached_tokens").Int(); cached > 0 {
 			usage.CacheReadInputTokens = int(cached)
 		}
-		if cached := parsed.Get("usage.cached_tokens").Int(); usage.CacheReadInputTokens == 0 && cached > 0 {
-			usage.CacheReadInputTokens = int(cached)
+	}
+
+	cc5m := node.Get("cache_creation.ephemeral_5m_input_tokens")
+	cc1h := node.Get("cache_creation.ephemeral_1h_input_tokens")
+	if cc5m.Exists() || cc1h.Exists() {
+		if overwrite || cc5m.Int() > 0 {
+			usage.CacheCreation5mTokens = int(cc5m.Int())
+		}
+		if overwrite || cc1h.Int() > 0 {
+			usage.CacheCreation1hTokens = int(cc1h.Int())
 		}
 	}
 	if usage.CacheCreationInputTokens == 0 {
-		cc5m := parsed.Get("message.usage.cache_creation.ephemeral_5m_input_tokens").Int()
-		cc1h := parsed.Get("message.usage.cache_creation.ephemeral_1h_input_tokens").Int()
-		if cc5m == 0 && cc1h == 0 {
-			cc5m = parsed.Get("usage.cache_creation.ephemeral_5m_input_tokens").Int()
-			cc1h = parsed.Get("usage.cache_creation.ephemeral_1h_input_tokens").Int()
-		}
-		total := cc5m + cc1h
+		total := usage.CacheCreation5mTokens + usage.CacheCreation1hTokens
 		if total > 0 {
-			usage.CacheCreationInputTokens = int(total)
+			usage.CacheCreationInputTokens = total
 		}
 	}
 }
@@ -5588,23 +5586,21 @@ func parseClaudeUsageFromResponseBody(body []byte) *ClaudeUsage {
 		return usage
 	}
 
-	usage.InputTokens = int(usageNode.Get("input_tokens").Int())
-	usage.OutputTokens = int(usageNode.Get("output_tokens").Int())
-	usage.CacheCreationInputTokens = int(usageNode.Get("cache_creation_input_tokens").Int())
-	usage.CacheReadInputTokens = int(usageNode.Get("cache_read_input_tokens").Int())
+	mergeClaudeUsageNode(usage, usageNode, true)
+	return usage
+}
 
-	cc5m := usageNode.Get("cache_creation.ephemeral_5m_input_tokens").Int()
-	cc1h := usageNode.Get("cache_creation.ephemeral_1h_input_tokens").Int()
-	if cc5m > 0 || cc1h > 0 {
-		usage.CacheCreation5mTokens = int(cc5m)
-		usage.CacheCreation1hTokens = int(cc1h)
+func parseClaudeUsageFromSSEBody(body []byte) *ClaudeUsage {
+	usage := &ClaudeUsage{}
+	if len(body) == 0 {
+		return usage
 	}
-	if usage.CacheCreationInputTokens == 0 && (cc5m > 0 || cc1h > 0) {
-		usage.CacheCreationInputTokens = int(cc5m + cc1h)
-	}
-	if usage.CacheReadInputTokens == 0 {
-		if cached := usageNode.Get("cached_tokens").Int(); cached > 0 {
-			usage.CacheReadInputTokens = int(cached)
+	scanner := bufio.NewScanner(bytes.NewReader(body))
+	scanner.Buffer(make([]byte, 0, 64*1024), defaultMaxLineSize)
+	svc := &GatewayService{}
+	for scanner.Scan() {
+		if data, ok := extractAnthropicSSEDataLine(scanner.Text()); ok {
+			svc.parseSSEUsagePassthrough(strings.TrimSpace(data), usage)
 		}
 	}
 	return usage
@@ -5626,6 +5622,11 @@ func (s *GatewayService) handleNonStreamingResponseAnthropicAPIKeyPassthrough(
 	}
 
 	usage := parseClaudeUsageFromResponseBody(body)
+	if usage != nil && usage.InputTokens == 0 && usage.OutputTokens == 0 &&
+		usage.CacheCreationInputTokens == 0 && usage.CacheReadInputTokens == 0 &&
+		(isEventStreamResponse(resp.Header) || bytes.Contains(body, []byte("\ndata:")) || bytes.HasPrefix(bytes.TrimSpace(body), []byte("data:"))) {
+		usage = parseClaudeUsageFromSSEBody(body)
+	}
 
 	writeAnthropicPassthroughResponseHeaders(c.Writer.Header(), resp.Header, s.responseHeaderFilter)
 	contentType := strings.TrimSpace(resp.Header.Get("Content-Type"))
