@@ -126,12 +126,19 @@
         :show-help="isAnthropic"
         :show-proxy-warning="isAnthropic"
         :show-cookie-option="isAnthropic"
+        :show-refresh-token-option="isOpenAILike || isAntigravity"
+        :show-mobile-refresh-token-option="isOpenAI"
+        :show-codex-session-import-option="isOpenAI"
         :allow-multiple="false"
         :method-label="t('admin.accounts.inputMethod')"
         :platform="isOpenAI ? 'openai' : isGemini ? 'gemini' : isAntigravity ? 'antigravity' : 'anthropic'"
         :show-project-id="isGemini && geminiOAuthType === 'code_assist'"
         @generate-url="handleGenerateUrl"
         @cookie-auth="handleCookieAuth"
+        @validate-refresh-token="handleValidateRefreshToken"
+        @validate-mobile-refresh-token="handleOpenAIValidateMobileRT"
+        @import-codex-session="handleOpenAIImportCodexSession"
+        @update:inputMethod="selectedInputMethod = $event"
       />
 
     </div>
@@ -234,6 +241,10 @@ const oauthFlowRef = ref<OAuthFlowExposed | null>(null)
 // State
 const addMethod = ref<AddMethod>('oauth')
 const geminiOAuthType = ref<'code_assist' | 'google_one' | 'ai_studio'>('code_assist')
+const selectedInputMethod = ref<AuthInputMethod>('manual')
+
+const OPENAI_STANDARD_CLIENT_ID = 'app_EMoamEEZ73f0CkXaXp7hrann'
+const OPENAI_MOBILE_RT_CLIENT_ID = 'app_LlGpXReQgckcGGUo2JrYvtJK'
 
 // Computed - check platform
 const isOpenAI = computed(() => props.account?.platform === 'openai')
@@ -270,8 +281,7 @@ const currentError = computed(() => {
 
 // Computed
 const isManualInputMethod = computed(() => {
-  // OpenAI/Gemini/Antigravity always use manual input (no cookie auth option)
-  return isOpenAILike.value || isGemini.value || isAntigravity.value || oauthFlowRef.value?.inputMethod === 'manual'
+  return selectedInputMethod.value === 'manual'
 })
 
 const canExchangeCode = computed(() => {
@@ -312,6 +322,7 @@ watch(
 const resetState = () => {
   addMethod.value = 'oauth'
   geminiOAuthType.value = 'code_assist'
+  selectedInputMethod.value = 'manual'
   claudeOAuth.resetState()
   openaiOAuth.resetState()
   geminiOAuth.resetState()
@@ -537,6 +548,325 @@ const handleCookieAuth = async (sessionKey: string) => {
       error.response?.data?.detail || t('admin.accounts.oauth.cookieAuthFailed')
   } finally {
     claudeOAuth.loading.value = false
+  }
+}
+
+const parseSingleCredentialInput = (
+  input: string,
+  emptyMessage: string,
+  multipleMessage: string
+): string | null => {
+  const trimmed = input.trim()
+  if (!trimmed) {
+    appStore.showError(emptyMessage)
+    return null
+  }
+
+  const values = trimmed
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean)
+  if (values.length > 1) {
+    appStore.showError(multipleMessage)
+    return null
+  }
+  return values[0] || null
+}
+
+const completeReauthorization = async (
+  updates: Parameters<typeof adminAPI.accounts.update>[1]
+) => {
+  if (!props.account) return
+
+  await adminAPI.accounts.update(props.account.id, updates)
+  const updatedAccount = await adminAPI.accounts.clearError(props.account.id)
+  appStore.showSuccess(t('admin.accounts.reAuthorizedSuccess'))
+  emit('reauthorized', updatedAccount)
+  handleClose()
+}
+
+const handleValidateRefreshToken = async (refreshTokenInput: string) => {
+  if (!props.account) return
+
+  if (isOpenAI.value) {
+    await handleOpenAIRefreshTokenReauth(refreshTokenInput)
+    return
+  }
+  if (isAntigravity.value) {
+    await handleAntigravityRefreshTokenReauth(refreshTokenInput)
+  }
+}
+
+const handleOpenAIValidateMobileRT = async (refreshTokenInput: string) => {
+  await handleOpenAIRefreshTokenReauth(refreshTokenInput, OPENAI_MOBILE_RT_CLIENT_ID)
+}
+
+const handleOpenAIRefreshTokenReauth = async (
+  refreshTokenInput: string,
+  clientId?: string
+) => {
+  if (!props.account || !isOpenAI.value) return
+
+  const refreshToken = parseSingleCredentialInput(
+    refreshTokenInput,
+    t('admin.accounts.oauth.openai.pleaseEnterRefreshToken'),
+    t('admin.accounts.oauth.singleCredentialOnly', '重新授权一次只能输入一个凭据')
+  )
+  if (!refreshToken) return
+
+  openaiOAuth.loading.value = true
+  openaiOAuth.error.value = ''
+  try {
+    const tokenInfo = await openaiOAuth.validateRefreshToken(
+      refreshToken,
+      props.account.proxy_id,
+      clientId
+    )
+    if (!tokenInfo) return
+
+    const credentials = openaiOAuth.buildCredentials(tokenInfo)
+    if (clientId) {
+      credentials.client_id = clientId
+    }
+    const extra = openaiOAuth.buildExtraInfo(tokenInfo)
+    await completeReauthorization({
+      type: 'oauth',
+      credentials,
+      extra
+    })
+  } catch (error: any) {
+    openaiOAuth.error.value =
+      error.response?.data?.detail || error.message || t('admin.accounts.oauth.authFailed')
+    appStore.showError(openaiOAuth.error.value)
+  } finally {
+    openaiOAuth.loading.value = false
+  }
+}
+
+const handleAntigravityRefreshTokenReauth = async (refreshTokenInput: string) => {
+  if (!props.account || !isAntigravity.value) return
+
+  const refreshToken = parseSingleCredentialInput(
+    refreshTokenInput,
+    t('admin.accounts.oauth.antigravity.pleaseEnterRefreshToken'),
+    t('admin.accounts.oauth.singleCredentialOnly', '重新授权一次只能输入一个凭据')
+  )
+  if (!refreshToken) return
+
+  antigravityOAuth.loading.value = true
+  antigravityOAuth.error.value = ''
+  try {
+    const tokenInfo = await antigravityOAuth.validateRefreshToken(refreshToken, props.account.proxy_id)
+    if (!tokenInfo) return
+
+    const credentials = antigravityOAuth.buildCredentials(tokenInfo)
+    await completeReauthorization({
+      type: 'oauth',
+      credentials
+    })
+  } catch (error: any) {
+    antigravityOAuth.error.value =
+      error.response?.data?.detail || error.message || t('admin.accounts.oauth.authFailed')
+    appStore.showError(antigravityOAuth.error.value)
+  } finally {
+    antigravityOAuth.loading.value = false
+  }
+}
+
+const handleOpenAIImportCodexSession = async (content: string) => {
+  if (!props.account || !isOpenAI.value) return
+
+  openaiOAuth.loading.value = true
+  openaiOAuth.error.value = ''
+  try {
+    const parsed = parseCodexSessionCredential(content)
+    const extra = openaiOAuth.buildExtraInfo(parsed.tokenInfo) || {}
+    extra.import_source = 'codex_session'
+    extra.imported_at = new Date().toISOString()
+
+    await completeReauthorization({
+      type: 'oauth',
+      credentials: parsed.credentials,
+      extra,
+      ...(parsed.expiresAt != null
+        ? { expires_at: parsed.expiresAt, auto_pause_on_expired: true }
+        : {})
+    })
+  } catch (error: any) {
+    openaiOAuth.error.value =
+      error.message ||
+      error.response?.data?.detail ||
+      t('admin.accounts.oauth.openai.codexSessionImportFailed')
+    appStore.showError(openaiOAuth.error.value)
+  } finally {
+    openaiOAuth.loading.value = false
+  }
+}
+
+const parseCodexSessionCredential = (content: string): {
+  credentials: Record<string, unknown>
+  tokenInfo: Record<string, unknown>
+  expiresAt: number | null
+} => {
+  const trimmed = content.trim()
+  if (!trimmed) {
+    throw new Error(t('admin.accounts.oauth.openai.codexSessionEmpty'))
+  }
+  if (trimmed.startsWith('[')) {
+    throw new Error(t('admin.accounts.oauth.singleCredentialOnly', '重新授权一次只能输入一个凭据'))
+  }
+
+  const lines = trimmed
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean)
+  if (!trimmed.startsWith('{') && lines.length > 1) {
+    throw new Error(t('admin.accounts.oauth.singleCredentialOnly', '重新授权一次只能输入一个凭据'))
+  }
+
+  const raw = trimmed.startsWith('{') ? JSON.parse(trimmed) : lines[0]
+  const accessToken = typeof raw === 'string'
+    ? raw
+    : firstStringAt(raw, ['tokens', 'access_token'], ['tokens', 'accessToken'], ['access_token'], ['accessToken'], ['token'])
+  if (!accessToken) {
+    throw new Error(t('admin.accounts.oauth.openai.codexSessionEmpty'))
+  }
+
+  const refreshToken = typeof raw === 'string'
+    ? ''
+    : firstStringAt(raw, ['tokens', 'refresh_token'], ['tokens', 'refreshToken'], ['refresh_token'], ['refreshToken'])
+  const idToken = typeof raw === 'string'
+    ? ''
+    : firstStringAt(raw, ['tokens', 'id_token'], ['tokens', 'idToken'], ['id_token'], ['idToken'])
+
+  const tokenInfo: Record<string, unknown> = {
+    access_token: accessToken
+  }
+  const credentials: Record<string, unknown> = {
+    access_token: accessToken
+  }
+
+  if (refreshToken) {
+    credentials.refresh_token = refreshToken
+    credentials.client_id = firstStringAt(raw, ['client_id'], ['clientId']) || OPENAI_STANDARD_CLIENT_ID
+  }
+  if (idToken) {
+    credentials.id_token = idToken
+  }
+
+  enrichOpenAITokenInfoFromJWT(tokenInfo, accessToken, true)
+  if (idToken) {
+    enrichOpenAITokenInfoFromJWT(tokenInfo, idToken, false)
+  }
+
+  if (typeof raw === 'object' && raw !== null) {
+    setTokenInfoIfPresent(tokenInfo, 'email', firstStringAt(raw, ['email'], ['user', 'email']))
+    setTokenInfoIfPresent(tokenInfo, 'name', firstStringAt(raw, ['name'], ['user', 'name']))
+    setTokenInfoIfPresent(tokenInfo, 'chatgpt_account_id', firstStringAt(raw, ['chatgpt_account_id'], ['chatgptAccountId'], ['account_id'], ['accountId'], ['account', 'id'], ['account', 'account_id'], ['account', 'chatgpt_account_id']))
+    setTokenInfoIfPresent(tokenInfo, 'chatgpt_user_id', firstStringAt(raw, ['chatgpt_user_id'], ['chatgptUserId'], ['user_id'], ['userId'], ['user', 'id']))
+    setTokenInfoIfPresent(tokenInfo, 'organization_id', firstStringAt(raw, ['organization_id'], ['organizationId'], ['org_id'], ['orgId']))
+    setTokenInfoIfPresent(tokenInfo, 'plan_type', firstStringAt(raw, ['plan_type'], ['planType'], ['account', 'plan_type'], ['account', 'planType']))
+  }
+
+  for (const key of ['email', 'chatgpt_account_id', 'chatgpt_user_id', 'organization_id', 'plan_type']) {
+    if (typeof tokenInfo[key] === 'string' && tokenInfo[key]) {
+      credentials[key] = tokenInfo[key]
+    }
+  }
+
+  const expiresAt = typeof tokenInfo.expires_at === 'number' ? tokenInfo.expires_at : null
+  if (!refreshToken && !expiresAt) {
+    throw new Error(t('admin.accounts.oauth.openai.codexSessionImportFailed'))
+  }
+  if (!refreshToken && expiresAt) {
+    credentials.expires_at = new Date(expiresAt * 1000).toISOString()
+  }
+
+  return {
+    credentials,
+    tokenInfo,
+    expiresAt: refreshToken ? null : expiresAt
+  }
+}
+
+const firstStringAt = (source: unknown, ...paths: string[][]): string => {
+  for (const path of paths) {
+    let current: unknown = source
+    for (const key of path) {
+      if (!current || typeof current !== 'object' || !(key in current)) {
+        current = undefined
+        break
+      }
+      current = (current as Record<string, unknown>)[key]
+    }
+    if (typeof current === 'string' && current.trim()) {
+      return current.trim()
+    }
+  }
+  return ''
+}
+
+const setTokenInfoIfPresent = (
+  target: Record<string, unknown>,
+  key: string,
+  value: string
+) => {
+  if (value) {
+    target[key] = value
+  }
+}
+
+const enrichOpenAITokenInfoFromJWT = (
+  tokenInfo: Record<string, unknown>,
+  token: string,
+  validateExpiry: boolean
+) => {
+  const claims = decodeJWTPayload(token)
+  if (!claims) return
+
+  if (validateExpiry && typeof claims.exp === 'number') {
+    const now = Math.floor(Date.now() / 1000)
+    if (now > claims.exp + 120) {
+      throw new Error(`access_token 已过期: ${new Date(claims.exp * 1000).toISOString()}`)
+    }
+    tokenInfo.expires_at = claims.exp
+  }
+
+  setTokenInfoIfPresent(tokenInfo, 'email', typeof claims.email === 'string' ? claims.email : '')
+
+  const openaiAuth = claims['https://api.openai.com/auth']
+  if (openaiAuth && typeof openaiAuth === 'object') {
+    const auth = openaiAuth as Record<string, unknown>
+    setTokenInfoIfPresent(tokenInfo, 'chatgpt_account_id', typeof auth.chatgpt_account_id === 'string' ? auth.chatgpt_account_id : '')
+    setTokenInfoIfPresent(tokenInfo, 'chatgpt_user_id', typeof auth.chatgpt_user_id === 'string' ? auth.chatgpt_user_id : '')
+    setTokenInfoIfPresent(tokenInfo, 'plan_type', typeof auth.chatgpt_plan_type === 'string' ? auth.chatgpt_plan_type : '')
+    setTokenInfoIfPresent(tokenInfo, 'organization_id', typeof auth.poid === 'string' ? auth.poid : '')
+    if (!tokenInfo.chatgpt_user_id && typeof auth.user_id === 'string') {
+      tokenInfo.chatgpt_user_id = auth.user_id
+    }
+  }
+
+  if (!tokenInfo.chatgpt_user_id && typeof claims.sub === 'string') {
+    tokenInfo.chatgpt_user_id = claims.sub
+  }
+}
+
+const decodeJWTPayload = (token: string): Record<string, unknown> | null => {
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+
+  try {
+    const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
+    const json = decodeURIComponent(
+      atob(padded)
+        .split('')
+        .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
+        .join('')
+    )
+    return JSON.parse(json) as Record<string, unknown>
+  } catch {
+    return null
   }
 }
 </script>
