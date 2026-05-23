@@ -55,9 +55,10 @@ func (s *GatewayService) ForwardAsChatCompletions(
 		return nil, fmt.Errorf("convert responses to anthropic: %w", err)
 	}
 
-	// 3. Force upstream streaming
-	anthropicReq.Stream = true
-	reqStream := true
+	// 3. Preserve the client stream mode. Forcing non-stream clients to upstream
+	// streaming makes cascaded Sub2API upstreams record an extra stream request.
+	anthropicReq.Stream = clientStream
+	reqStream := clientStream
 
 	// 4. Model mapping
 	mappedModel := originalModel
@@ -189,8 +190,10 @@ func (s *GatewayService) ForwardAsChatCompletions(
 	var handleErr error
 	if clientStream {
 		result, handleErr = s.handleCCStreamingFromAnthropic(resp, c, originalModel, mappedModel, reasoningEffort, startTime, includeUsage)
-	} else {
+	} else if isEventStreamResponse(resp.Header) {
 		result, handleErr = s.handleCCBufferedFromAnthropic(resp, c, originalModel, mappedModel, reasoningEffort, startTime)
+	} else {
+		result, handleErr = s.handleCCNonStreamingFromAnthropic(resp, c, originalModel, mappedModel, reasoningEffort, startTime)
 	}
 
 	return result, handleErr
@@ -264,6 +267,8 @@ func (s *GatewayService) handleCCBufferedFromAnthropic(
 		if err := json.Unmarshal([]byte(payload), &event); err != nil {
 			continue
 		}
+		mergeAnthropicRawUsageEvent(&usage, payload)
+		reconcileAnthropicStreamEventUsageFromRaw(&event, payload)
 
 		// message_start carries the initial response structure and cache usage
 		if event.Type == "message_start" && event.Message != nil {
@@ -341,6 +346,62 @@ func (s *GatewayService) handleCCBufferedFromAnthropic(
 	return &ForwardResult{
 		RequestID:       requestID,
 		Usage:           usage,
+		Model:           originalModel,
+		UpstreamModel:   mappedModel,
+		ReasoningEffort: reasoningEffort,
+		Stream:          false,
+		Duration:        time.Since(startTime),
+	}, nil
+}
+
+func (s *GatewayService) handleCCNonStreamingFromAnthropic(
+	resp *http.Response,
+	c *gin.Context,
+	originalModel string,
+	mappedModel string,
+	reasoningEffort *string,
+	startTime time.Time,
+) (*ForwardResult, error) {
+	requestID := resp.Header.Get("x-request-id")
+	body, err := ReadUpstreamResponseBody(resp.Body, s.cfg, c, anthropicTooLargeError)
+	if err != nil {
+		return nil, err
+	}
+
+	var anthropicResp apicompat.AnthropicResponse
+	if err := json.Unmarshal(body, &anthropicResp); err != nil {
+		writeGatewayCCError(c, http.StatusBadGateway, "server_error", "Failed to parse upstream response")
+		return nil, fmt.Errorf("parse anthropic response: %w", err)
+	}
+
+	usage := parseClaudeUsageFromResponseBody(body)
+	if usage != nil {
+		anthropicResp.Usage = apicompat.AnthropicUsage{
+			InputTokens:              usage.InputTokens,
+			OutputTokens:             usage.OutputTokens,
+			CacheCreationInputTokens: usage.CacheCreationInputTokens,
+			CacheReadInputTokens:     usage.CacheReadInputTokens,
+		}
+	} else {
+		usage = &ClaudeUsage{}
+	}
+
+	responsesResp := apicompat.AnthropicToResponsesResponse(&anthropicResp)
+	ccResp := apicompat.ResponsesToChatCompletions(responsesResp, originalModel)
+
+	if s.responseHeaderFilter != nil {
+		responseheaders.WriteFilteredHeaders(c.Writer.Header(), resp.Header, s.responseHeaderFilter)
+	}
+	if respBytes, err := json.Marshal(ccResp); err == nil {
+		respBytes = reverseToolNamesIfPresent(c, respBytes)
+		c.Data(http.StatusOK, "application/json; charset=utf-8", respBytes)
+	} else {
+		c.JSON(http.StatusOK, ccResp)
+	}
+
+	return &ForwardResult{
+		RequestID:       requestID,
+		Usage:           *usage,
 		Model:           originalModel,
 		UpstreamModel:   mappedModel,
 		ReasoningEffort: reasoningEffort,
@@ -465,6 +526,8 @@ func (s *GatewayService) handleCCStreamingFromAnthropic(
 		if err := json.Unmarshal([]byte(payload), &event); err != nil {
 			continue
 		}
+		mergeAnthropicRawUsageEvent(&usage, payload)
+		reconcileAnthropicStreamEventUsageFromRaw(&event, payload)
 
 		if processAnthropicEvent(&event) {
 			return resultWithUsage(), nil

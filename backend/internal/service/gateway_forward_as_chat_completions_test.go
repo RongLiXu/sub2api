@@ -66,7 +66,7 @@ func TestHandleCCBufferedFromAnthropic_PreservesMessageStartCacheUsageAndReasoni
 		Header: http.Header{"x-request-id": []string{"rid_cc_buffered"}},
 		Body: io.NopCloser(strings.NewReader(strings.Join([]string{
 			`event: message_start`,
-			`data: {"type":"message_start","message":{"id":"msg_1","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4.5","stop_reason":"","usage":{"input_tokens":12,"cache_read_input_tokens":9,"cache_creation_input_tokens":3}}}`,
+			`data: {"type":"message_start","message":{"id":"msg_1","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4.5","stop_reason":"","usage":{"input_tokens":12,"cache_read_input_tokens":0,"cached_tokens":9,"cache_creation_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":1,"ephemeral_1h_input_tokens":2}}}}`,
 			``,
 			`event: content_block_start`,
 			`data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":"hello"}}`,
@@ -85,6 +85,8 @@ func TestHandleCCBufferedFromAnthropic_PreservesMessageStartCacheUsageAndReasoni
 	require.Equal(t, 7, result.Usage.OutputTokens)
 	require.Equal(t, 9, result.Usage.CacheReadInputTokens)
 	require.Equal(t, 3, result.Usage.CacheCreationInputTokens)
+	require.Equal(t, 1, result.Usage.CacheCreation5mTokens)
+	require.Equal(t, 2, result.Usage.CacheCreation1hTokens)
 	require.NotNil(t, result.ReasoningEffort)
 	require.Equal(t, "high", *result.ReasoningEffort)
 }
@@ -101,7 +103,7 @@ func TestHandleCCStreamingFromAnthropic_PreservesMessageStartCacheUsageAndReason
 		Header: http.Header{"x-request-id": []string{"rid_cc_stream"}},
 		Body: io.NopCloser(strings.NewReader(strings.Join([]string{
 			`event: message_start`,
-			`data: {"type":"message_start","message":{"id":"msg_2","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4.5","stop_reason":"","usage":{"input_tokens":20,"cache_read_input_tokens":11,"cache_creation_input_tokens":4}}}`,
+			`data: {"type":"message_start","message":{"id":"msg_2","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4.5","stop_reason":"","usage":{"input_tokens":20,"cache_read_input_tokens":0,"cached_tokens":11,"cache_creation_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":3,"ephemeral_1h_input_tokens":1}}}}`,
 			``,
 			`event: content_block_start`,
 			`data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":"hello"}}`,
@@ -123,9 +125,54 @@ func TestHandleCCStreamingFromAnthropic_PreservesMessageStartCacheUsageAndReason
 	require.Equal(t, 8, result.Usage.OutputTokens)
 	require.Equal(t, 11, result.Usage.CacheReadInputTokens)
 	require.Equal(t, 4, result.Usage.CacheCreationInputTokens)
+	require.Equal(t, 3, result.Usage.CacheCreation5mTokens)
+	require.Equal(t, 1, result.Usage.CacheCreation1hTokens)
 	require.NotNil(t, result.ReasoningEffort)
 	require.Equal(t, "medium", *result.ReasoningEffort)
 	require.Contains(t, rec.Body.String(), `[DONE]`)
+}
+
+func TestHandleCCNonStreamingFromAnthropic_PreservesCacheUsageFallbacks(t *testing.T) {
+	t.Parallel()
+	gin.SetMode(gin.TestMode)
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+
+	reasoningEffort := "high"
+	resp := &http.Response{
+		Header: http.Header{"x-request-id": []string{"rid_cc_json"}},
+		Body: io.NopCloser(strings.NewReader(`{
+			"id":"msg_json",
+			"type":"message",
+			"role":"assistant",
+			"model":"claude-sonnet-4.5",
+			"content":[{"type":"text","text":"ok"}],
+			"stop_reason":"end_turn",
+			"usage":{
+				"input_tokens":21,
+				"output_tokens":5,
+				"cache_read_input_tokens":0,
+				"cached_tokens":13,
+				"cache_creation_input_tokens":0,
+				"cache_creation":{"ephemeral_5m_input_tokens":2,"ephemeral_1h_input_tokens":3}
+			}
+		}`)),
+	}
+
+	svc := &GatewayService{}
+	result, err := svc.handleCCNonStreamingFromAnthropic(resp, c, "gpt-5", "claude-sonnet-4.5", &reasoningEffort, time.Now())
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.False(t, result.Stream)
+	require.Equal(t, 21, result.Usage.InputTokens)
+	require.Equal(t, 5, result.Usage.OutputTokens)
+	require.Equal(t, 13, result.Usage.CacheReadInputTokens)
+	require.Equal(t, 5, result.Usage.CacheCreationInputTokens)
+	require.Equal(t, 2, result.Usage.CacheCreation5mTokens)
+	require.Equal(t, 3, result.Usage.CacheCreation1hTokens)
+	require.NotNil(t, result.ReasoningEffort)
+	require.Equal(t, "high", *result.ReasoningEffort)
 }
 
 func TestForwardAsChatCompletions_AnthropicAPIKey_PromotesStringSystemToStableCacheAnchor(t *testing.T) {
@@ -183,6 +230,7 @@ func TestForwardAsChatCompletions_AnthropicAPIKey_PromotesStringSystemToStableCa
 	result, err := svc.ForwardAsChatCompletions(t.Context(), c, newAnthropicAPIKeyAccountForTest(), body, nil)
 	require.NoError(t, err)
 	require.NotNil(t, result)
+	require.False(t, gjson.GetBytes(upstream.lastBody, "stream").Bool())
 	require.True(t, gjson.GetBytes(upstream.lastBody, "system").IsArray())
 	require.Equal(t, "stable system prompt", gjson.GetBytes(upstream.lastBody, "system.0.text").String())
 	require.Equal(t, "ephemeral", gjson.GetBytes(upstream.lastBody, "system.0.cache_control.type").String())
