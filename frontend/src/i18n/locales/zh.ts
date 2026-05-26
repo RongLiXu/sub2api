@@ -3889,6 +3889,7 @@ export default {
         sessionKey: 'sessionKey',
         keysCount: '{count} 个密钥',
         batchCreateAccounts: '将批量创建 {count} 个账号',
+        singleCredentialOnly: '重新授权一次只能输入一个凭据',
         sessionKeyPlaceholder:
           '每行一个 sessionKey，例如：\nsk-ant-sid01-xxxxx...\nsk-ant-sid01-yyyyy...',
         sessionKeyPlaceholderSingle: 'sk-ant-sid01-xxxxx...',
@@ -3953,6 +3954,8 @@ export default {
           refreshTokenAuth: '手动输入 RT',
           refreshTokenDesc: '输入您已有的 OpenAI Refresh Token，支持批量输入（每行一个），系统将自动验证并创建账号。',
           refreshTokenPlaceholder: '粘贴您的 OpenAI Refresh Token...\n支持多个，每行一个',
+          mobileRefreshTokenAuth: '手动输入 Mobile RT',
+          accessTokenAuth: '手动输入 AT',
           codexSessionAuth: 'Codex JSON / AT 批量输入',
           codexSessionDesc: '粘贴 Codex JSON 或 accessToken，按第一步配置创建账号。',
           codexSessionInputLabel: 'Codex JSON 或 accessToken',

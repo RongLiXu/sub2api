@@ -3442,6 +3442,8 @@ const messages = {
           "refreshTokenAuth": "Entrée RT manuelle",
           "refreshTokenDesc": "Entrez votre (vos) jeton(s) d'actualisation OpenAI existant. Prend en charge la saisie par lots (un par ligne). Le système validera et créera automatiquement des comptes.",
           "refreshTokenPlaceholder": "Collez votre jeton d'actualisation OpenAI...\nPrend en charge plusieurs, un par ligne",
+          "mobileRefreshTokenAuth": "Saisir le Mobile RT manuellement",
+          "accessTokenAuth": "Saisir l'AT manuellement",
           "codexSessionAuth": "Entrée par lots Codex JSON/AT",
           "codexSessionDesc": "Collez le Codex JSON ou un accessToken. Les comptes utilisent les paramètres de l'étape 1.",
           "codexSessionInputLabel": "Codex JSON ou accessToken",

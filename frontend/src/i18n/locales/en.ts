@@ -3735,6 +3735,7 @@ export default {
         sessionKey: 'sessionKey',
         keysCount: '{count} keys',
         batchCreateAccounts: 'Will batch create {count} accounts',
+        singleCredentialOnly: 'Only one credential can be entered per reauthorization.',
         sessionKeyPlaceholder:
           'One sessionKey per line, e.g.:\nsk-ant-sid01-xxxxx...\nsk-ant-sid01-yyyyy...',
         sessionKeyPlaceholderSingle: 'sk-ant-sid01-xxxxx...',
@@ -3804,6 +3805,8 @@ export default {
           refreshTokenAuth: 'Manual RT Input',
           refreshTokenDesc: 'Enter your existing OpenAI Refresh Token(s). Supports batch input (one per line). The system will automatically validate and create accounts.',
           refreshTokenPlaceholder: 'Paste your OpenAI Refresh Token...\nSupports multiple, one per line',
+          mobileRefreshTokenAuth: 'Manual Mobile RT Input',
+          accessTokenAuth: 'Manual AT Input',
           codexSessionAuth: 'Codex JSON / AT Batch Input',
           codexSessionDesc: 'Paste Codex JSON or an accessToken. Accounts use the step 1 settings.',
           codexSessionInputLabel: 'Codex JSON or accessToken',

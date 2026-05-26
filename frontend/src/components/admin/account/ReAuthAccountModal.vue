@@ -598,7 +598,7 @@ const handleOpenAIRefreshTokenReauth = async (
   const refreshToken = parseSingleCredentialInput(
     refreshTokenInput,
     t('admin.accounts.oauth.openai.pleaseEnterRefreshToken'),
-    t('admin.accounts.oauth.singleCredentialOnly', '重新授权一次只能输入一个凭据')
+    t('admin.accounts.oauth.singleCredentialOnly')
   )
   if (!refreshToken) return
 
@@ -637,7 +637,7 @@ const handleAntigravityRefreshTokenReauth = async (refreshTokenInput: string) =>
   const refreshToken = parseSingleCredentialInput(
     refreshTokenInput,
     t('admin.accounts.oauth.antigravity.pleaseEnterRefreshToken'),
-    t('admin.accounts.oauth.singleCredentialOnly', '重新授权一次只能输入一个凭据')
+    t('admin.accounts.oauth.singleCredentialOnly')
   )
   if (!refreshToken) return
 
@@ -701,7 +701,7 @@ const parseCodexSessionCredential = (content: string): {
     throw new Error(t('admin.accounts.oauth.openai.codexSessionEmpty'))
   }
   if (trimmed.startsWith('[')) {
-    throw new Error(t('admin.accounts.oauth.singleCredentialOnly', '重新授权一次只能输入一个凭据'))
+    throw new Error(t('admin.accounts.oauth.singleCredentialOnly'))
   }
 
   const lines = trimmed
@@ -709,7 +709,7 @@ const parseCodexSessionCredential = (content: string): {
     .map((item) => item.trim())
     .filter(Boolean)
   if (!trimmed.startsWith('{') && lines.length > 1) {
-    throw new Error(t('admin.accounts.oauth.singleCredentialOnly', '重新授权一次只能输入一个凭据'))
+    throw new Error(t('admin.accounts.oauth.singleCredentialOnly'))
   }
 
   const raw = trimmed.startsWith('{') ? JSON.parse(trimmed) : lines[0]
