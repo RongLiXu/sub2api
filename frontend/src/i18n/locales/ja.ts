@@ -2055,6 +2055,15 @@ const messages = {
         "title": "イメージ生成の価格",
         "description": "イメージ生成モデルの価格を構成します。デフォルトの価格を使用するには、空のままにします。"
       },
+      "modelsList": {
+        "title": "カスタム /v1/models モデル一覧",
+        "hint": "/v1/models の応答のみを変更します。ホワイトリストによるモデル呼び出しとアカウントルーティングは変更されません。",
+        "loading": "モデル一覧を読み込み中...",
+        "empty": "表示可能なモデルがありません",
+        "selectedSummary": "{selected} / {total} 件を選択",
+        "selectAll": "すべて選択",
+        "invertSelection": "選択を反転"
+      },
       "claudeCode": {
         "title": "クロードコードクライアント制限",
         "tooltip": "有効にすると、このグループは公式のクロード コード クライアントのみを許可します。非クロード コードのリクエストは拒否されるか、指定されたグループにフォールバックされます。",
@@ -3163,6 +3172,8 @@ const messages = {
       "poolModeInfo": "有効にすると、アップストリーム 429/403/401 エラーは、アカウントをレート制限またはエラーとしてマークせずに自動再試行されます。別の sub2api インスタンスを指すアップストリームに適しています。",
       "poolModeRetryCount": "同じアカウントの再試行",
       "poolModeRetryCountHint": "プール モードにのみ適用されます。インプレース再試行を無効にするには、0 を使用します。デフォルトは {default}、最大値は {max}。",
+      "poolModeRetryStatusCodes": "再試行ステータスコード",
+      "poolModeRetryStatusCodesHint": "プールモードで同一アカウントの再試行を発生させる HTTP ステータスコード (100-599) をカンマ区切りで指定します。空欄の場合はデフォルト値 ({default}) を使用します。",
       "customErrorCodes": "カスタムエラーコード",
       "customErrorCodesHint": "選択したエラー コードのスケジュールのみを停止します",
       "customErrorCodesWarning": "選択したエラー コードのみがスケジュールを停止します。その他のエラーでは 500 が返されます。",

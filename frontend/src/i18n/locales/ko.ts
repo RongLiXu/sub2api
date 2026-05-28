@@ -2105,6 +2105,15 @@ const messages = {
         "finalPricePreview": "최종 이미지당 가격 미리보기",
         "notConfigured": "구성되지 않음"
       },
+      "modelsList": {
+        "title": "사용자 지정 /v1/models 모델 목록",
+        "hint": "/v1/models 응답만 변경합니다. 화이트리스트 모델 호출과 계정 라우팅은 변경되지 않습니다.",
+        "loading": "모델 목록을 불러오는 중...",
+        "empty": "표시할 수 있는 모델이 없습니다",
+        "selectedSummary": "{selected}개 선택 / 전체 {total}개",
+        "selectAll": "전체 선택",
+        "invertSelection": "선택 반전"
+      },
       "claudeCode": {
         "title": "클로드 코드 클라이언트 제한 사항",
         "tooltip": "활성화되면 이 그룹은 공식 Claude Code 클라이언트만 허용합니다. 클로드 코드가 아닌 요청은 거부되거나 지정된 그룹으로 대체됩니다.",
@@ -3235,6 +3244,8 @@ const messages = {
       "poolModeInfo": "활성화되면 업스트림 429/403/401 오류는 계정을 속도 제한 또는 오류 발생으로 표시하지 않고 자동으로 재시도됩니다. 다른 sub2api 인스턴스를 가리키는 업스트림에 적합합니다.",
       "poolModeRetryCount": "동일 계정 재시도",
       "poolModeRetryCountHint": "풀 모드에만 적용됩니다. 내부 재시도를 비활성화하려면 0을 사용합니다. 기본값은 {default}, 최대값은 {max}입니다.",
+      "poolModeRetryStatusCodes": "재시도 상태 코드",
+      "poolModeRetryStatusCodesHint": "풀 모드에서 동일 계정 재시도를 트리거할 HTTP 상태 코드(100-599)를 쉼표로 구분해 입력합니다. 비워 두면 기본값({default})을 사용합니다.",
       "customErrorCodes": "사용자 정의 오류 코드",
       "customErrorCodesHint": "선택한 오류 코드에 대해서만 예약 중지",
       "customErrorCodesWarning": "선택한 오류 코드만 예약을 중지합니다. 다른 오류는 500을 반환합니다.",

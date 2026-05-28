@@ -2086,6 +2086,15 @@ const messages = {
         "finalPricePreview": "Aperçu du prix final par image",
         "notConfigured": "Non configuré"
       },
+      "modelsList": {
+        "title": "Liste de modèles /v1/models personnalisée",
+        "hint": "Modifie uniquement la réponse de /v1/models. Les appels de modèles en liste blanche et le routage des comptes restent inchangés.",
+        "loading": "Chargement de la liste des modèles...",
+        "empty": "Aucun modèle affichable",
+        "selectedSummary": "{selected} sélectionnés / {total}",
+        "selectAll": "Tout sélectionner",
+        "invertSelection": "Inverser la sélection"
+      },
       "claudeCode": {
         "title": "Claude Code Client Restriction",
         "tooltip": "Lorsqu'il est activé, ce groupe autorise uniquement les clients officiels de Claude Code. Les demandes de code non Claude seront rejetées ou renvoyées au groupe spécifié.",
@@ -3213,6 +3222,8 @@ const messages = {
       "poolModeInfo": "Lorsqu'elles sont activées, les erreurs 429/403/401 en amont effectueront une nouvelle tentative sans marquer le compte comme étant à débit limité ou erroné. Convient pour le pointage en amont vers une autre instance sub2api.",
       "poolModeRetryCount": "Nouvelles tentatives avec le même compte",
       "poolModeRetryCountHint": "S'applique uniquement en mode piscine. Utilisez 0 pour désactiver la nouvelle tentative sur place. Par défaut {default}, maximum {max}.",
+      "poolModeRetryStatusCodes": "Codes d'état de nouvelle tentative",
+      "poolModeRetryStatusCodesHint": "Codes d'état HTTP séparés par des virgules (100-599) qui déclenchent une nouvelle tentative avec le même compte en mode pool. Laissez vide pour utiliser les valeurs par défaut ({default}).",
       "customErrorCodes": "Codes d'erreur personnalisés",
       "customErrorCodesHint": "Arrêtez la planification uniquement pour les codes d'erreur sélectionnés",
       "customErrorCodesWarning": "Seuls les codes d'erreur sélectionnés arrêteront la planification. Les autres erreurs renverront 500.",

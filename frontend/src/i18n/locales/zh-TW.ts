@@ -2148,6 +2148,15 @@ const messages = {
         "title": "圖片產生計費",
         "description": "設定圖片產生模型的圖片產生價格，留空則使用預設價格"
       },
+      "modelsList": {
+        "title": "自訂 /v1/models 模型列表",
+        "hint": "僅影響 /v1/models 顯示結果，不影響白名單模型呼叫與帳號調度。",
+        "loading": "正在載入模型列表...",
+        "empty": "暫無可顯示模型",
+        "selectedSummary": "已選 {selected} / {total}",
+        "selectAll": "全選",
+        "invertSelection": "反選"
+      },
       "claudeCode": {
         "title": "Claude Code 用戶端限制",
         "tooltip": "啟用後，此分組僅允許 Claude Code 官方用戶端存取。非 Claude Code 請求將被拒絕或降級到指定分組。",
@@ -3328,6 +3337,8 @@ const messages = {
       "poolModeInfo": "启用後，上游 429/403/401 错误将自动重试而不标记帳號限流或错误，适用於上游指向另一个 sub2api 实例的场景。",
       "poolModeRetryCount": "同帳號重試次數",
       "poolModeRetryCountHint": "僅在池模式下生效。 0 表示不原地重試；預設 {default}，最大 {max}。",
+      "poolModeRetryStatusCodes": "同帳號重試狀態碼",
+      "poolModeRetryStatusCodesHint": "僅在池模式下生效。以半形逗號分隔的 HTTP 狀態碼（100-599），命中時觸發同帳號重試。留空使用預設值（{default}）。",
       "customErrorCodes": "自訂錯誤碼",
       "customErrorCodesHint": "僅對選取的錯誤碼停止調度",
       "customErrorCodesWarning": "僅選取的錯誤碼會停止調度，其他錯誤將傳回 500。",

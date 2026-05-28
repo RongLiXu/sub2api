@@ -4495,12 +4495,12 @@ func (s *AntigravityGatewayService) extractClaudeUsage(body []byte) *ClaudeUsage
 }
 
 func antigravityClaudeUsageObject(event map[string]any) map[string]any {
-	if eventType, _ := event["type"].(string); eventType == "message_start" {
+	if eventType, _ := event["type"].(string); eventType != "message_start" {
 		if u, ok := event["usage"].(map[string]any); ok {
 			return u
 		}
-	} 
-	
+	}
+
 	if msg, ok := event["message"].(map[string]any); ok {
 		if u, ok := msg["usage"].(map[string]any); ok {
 			return u

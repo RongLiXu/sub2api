@@ -2055,6 +2055,15 @@ const messages = {
         "title": "Giá tạo hình ảnh",
         "description": "Định cấu hình giá cho các mô hình tạo hình ảnh. Để trống để sử dụng giá mặc định."
       },
+      "modelsList": {
+        "title": "Danh sách mô hình /v1/models tùy chỉnh",
+        "hint": "Chỉ thay đổi phản hồi /v1/models. Lệnh gọi mô hình theo danh sách trắng và định tuyến tài khoản không thay đổi.",
+        "loading": "Đang tải danh sách mô hình...",
+        "empty": "Không có mô hình nào có thể hiển thị",
+        "selectedSummary": "Đã chọn {selected} / {total}",
+        "selectAll": "Chọn tất cả",
+        "invertSelection": "Đảo lựa chọn"
+      },
       "claudeCode": {
         "title": "Hạn chế của khách hàng mã Claude",
         "tooltip": "Khi được bật, nhóm này chỉ cho phép các ứng dụng khách Claude Code chính thức. Các yêu cầu Mã không phải Claude sẽ bị từ chối hoặc chuyển sang nhóm được chỉ định.",
@@ -3163,6 +3172,8 @@ const messages = {
       "poolModeInfo": "Khi được bật, lỗi 429/403/401 ngược dòng sẽ tự động thử lại mà không đánh dấu tài khoản là bị giới hạn tốc độ hoặc bị lỗi. Thích hợp để trỏ ngược dòng tới một phiên bản sub2api khác.",
       "poolModeRetryCount": "Thử lại cùng một tài khoản",
       "poolModeRetryCountHint": "Chỉ áp dụng ở chế độ pool. Sử dụng 0 để tắt tính năng thử lại tại chỗ. Mặc định {default}, tối đa {max}.",
+      "poolModeRetryStatusCodes": "Mã trạng thái thử lại",
+      "poolModeRetryStatusCodesHint": "Các mã trạng thái HTTP (100-599) được phân tách bằng dấu phẩy sẽ kích hoạt thử lại cùng tài khoản trong chế độ pool. Để trống để dùng giá trị mặc định ({default}).",
       "customErrorCodes": "Mã lỗi tùy chỉnh",
       "customErrorCodesHint": "Chỉ dừng lập lịch cho các mã lỗi đã chọn",
       "customErrorCodesWarning": "Chỉ những mã lỗi được chọn mới ngừng lập lịch. Các lỗi khác sẽ trả về 500.",
