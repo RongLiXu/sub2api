@@ -532,6 +532,16 @@ type contentModerationKeyHealth struct {
 	SyncLatencyMS  int64
 }
 
+func newContentModerationHTTPClient() *http.Client {
+	defaultTransport, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return &http.Client{Timeout: 15 * time.Second}
+	}
+	transport := defaultTransport.Clone()
+	transport.Proxy = nil
+	return &http.Client{Timeout: 15 * time.Second, Transport: transport}
+}
+
 func NewContentModerationService(
 	settingRepo SettingRepository,
 	repo ContentModerationRepository,
@@ -549,7 +559,7 @@ func NewContentModerationService(
 		userRepo:             userRepo,
 		authCacheInvalidator: authCacheInvalidator,
 		emailService:         emailService,
-		httpClient:           &http.Client{},
+		httpClient:           newContentModerationHTTPClient(),
 		workerCount:          maxContentModerationWorkerCount,
 		asyncQueue:           make(chan contentModerationTask, maxContentModerationQueueSize),
 		keyHealth:            make(map[string]*contentModerationKeyHealth),

@@ -2,12 +2,19 @@ package service
 
 import (
 	"context"
+	"io"
 	"net/http"
-	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+type proxyQualityRoundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f proxyQualityRoundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) {
+	return f(r)
+}
 
 func TestFinalizeProxyQualityResult_ScoreAndGrade(t *testing.T) {
 	result := &ProxyQualityCheckResult{
@@ -28,67 +35,74 @@ func TestFinalizeProxyQualityResult_ScoreAndGrade(t *testing.T) {
 }
 
 func TestRunProxyQualityTarget_CloudflareChallenge(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/html")
-		w.Header().Set("cf-ray", "test-ray-123")
-		w.WriteHeader(http.StatusForbidden)
-		_, _ = w.Write([]byte("<!DOCTYPE html><title>Just a moment...</title><script>window._cf_chl_opt={};</script>"))
-	}))
-	defer server.Close()
+	client := &http.Client{Transport: proxyQualityRoundTripFunc(func(_ *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusForbidden,
+			Header: http.Header{
+				"Content-Type": []string{"text/html"},
+				"Cf-Ray":       []string{"test-ray-123"},
+			},
+			Body: io.NopCloser(strings.NewReader("<!DOCTYPE html><title>Just a moment...</title><script>window._cf_chl_opt={};</script>")),
+		}, nil
+	})}
 
 	target := proxyQualityTarget{
 		Target: "openai",
-		URL:    server.URL,
+		URL:    "http://proxy-quality.test/openai",
 		Method: http.MethodGet,
 		AllowedStatuses: map[int]struct{}{
 			http.StatusUnauthorized: {},
 		},
 	}
 
-	item := runProxyQualityTarget(context.Background(), server.Client(), target)
+	item := runProxyQualityTarget(context.Background(), client, target)
 	require.Equal(t, "challenge", item.Status)
 	require.Equal(t, http.StatusForbidden, item.HTTPStatus)
 	require.Equal(t, "test-ray-123", item.CFRay)
 }
 
 func TestRunProxyQualityTarget_AllowedStatusPass(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"models":[]}`))
-	}))
-	defer server.Close()
+	client := &http.Client{Transport: proxyQualityRoundTripFunc(func(_ *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(`{"models":[]}`)),
+		}, nil
+	})}
 
 	target := proxyQualityTarget{
 		Target: "gemini",
-		URL:    server.URL,
+		URL:    "http://proxy-quality.test/gemini",
 		Method: http.MethodGet,
 		AllowedStatuses: map[int]struct{}{
 			http.StatusOK: {},
 		},
 	}
 
-	item := runProxyQualityTarget(context.Background(), server.Client(), target)
+	item := runProxyQualityTarget(context.Background(), client, target)
 	require.Equal(t, "pass", item.Status)
 	require.Equal(t, http.StatusOK, item.HTTPStatus)
 }
 
 func TestRunProxyQualityTarget_AllowedStatusWarnForUnauthorized(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusUnauthorized)
-		_, _ = w.Write([]byte(`{"error":"unauthorized"}`))
-	}))
-	defer server.Close()
+	client := &http.Client{Transport: proxyQualityRoundTripFunc(func(_ *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusUnauthorized,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(`{"error":"unauthorized"}`)),
+		}, nil
+	})}
 
 	target := proxyQualityTarget{
 		Target: "openai",
-		URL:    server.URL,
+		URL:    "http://proxy-quality.test/openai",
 		Method: http.MethodGet,
 		AllowedStatuses: map[int]struct{}{
 			http.StatusUnauthorized: {},
 		},
 	}
 
-	item := runProxyQualityTarget(context.Background(), server.Client(), target)
+	item := runProxyQualityTarget(context.Background(), client, target)
 	require.Equal(t, "warn", item.Status)
 	require.Equal(t, http.StatusUnauthorized, item.HTTPStatus)
 	require.Contains(t, item.Message, "目标可达")

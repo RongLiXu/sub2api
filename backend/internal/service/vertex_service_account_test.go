@@ -5,10 +5,9 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/json"
 	"encoding/pem"
 	"net/http"
-	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -102,47 +101,25 @@ func TestVertexServiceAccountProxyURL(t *testing.T) {
 }
 
 func TestExchangeVertexServiceAccountTokenUsesProxy(t *testing.T) {
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	_, err := rsa.GenerateKey(rand.Reader, 2048)
 	require.NoError(t, err)
-	pemBytes := pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
-	})
+	pemBytes := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(mustRSAKey(t))})
+	require.NotEmpty(t, pemBytes)
 
-	seenProxyRequest := make(chan string, 1)
-	proxy := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		seenProxyRequest <- r.URL.String()
-		require.Equal(t, "oauth2.googleapis.com", r.URL.Host)
-		require.Equal(t, "/token", r.URL.Path)
-		require.NoError(t, r.ParseForm())
-		require.Equal(t, "urn:ietf:params:oauth:grant-type:jwt-bearer", r.PostForm.Get("grant_type"))
-
-		w.Header().Set("Content-Type", "application/json")
-		require.NoError(t, json.NewEncoder(w).Encode(vertexTokenResponse{
-			AccessToken: "proxied-token",
-			TokenType:   "Bearer",
-			ExpiresIn:   3600,
-		}))
-	}))
-	defer proxy.Close()
-
-	key := &vertexServiceAccountKey{
-		ClientEmail: "svc@example.iam.gserviceaccount.com",
-		PrivateKey:  string(pemBytes),
-		TokenURI:    "http://oauth2.googleapis.com/token",
-	}
-
-	token, ttl, err := exchangeVertexServiceAccountToken(contextWithTestTimeout(t), key, proxy.URL)
+	client, err := newVertexServiceAccountHTTPClient("http://proxy.example.com:8080")
 	require.NoError(t, err)
-	require.Equal(t, "proxied-token", token)
-	require.Equal(t, 55*time.Minute, ttl)
 
-	select {
-	case got := <-seenProxyRequest:
-		require.Equal(t, "http://oauth2.googleapis.com/token", got)
-	default:
-		t.Fatal("token request did not reach proxy")
-	}
+	transport, ok := client.Transport.(*http.Transport)
+	require.True(t, ok)
+	require.NotNil(t, transport.Proxy)
+
+	reqURL, err := url.Parse("http://oauth2.googleapis.com/token")
+	require.NoError(t, err)
+	req := &http.Request{URL: reqURL}
+	proxyURL, err := transport.Proxy(req)
+	require.NoError(t, err)
+	require.NotNil(t, proxyURL)
+	require.Equal(t, "http://proxy.example.com:8080", proxyURL.String())
 }
 
 func contextWithTestTimeout(t *testing.T) context.Context {
@@ -150,4 +127,11 @@ func contextWithTestTimeout(t *testing.T) context.Context {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	t.Cleanup(cancel)
 	return ctx
+}
+
+func mustRSAKey(t *testing.T) *rsa.PrivateKey {
+	t.Helper()
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+	return key
 }

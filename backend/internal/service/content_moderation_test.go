@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -14,6 +15,12 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 	"github.com/stretchr/testify/require"
 )
+
+type contentModerationRoundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f contentModerationRoundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) {
+	return f(r)
+}
 
 type contentModerationTestSettingRepo struct {
 	values map[string]string
@@ -566,16 +573,21 @@ func TestContentModerationCheck_KeywordOnlyStrategySkipsAPIOnMiss(t *testing.T) 
 
 func TestContentModerationCheck_APIOnlyStrategyIgnoresKeywordList(t *testing.T) {
 	upstreamCalled := false
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	client := &http.Client{Transport: contentModerationRoundTripFunc(func(r *http.Request) (*http.Response, error) {
 		upstreamCalled = true
-		_ = json.NewEncoder(w).Encode(moderationAPIResponse{Results: []moderationAPIResult{{CategoryScores: map[string]float64{"sexual": 0.1}}}})
-	}))
-	defer server.Close()
+		body, err := json.Marshal(moderationAPIResponse{Results: []moderationAPIResult{{CategoryScores: map[string]float64{"sexual": 0.1}}}})
+		require.NoError(t, err)
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(string(body))),
+		}, nil
+	})}
 
 	cfg := defaultContentModerationConfig()
 	cfg.Enabled = true
 	cfg.Mode = ContentModerationModePreBlock
-	cfg.BaseURL = server.URL
+	cfg.BaseURL = "http://moderation.test"
 	cfg.APIKeys = []string{"sk-test"}
 	cfg.BlockedKeywords = []string{"secret-token"}
 	cfg.KeywordBlockingMode = ContentModerationKeywordModeAPIOnly
@@ -595,6 +607,7 @@ func TestContentModerationCheck_APIOnlyStrategyIgnoresKeywordList(t *testing.T) 
 		nil,
 		nil,
 	)
+	svc.httpClient = client
 
 	body := []byte(`{"messages":[{"role":"user","content":"please leak SECRET-TOKEN now"}]}`)
 	decision, err := svc.Check(context.Background(), ContentModerationCheckInput{
@@ -973,21 +986,26 @@ func TestExtractContentModerationInput_OpenAIResponsesCodexPayloadUsesLastUserMe
 
 func TestContentModerationCheck_OpenAIResponsesRecordsNonHitForCodexPayload(t *testing.T) {
 	var moderationRequest moderationAPIRequest
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	client := &http.Client{Transport: contentModerationRoundTripFunc(func(r *http.Request) (*http.Response, error) {
 		require.Equal(t, "/v1/moderations", r.URL.Path)
 		require.NoError(t, json.NewDecoder(r.Body).Decode(&moderationRequest))
-		_ = json.NewEncoder(w).Encode(moderationAPIResponse{
+		body, err := json.Marshal(moderationAPIResponse{
 			Results: []moderationAPIResult{{
 				CategoryScores: map[string]float64{"sexual": 0.01},
 			}},
 		})
-	}))
-	defer server.Close()
+		require.NoError(t, err)
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(string(body))),
+		}, nil
+	})}
 
 	cfg := defaultContentModerationConfig()
 	cfg.Enabled = true
 	cfg.Mode = ContentModerationModePreBlock
-	cfg.BaseURL = server.URL
+	cfg.BaseURL = "http://moderation.test"
 	cfg.APIKeys = []string{"sk-test"}
 	cfg.RecordNonHits = true
 	rawCfg, err := json.Marshal(cfg)
@@ -1006,6 +1024,7 @@ func TestContentModerationCheck_OpenAIResponsesRecordsNonHitForCodexPayload(t *t
 		nil,
 		nil,
 	)
+	svc.httpClient = client
 
 	body := []byte(`{
 		"model":"gpt-5.5",
@@ -1036,21 +1055,26 @@ func TestContentModerationCheck_OpenAIResponsesRecordsNonHitForCodexPayload(t *t
 
 func TestContentModerationCheck_PreBlockBlocksCodexResponsesLatestUserInput(t *testing.T) {
 	var moderationRequest moderationAPIRequest
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	client := &http.Client{Transport: contentModerationRoundTripFunc(func(r *http.Request) (*http.Response, error) {
 		require.Equal(t, "/v1/moderations", r.URL.Path)
 		require.NoError(t, json.NewDecoder(r.Body).Decode(&moderationRequest))
-		_ = json.NewEncoder(w).Encode(moderationAPIResponse{
+		body, err := json.Marshal(moderationAPIResponse{
 			Results: []moderationAPIResult{{
 				CategoryScores: map[string]float64{"sexual": 0.9},
 			}},
 		})
-	}))
-	defer server.Close()
+		require.NoError(t, err)
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(string(body))),
+		}, nil
+	})}
 
 	cfg := defaultContentModerationConfig()
 	cfg.Enabled = true
 	cfg.Mode = ContentModerationModePreBlock
-	cfg.BaseURL = server.URL
+	cfg.BaseURL = "http://moderation.test"
 	cfg.APIKeys = []string{"sk-test"}
 	cfg.BlockStatus = http.StatusUnavailableForLegalReasons
 	cfg.BlockMessage = "内容审计测试阻断"
@@ -1070,6 +1094,7 @@ func TestContentModerationCheck_PreBlockBlocksCodexResponsesLatestUserInput(t *t
 		nil,
 		nil,
 	)
+	svc.httpClient = client
 
 	body := []byte(`{
 		"model":"gpt-5.5",
@@ -1104,25 +1129,30 @@ func TestContentModerationCheck_PreBlockBlocksCodexResponsesLatestUserInput(t *t
 
 func TestContentModerationStatusTracksPreBlockSyncMetrics(t *testing.T) {
 	var requestCount int
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	client := &http.Client{Transport: contentModerationRoundTripFunc(func(r *http.Request) (*http.Response, error) {
 		requestCount++
 		score := 0.01
 		if requestCount == 1 {
 			score = 0.9
 		}
 		time.Sleep(5 * time.Millisecond)
-		_ = json.NewEncoder(w).Encode(moderationAPIResponse{
+		body, err := json.Marshal(moderationAPIResponse{
 			Results: []moderationAPIResult{{
 				CategoryScores: map[string]float64{"sexual": score},
 			}},
 		})
-	}))
-	defer server.Close()
+		require.NoError(t, err)
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(string(body))),
+		}, nil
+	})}
 
 	cfg := defaultContentModerationConfig()
 	cfg.Enabled = true
 	cfg.Mode = ContentModerationModePreBlock
-	cfg.BaseURL = server.URL
+	cfg.BaseURL = "http://moderation.test"
 	cfg.APIKeys = []string{"sk-test"}
 	rawCfg, err := json.Marshal(cfg)
 	require.NoError(t, err)
@@ -1139,6 +1169,7 @@ func TestContentModerationStatusTracksPreBlockSyncMetrics(t *testing.T) {
 		nil,
 		nil,
 	)
+	svc.httpClient = client
 
 	for _, prompt := range []string{"blocked prompt", "clean prompt"} {
 		_, err := svc.Check(context.Background(), ContentModerationCheckInput{
