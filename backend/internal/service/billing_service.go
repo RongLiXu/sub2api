@@ -287,6 +287,7 @@ func (s *BillingService) initFallbackPricing() {
 		OutputPricePerToken:            15e-6,    // $15 per MTok
 		OutputPricePerTokenPriority:    30e-6,    // $30 per MTok
 		OutputPricePerTokenFlex:        7.5e-6,   // $7.5 per MTok
+		CacheCreationPricePerToken:     2.5e-6,   // $2.5 per MTok
 		CacheReadPricePerToken:         0.25e-6,  // $0.25 per MTok
 		CacheReadPricePerTokenPriority: 0.5e-6,   // $0.5 per MTok
 		CacheReadPricePerTokenFlex:     0.125e-6, // $0.125 per MTok
@@ -624,6 +625,7 @@ func (s *BillingService) computeTokenBreakdown(
 		if pricing.CacheReadPricePerTokenPriority > 0 {
 			cacheReadPrice = pricing.CacheReadPricePerTokenPriority
 		}
+		cacheCreationMultiplier *= serviceTierCostMultiplier(serviceTier)
 	} else if useFlexServiceTierPricing(serviceTier, pricing) {
 		if pricing.InputPricePerTokenFlex > 0 {
 			inputPrice = pricing.InputPricePerTokenFlex
@@ -634,13 +636,13 @@ func (s *BillingService) computeTokenBreakdown(
 		if pricing.CacheReadPricePerTokenFlex > 0 {
 			cacheReadPrice = pricing.CacheReadPricePerTokenFlex
 		}
+		cacheCreationMultiplier *= serviceTierCostMultiplier(serviceTier)
 	} else {
 		tierMultiplier = serviceTierCostMultiplier(serviceTier)
 	}
 
 	if applyLongCtx && s.shouldApplySessionLongContextPricing(tokens, pricing) {
 		inputPrice *= pricing.LongContextInputMultiplier
-		cacheReadPrice *= pricing.LongContextInputMultiplier
 		outputPrice *= pricing.LongContextOutputMultiplier
 		// 缓存读取本质上是输入侧的复用，应与 input 一同应用长上下文倍率；
 		// 否则 cache hit 越多，少计的费用越多（见 #2293）。
