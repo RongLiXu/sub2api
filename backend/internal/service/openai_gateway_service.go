@@ -2425,60 +2425,30 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 	// 	}
 	// }
 
-	reqBody, err := getOpenAIRequestBodyMap(c, body)
-	if err != nil {
-		return nil, err
-	}
-
-	if v, ok := reqBody["model"].(string); ok {
-		reqModel = v
-		originalModel = reqModel
-	}
-	if v, ok := reqBody["stream"].(bool); ok {
-		reqStream = v
-	}
-	if promptCacheKey == "" {
-		if v, ok := reqBody["prompt_cache_key"].(string); ok {
-			promptCacheKey = strings.TrimSpace(v)
-		}
-	}
-	apiKey := getAPIKeyFromContext(c)
-	imageGenerationAllowed := GroupAllowsImageGeneration(nil)
-	if apiKey != nil {
-		imageGenerationAllowed = GroupAllowsImageGeneration(apiKey.Group)
-	}
-	codexImageGenerationBridgeEnabled := isCodexCLI && imageGenerationAllowed && s.isCodexImageGenerationBridgeEnabled(ctx, account, apiKey)
-	if IsImageGenerationIntentMap(openAIResponsesEndpoint, reqModel, reqBody) && !imageGenerationAllowed {
-		MarkOpsClientBusinessLimited(c, OpsClientBusinessLimitedReasonLocalFeatureGate)
-		c.JSON(http.StatusForbidden, gin.H{
-			"error": gin.H{
-				"type":    "permission_error",
-				"message": ImageGenerationPermissionMessage(),
-			},
-		})
-		return nil, errors.New("image generation disabled for group")
-	}
-
-	// API key accounts may still re-serialize the request body later in this
-	// pipeline (for example after injecting default instructions). Preserve the
-	// client prompt_cache_key in reqBody so OpenAI-compatible Responses upstreams
-	// can keep deriving a stable session/cache identity from it.
-	// if account.Type == AccountTypeAPIKey {
-	// 	if trimmedKey := strings.TrimSpace(promptCacheKey); trimmedKey != "" {
-	// 		if existing, ok := reqBody["prompt_cache_key"].(string); !ok || strings.TrimSpace(existing) == "" {
-	// 			reqBody["prompt_cache_key"] = trimmedKey
-	// 		}
-	// 	}
-	// }
-
-	// Track if body needs re-serialization
+	requestView := newOpenAIRequestView(body)
 	bodyModified := false
-	// 单字段补丁快速路径：只要整个变更集最终可归约为同一路径的 set/delete，就避免全量 Marshal。
-	patchDisabled := false
-	patchHasOp := false
-	patchDelete := false
-	patchPath := ""
-	var patchValue any
+	var reqBody map[string]any
+	ensureReqBody := func() (map[string]any, error) {
+		if requestView.HasPatches() {
+			patchedBody, patchErr := requestView.ApplyPatches()
+			if patchErr != nil {
+				return nil, patchErr
+			}
+			body = patchedBody
+			requestView = newOpenAIRequestView(body)
+			reqBody = nil
+			bodyModified = false
+		}
+		if reqBody != nil {
+			return reqBody, nil
+		}
+		decoded, decodeErr := requestView.Decode(c)
+		if decodeErr != nil {
+			return nil, decodeErr
+		}
+		reqBody = decoded
+		return reqBody, nil
+	}
 	markPatchSet := func(path string, value any) {
 		bodyModified = true
 		if requestView.patchesDisabled {

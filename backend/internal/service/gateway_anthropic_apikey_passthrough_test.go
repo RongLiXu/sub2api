@@ -200,7 +200,7 @@ func TestGatewayService_AnthropicAPIKeyPassthrough_RewritesMessageCacheControlWh
 
 	body := []byte(`{"model":"claude-opus-4-7","messages":[{"role":"user","content":[{"type":"text","text":"stable","cache_control":{"type":"ephemeral","ttl":"1h"}}]},{"role":"assistant","content":[{"type":"text","text":"ok"}]},{"role":"user","content":"latest"}]}`)
 	parsed := &ParsedRequest{
-		Body:  body,
+		Body:  NewRequestBodyRef(body),
 		Model: "claude-opus-4-7",
 	}
 
@@ -245,7 +245,7 @@ func TestGatewayService_AnthropicAPIKeyPassthrough_AutoInjectsMessageCacheContro
 
 	body := []byte(`{"model":"claude-opus-4-7","messages":[{"role":"user","content":"long prompt"}]}`)
 	parsed := &ParsedRequest{
-		Body:  body,
+		Body:  NewRequestBodyRef(body),
 		Model: "claude-opus-4-7",
 	}
 
@@ -366,7 +366,7 @@ func TestGatewayService_AnthropicAPIKeyPassthrough_AddsStableAnchorForStringSyst
 
 	body := []byte(`{"model":"claude-opus-4-7","system":"stable system prompt","messages":[{"role":"user","content":"dynamic current task"}]}`)
 	parsed := &ParsedRequest{
-		Body:  body,
+		Body:  NewRequestBodyRef(body),
 		Model: "claude-opus-4-7",
 	}
 
