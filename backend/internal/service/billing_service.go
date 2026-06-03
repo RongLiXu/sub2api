@@ -375,6 +375,24 @@ func (s *BillingService) initFallbackPricing() {
 		CacheReadPricePerTokenPriority: 0.3e-6,
 		SupportsCacheBreakdown:         false,
 	}
+
+	// DeepSeek V4 Flash（官方 $0.14/$0.28 per MTok，输入缓存 $0.028）
+	s.fallbackPrices["deepseek-v4-flash"] = &ModelPricing{
+		InputPricePerToken:         1.4e-07, // $0.14 per MTok
+		OutputPricePerToken:        2.8e-07, // $0.28 per MTok
+		CacheReadPricePerToken:     2.8e-08, // $0.028 per MTok
+		CacheCreationPricePerToken: 2.8e-08,
+		SupportsCacheBreakdown:     false,
+	}
+
+	// DeepSeek V4 Pro（官方 $1.74/$3.48 per MTok，输入缓存 $0.0145）
+	s.fallbackPrices["deepseek-v4-pro"] = &ModelPricing{
+		InputPricePerToken:         1.74e-06, // $1.74 per MTok
+		OutputPricePerToken:        3.48e-06, // $3.48 per MTok
+		CacheReadPricePerToken:     1.45e-08, // $0.0145 per MTok
+		CacheCreationPricePerToken: 1.45e-08,
+		SupportsCacheBreakdown:     false,
+	}
 }
 
 // getFallbackPricing 根据模型系列获取回退价格
@@ -434,6 +452,17 @@ func (s *BillingService) getFallbackPricing(model string) *ModelPricing {
 		case "gpt-5.3-codex", "gpt-5.3-codex-spark":
 			return s.fallbackPrices["gpt-5.3-codex"]
 		}
+	}
+
+	// DeepSeek V4 系列
+	if strings.HasPrefix(modelLower, "deepseek-v4-flash") {
+		return s.fallbackPrices["deepseek-v4-flash"]
+	}
+	if strings.HasPrefix(modelLower, "deepseek-v4-pro") {
+		return s.fallbackPrices["deepseek-v4-pro"]
+	}
+	if strings.Contains(modelLower, "deepseek") {
+		return s.fallbackPrices["deepseek-v4-flash"]
 	}
 
 	return nil

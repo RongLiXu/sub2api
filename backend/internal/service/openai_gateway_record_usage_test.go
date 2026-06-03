@@ -281,15 +281,18 @@ func TestOpenAIGatewayServiceRecordUsage_MissingPricingRecordsZeroCostUsageLog(t
 	require.Equal(t, "deepseek-v4-flash", usageRepo.lastLog.RequestedModel)
 	require.Equal(t, 1200, usageRepo.lastLog.InputTokens)
 	require.Equal(t, 300, usageRepo.lastLog.OutputTokens)
-	require.Zero(t, usageRepo.lastLog.TotalCost)
-	require.Zero(t, usageRepo.lastLog.ActualCost)
+	// deepseek-v4-flash fallback: 1200*1.4e-07 + 300*2.8e-07 = 0.000252
+	// APIKey.GroupID is nil, so cfg.Default.RateMultiplier(1.1) applies
+	expected := 0.000252 * 1.1
+	require.InDelta(t, 0.000252, usageRepo.lastLog.TotalCost, 1e-10)
+	require.InDelta(t, expected, usageRepo.lastLog.ActualCost, 1e-10)
 	require.NotNil(t, usageRepo.lastLog.BillingMode)
 	require.Equal(t, string(BillingModeToken), *usageRepo.lastLog.BillingMode)
 
 	require.NotNil(t, billingRepo.lastCmd)
-	require.Zero(t, billingRepo.lastCmd.BalanceCost)
+	require.InDelta(t, expected, billingRepo.lastCmd.BalanceCost, 1e-10)
 	require.Zero(t, billingRepo.lastCmd.SubscriptionCost)
-	require.Zero(t, billingRepo.lastCmd.APIKeyQuotaCost)
+	require.InDelta(t, expected, billingRepo.lastCmd.APIKeyQuotaCost, 1e-10)
 	require.Zero(t, billingRepo.lastCmd.APIKeyRateLimitCost)
 	require.Zero(t, billingRepo.lastCmd.AccountQuotaCost)
 }
