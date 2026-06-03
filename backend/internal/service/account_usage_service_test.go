@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 type accountUsageCodexProbeRepo struct {
@@ -103,17 +105,13 @@ func TestBuildCodexUsageProgressFromExtra_UsesCanonicalUsedPercent(t *testing.T)
 	}
 
 	fiveHour := buildCodexUsageProgressFromExtra(extra, "5h", now)
-	if fiveHour == nil {
-		t.Fatal("expected non-nil 5h progress")
-	}
+	require.NotNil(t, fiveHour)
 	if fiveHour.Utilization != 94.0 {
 		t.Fatalf("5h Utilization = %v, want 94", fiveHour.Utilization)
 	}
 
 	sevenDay := buildCodexUsageProgressFromExtra(extra, "7d", now)
-	if sevenDay == nil {
-		t.Fatal("expected non-nil 7d progress")
-	}
+	require.NotNil(t, sevenDay)
 	if sevenDay.Utilization != 93.0 {
 		t.Fatalf("7d Utilization = %v, want 93", sevenDay.Utilization)
 	}

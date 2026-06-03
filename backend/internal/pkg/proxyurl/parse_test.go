@@ -3,6 +3,8 @@ package proxyurl
 import (
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestParse_空字符串直连(t *testing.T) {
@@ -39,9 +41,7 @@ func TestParse_有效HTTP代理(t *testing.T) {
 	if trimmed != "http://proxy.example.com:8080" {
 		t.Errorf("trimmed 不匹配: got %q", trimmed)
 	}
-	if parsed == nil {
-		t.Fatal("parsed 不应为 nil")
-	}
+	require.NotNil(t, parsed)
 	if parsed.Host != "proxy.example.com:8080" {
 		t.Errorf("Host 不匹配: got %q", parsed.Host)
 	}
@@ -52,6 +52,7 @@ func TestParse_有效HTTPS代理(t *testing.T) {
 	if err != nil {
 		t.Fatalf("有效 HTTPS 代理应成功: %v", err)
 	}
+	require.NotNil(t, parsed)
 	if parsed.Scheme != "https" {
 		t.Errorf("Scheme 不匹配: got %q", parsed.Scheme)
 	}
@@ -66,6 +67,7 @@ func TestParse_有效SOCKS5代理_自动升级为SOCKS5H(t *testing.T) {
 	if trimmed != "socks5h://127.0.0.1:1080" {
 		t.Errorf("trimmed 应升级为 socks5h: got %q", trimmed)
 	}
+	require.NotNil(t, parsed)
 	if parsed.Scheme != "socks5h" {
 		t.Errorf("Scheme 应升级为 socks5h: got %q", parsed.Scheme)
 	}
