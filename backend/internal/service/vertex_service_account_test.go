@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -10,7 +9,6 @@ import (
 	"net/url"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -120,13 +118,6 @@ func TestExchangeVertexServiceAccountTokenUsesProxy(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, proxyURL)
 	require.Equal(t, "http://proxy.example.com:8080", proxyURL.String())
-}
-
-func contextWithTestTimeout(t *testing.T) context.Context {
-	t.Helper()
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	t.Cleanup(cancel)
-	return ctx
 }
 
 func mustRSAKey(t *testing.T) *rsa.PrivateKey {
