@@ -322,6 +322,27 @@ func TestConvertClaudeToolsToGeminiTools_PreservesWebSearchAlongsideFunctions(t 
 	require.Empty(t, googleSearch)
 }
 
+func TestCleanToolSchema_NormalizesTypeToLowercaseJSONSchema(t *testing.T) {
+	input := map[string]any{
+		"type": "OBJECT",
+		"properties": map[string]any{
+			"query": map[string]any{
+				"type": "STRING",
+			},
+		},
+	}
+
+	got, ok := cleanToolSchema(input).(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, "object", got["type"])
+
+	props, ok := got["properties"].(map[string]any)
+	require.True(t, ok)
+	query, ok := props["query"].(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, "string", query["type"])
+}
+
 func TestGeminiHandleNativeNonStreamingResponse_DebugDisabledDoesNotEmitHeaderLogs(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	logSink, restore := captureStructuredLog(t)

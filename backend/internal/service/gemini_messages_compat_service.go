@@ -3406,9 +3406,9 @@ func cleanToolSchema(schema any) any {
 			// 递归清理嵌套对象
 			cleaned[key] = cleanToolSchema(value)
 		}
-		// 规范化 type 字段为大写
+		// JSON Schema draft 2020-12 的 type 必须使用小写标准值
 		if typeVal, ok := cleaned["type"].(string); ok {
-			cleaned["type"] = strings.ToUpper(typeVal)
+			cleaned["type"] = strings.ToLower(strings.TrimSpace(typeVal))
 		}
 		return cleaned
 	case []any:
