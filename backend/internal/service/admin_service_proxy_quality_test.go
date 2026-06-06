@@ -84,7 +84,7 @@ func TestRunProxyQualityTarget_AllowedStatusPass(t *testing.T) {
 	require.Equal(t, http.StatusOK, item.HTTPStatus)
 }
 
-func TestRunProxyQualityTarget_AllowedStatusWarnForUnauthorized(t *testing.T) {
+func TestRunProxyQualityTarget_AllowedStatusPassForUnauthorized(t *testing.T) {
 	client := &http.Client{Transport: proxyQualityRoundTripFunc(func(_ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusUnauthorized,
@@ -103,7 +103,7 @@ func TestRunProxyQualityTarget_AllowedStatusWarnForUnauthorized(t *testing.T) {
 	}
 
 	item := runProxyQualityTarget(context.Background(), client, target)
-	require.Equal(t, "warn", item.Status)
+	require.Equal(t, "pass", item.Status)
 	require.Equal(t, http.StatusUnauthorized, item.HTTPStatus)
 	require.Contains(t, item.Message, "目标可达")
 }

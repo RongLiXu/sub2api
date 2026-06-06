@@ -117,6 +117,7 @@ type TokenPricingTier struct {
 	InputPricePerToken     float64
 	OutputPricePerToken    float64
 	CacheReadPricePerToken float64
+	ImageOutputPriceExplicit       bool    // 是否由渠道定价显式设定（为 true 时即使 == 0 也不回退）
 }
 
 const (
@@ -517,7 +518,7 @@ func (s *BillingService) GetModelPricing(model string) (*ModelPricing, error) {
 }
 
 // GetModelPricingWithChannel 获取模型定价，渠道配置的价格覆盖默认值
-// 仅覆盖渠道中非 nil 的价格字段，nil 字段使用默认定价
+// 渠道存在时，未配置的图片输出价格归零（不回退到 LiteLLM）
 func (s *BillingService) GetModelPricingWithChannel(model string, channelPricing *ChannelModelPricing) (*ModelPricing, error) {
 	pricing, err := s.GetModelPricing(model)
 	if err != nil {
@@ -548,7 +549,10 @@ func (s *BillingService) GetModelPricingWithChannel(model string, channelPricing
 	}
 	if channelPricing.ImageOutputPrice != nil {
 		pricing.ImageOutputPricePerToken = *channelPricing.ImageOutputPrice
+	} else {
+		pricing.ImageOutputPricePerToken = 0
 	}
+	pricing.ImageOutputPriceExplicit = true
 	return pricing, nil
 }
 
@@ -695,8 +699,8 @@ func (s *BillingService) computeTokenBreakdown(
 	// 图片输出 token 费用（独立费率）
 	if tokens.ImageOutputTokens > 0 {
 		imgPrice := pricing.ImageOutputPricePerToken
-		if imgPrice == 0 {
-			imgPrice = outputPrice // 回退到常规输出价格
+		if imgPrice == 0 && !pricing.ImageOutputPriceExplicit {
+			imgPrice = outputPrice
 		}
 		bd.ImageOutputCost = float64(tokens.ImageOutputTokens) * imgPrice
 	}
