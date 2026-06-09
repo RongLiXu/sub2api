@@ -159,7 +159,7 @@ func (h *AccountHandler) importCodexSessions(ctx context.Context, req CodexSessi
 	}
 	index := buildCodexAccountIndex(existingAccounts)
 
-	updateExisting := true
+	updateExisting := false
 	if req.UpdateExisting != nil {
 		updateExisting = *req.UpdateExisting
 	}
@@ -803,15 +803,16 @@ func sanitizeCodexImportCredentialExtras(input map[string]any) map[string]any {
 }
 
 func buildCodexIdentityKeys(accountID, userID, email, accessToken string) []string {
-	keys := make([]string, 0, 4)
+	keys := make([]string, 0, 3)
 	accountID = strings.TrimSpace(accountID)
 	userID = strings.TrimSpace(userID)
 	if accountID != "" {
 		keys = append(keys, "account:"+accountID)
 	}
-	if userID != "" {
-		keys = append(keys, "user:"+userID)
-	}
+	// chatgpt_user_id identifies the OpenAI user, not a specific ChatGPT account/org.
+	// A single user can own multiple accounts, so matching by user_id will make a later
+	// import/RT add update an earlier account. Keep userID only as a signal to suppress
+	// weak email matching; do not use it as an account identity key.
 	if accountID == "" && userID == "" {
 		if email = strings.ToLower(strings.TrimSpace(email)); email != "" {
 			keys = append(keys, "email:"+email)

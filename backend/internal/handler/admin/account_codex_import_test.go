@@ -1,12 +1,15 @@
 package admin
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/Wei-Shaw/sub2api/internal/service"
 )
 
 func TestParseCodexSessionImportEntriesSupportsRawTokenJSONAndArray(t *testing.T) {
@@ -298,11 +301,32 @@ func TestResolveCodexImportExpiryForNoRefreshTokenUsesEarlierRequestExpiry(t *te
 	}
 }
 
-func TestCodexIdentityKeysPreferStrongIdentifiers(t *testing.T) {
+func TestCodexImportUpdateExistingDefaultsToFalse(t *testing.T) {
+	var req CodexSessionImportRequest
+	updateExisting := false
+	if req.UpdateExisting != nil {
+		updateExisting = *req.UpdateExisting
+	}
+	if updateExisting {
+		t.Fatal("default updateExisting = true, want false")
+	}
+
+	enabled := true
+	req.UpdateExisting = &enabled
+	updateExisting = false
+	if req.UpdateExisting != nil {
+		updateExisting = *req.UpdateExisting
+	}
+	if !updateExisting {
+		t.Fatal("explicit updateExisting=true not honored")
+	}
+}
+
+func TestCodexIdentityKeysPreferStrongAccountIdentifiers(t *testing.T) {
 	keys := buildCodexIdentityKeys("acct-1", "user-1", "same@example.com", "token")
 	for _, key := range keys {
-		if strings.HasPrefix(key, "email:") {
-			t.Fatalf("strong identity should not include email fallback: %v", keys)
+		if strings.HasPrefix(key, "email:") || strings.HasPrefix(key, "user:") {
+			t.Fatalf("strong identity should not include weak email/user fallback: %v", keys)
 		}
 	}
 
@@ -315,6 +339,96 @@ func TestCodexIdentityKeysPreferStrongIdentifiers(t *testing.T) {
 	}
 	if !hasEmail {
 		t.Fatalf("weak identity should include email fallback: %v", keys)
+	}
+}
+
+func TestCodexIdentityKeysDoNotMatchByChatGPTUserID(t *testing.T) {
+	keys := buildCodexIdentityKeys("", "shared-user", "same@example.com", "token")
+	for _, key := range keys {
+		if strings.HasPrefix(key, "user:") || strings.HasPrefix(key, "email:") {
+			t.Fatalf("chatgpt_user_id/email must not be used when userID is present without accountID: %v", keys)
+		}
+	}
+}
+
+func TestImportCodexSessionsDefaultsToCreateWhenExistingIdentityMatches(t *testing.T) {
+	now := time.Now().UTC()
+	existing := service.Account{
+		ID:       10,
+		Name:     "existing-openai",
+		Platform: service.PlatformOpenAI,
+		Type:     service.AccountTypeOAuth,
+		Credentials: map[string]any{
+			"chatgpt_account_id": "acct-same",
+			"access_token":       "old-access-token",
+		},
+		Status:    service.StatusActive,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+	adminSvc := newStubAdminService()
+	adminSvc.accounts = []service.Account{existing}
+	h := &AccountHandler{adminService: adminSvc}
+	entries := []codexImportEntry{{
+		Index: 1,
+		Value: map[string]any{
+			"accessToken":      buildCodexImportTestJWT(t, now.Add(time.Hour), map[string]any{}),
+			"refreshToken":     "new-refresh-token",
+			"chatgptAccountId": "acct-same",
+			"chatgpt_user_id":  "same-user",
+			"email":            "same@example.com",
+		},
+	}}
+
+	result, err := h.importCodexSessions(context.Background(), CodexSessionImportRequest{}, entries)
+	if err != nil {
+		t.Fatalf("importCodexSessions error = %v", err)
+	}
+	if result.Created != 1 || result.Updated != 0 || result.Failed != 0 {
+		t.Fatalf("result created/updated/failed = %d/%d/%d, want 1/0/0", result.Created, result.Updated, result.Failed)
+	}
+	if len(adminSvc.createdAccounts) != 1 {
+		t.Fatalf("createdAccounts len = %d, want 1", len(adminSvc.createdAccounts))
+	}
+}
+
+func TestImportCodexSessionsCanStillUpdateWhenExplicitlyRequested(t *testing.T) {
+	now := time.Now().UTC()
+	existing := service.Account{
+		ID:       10,
+		Name:     "existing-openai",
+		Platform: service.PlatformOpenAI,
+		Type:     service.AccountTypeOAuth,
+		Credentials: map[string]any{
+			"chatgpt_account_id": "acct-same",
+			"access_token":       "old-access-token",
+		},
+		Status:    service.StatusActive,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+	adminSvc := newStubAdminService()
+	adminSvc.accounts = []service.Account{existing}
+	h := &AccountHandler{adminService: adminSvc}
+	updateExisting := true
+	entries := []codexImportEntry{{
+		Index: 1,
+		Value: map[string]any{
+			"accessToken":      buildCodexImportTestJWT(t, now.Add(time.Hour), map[string]any{}),
+			"refreshToken":     "new-refresh-token",
+			"chatgptAccountId": "acct-same",
+		},
+	}}
+
+	result, err := h.importCodexSessions(context.Background(), CodexSessionImportRequest{UpdateExisting: &updateExisting}, entries)
+	if err != nil {
+		t.Fatalf("importCodexSessions error = %v", err)
+	}
+	if result.Created != 0 || result.Updated != 1 || result.Failed != 0 {
+		t.Fatalf("result created/updated/failed = %d/%d/%d, want 0/1/0", result.Created, result.Updated, result.Failed)
+	}
+	if len(adminSvc.createdAccounts) != 0 {
+		t.Fatalf("createdAccounts len = %d, want 0", len(adminSvc.createdAccounts))
 	}
 }
 
