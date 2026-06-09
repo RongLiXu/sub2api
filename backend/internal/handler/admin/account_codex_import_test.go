@@ -301,24 +301,24 @@ func TestResolveCodexImportExpiryForNoRefreshTokenUsesEarlierRequestExpiry(t *te
 	}
 }
 
-func TestCodexImportUpdateExistingDefaultsToFalse(t *testing.T) {
+func TestCodexImportUpdateExistingDefaultsToTrue(t *testing.T) {
 	var req CodexSessionImportRequest
-	updateExisting := false
-	if req.UpdateExisting != nil {
-		updateExisting = *req.UpdateExisting
-	}
-	if updateExisting {
-		t.Fatal("default updateExisting = true, want false")
-	}
-
-	enabled := true
-	req.UpdateExisting = &enabled
-	updateExisting = false
+	updateExisting := true
 	if req.UpdateExisting != nil {
 		updateExisting = *req.UpdateExisting
 	}
 	if !updateExisting {
-		t.Fatal("explicit updateExisting=true not honored")
+		t.Fatal("default updateExisting = false, want true")
+	}
+
+	disabled := false
+	req.UpdateExisting = &disabled
+	updateExisting = true
+	if req.UpdateExisting != nil {
+		updateExisting = *req.UpdateExisting
+	}
+	if updateExisting {
+		t.Fatal("explicit updateExisting=false not honored")
 	}
 }
 
@@ -351,7 +351,7 @@ func TestCodexIdentityKeysDoNotMatchByChatGPTUserID(t *testing.T) {
 	}
 }
 
-func TestImportCodexSessionsDefaultsToCreateWhenExistingIdentityMatches(t *testing.T) {
+func TestImportCodexSessionsDefaultsToUpdateWhenExistingIdentityMatches(t *testing.T) {
 	now := time.Now().UTC()
 	existing := service.Account{
 		ID:       10,
@@ -360,6 +360,7 @@ func TestImportCodexSessionsDefaultsToCreateWhenExistingIdentityMatches(t *testi
 		Type:     service.AccountTypeOAuth,
 		Credentials: map[string]any{
 			"chatgpt_account_id": "acct-same",
+			"email":              "same@example.com",
 			"access_token":       "old-access-token",
 		},
 		Status:    service.StatusActive,
@@ -384,6 +385,63 @@ func TestImportCodexSessionsDefaultsToCreateWhenExistingIdentityMatches(t *testi
 	if err != nil {
 		t.Fatalf("importCodexSessions error = %v", err)
 	}
+	if result.Created != 0 || result.Updated != 1 || result.Failed != 0 {
+		t.Fatalf("result created/updated/failed = %d/%d/%d, want 0/1/0", result.Created, result.Updated, result.Failed)
+	}
+	if len(adminSvc.createdAccounts) != 0 {
+		t.Fatalf("createdAccounts len = %d, want 0", len(adminSvc.createdAccounts))
+	}
+}
+
+func TestCodexIdentityKeysIncludeEmailWithAccountID(t *testing.T) {
+	keys := buildCodexIdentityKeys("acct-1", "user-1", "same@example.com", "token")
+	hasAccountEmail := false
+	for _, key := range keys {
+		if key == "account_email:acct-1:same@example.com" {
+			hasAccountEmail = true
+		}
+		if key == "account:acct-1" || strings.HasPrefix(key, "user:") {
+			t.Fatalf("account identity should require email and must not use user fallback: %v", keys)
+		}
+	}
+	if !hasAccountEmail {
+		t.Fatalf("identity should include account+email key: %v", keys)
+	}
+}
+
+func TestImportCodexSessionsCreatesWhenSameAccountIDDifferentEmail(t *testing.T) {
+	now := time.Now().UTC()
+	existing := service.Account{
+		ID:       10,
+		Name:     "existing-openai",
+		Platform: service.PlatformOpenAI,
+		Type:     service.AccountTypeOAuth,
+		Credentials: map[string]any{
+			"chatgpt_account_id": "acct-same",
+			"email":              "first@example.com",
+			"access_token":       "old-access-token",
+		},
+		Status:    service.StatusActive,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+	adminSvc := newStubAdminService()
+	adminSvc.accounts = []service.Account{existing}
+	h := &AccountHandler{adminService: adminSvc}
+	entries := []codexImportEntry{{
+		Index: 1,
+		Value: map[string]any{
+			"accessToken":      buildCodexImportTestJWT(t, now.Add(time.Hour), map[string]any{}),
+			"refreshToken":     "new-refresh-token",
+			"chatgptAccountId": "acct-same",
+			"email":            "second@example.com",
+		},
+	}}
+
+	result, err := h.importCodexSessions(context.Background(), CodexSessionImportRequest{}, entries)
+	if err != nil {
+		t.Fatalf("importCodexSessions error = %v", err)
+	}
 	if result.Created != 1 || result.Updated != 0 || result.Failed != 0 {
 		t.Fatalf("result created/updated/failed = %d/%d/%d, want 1/0/0", result.Created, result.Updated, result.Failed)
 	}
@@ -401,6 +459,7 @@ func TestImportCodexSessionsCanStillUpdateWhenExplicitlyRequested(t *testing.T) 
 		Type:     service.AccountTypeOAuth,
 		Credentials: map[string]any{
 			"chatgpt_account_id": "acct-same",
+			"email":              "same@example.com",
 			"access_token":       "old-access-token",
 		},
 		Status:    service.StatusActive,
@@ -417,6 +476,7 @@ func TestImportCodexSessionsCanStillUpdateWhenExplicitlyRequested(t *testing.T) 
 			"accessToken":      buildCodexImportTestJWT(t, now.Add(time.Hour), map[string]any{}),
 			"refreshToken":     "new-refresh-token",
 			"chatgptAccountId": "acct-same",
+			"email":            "same@example.com",
 		},
 	}}
 
