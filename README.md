@@ -16,6 +16,10 @@ English | [中文](README_CN.md) | [日本語](README_JA.md)
 
 </div>
 
+> **Sub2API officially uses only the `sub2api.org` and `pincc.ai` domains. Other websites using the Sub2API name may be third-party deployments or services and are not affiliated with this project. Please verify carefully.**
+
+---
+
 ## ⚠️ Important Notice
 
 Please read the following carefully before using this project:
@@ -23,6 +27,16 @@ Please read the following carefully before using this project:
 - **🚨 Terms of Service Risk**: Using this project may violate the terms of service of Anthropic and other upstream providers. Please review the relevant providers' user agreements before use; all risks arising from such use are borne solely by the user.
 - **⚖️ Compliant Use**: Use this project only in compliance with the laws and regulations of your country or region. Any unlawful use is strictly prohibited.
 - **📖 Disclaimer**: This project is provided for technical learning and research purposes only. The authors assume no liability for account bans, service interruptions, data loss, or any other direct or indirect damages resulting from the use of this project.
+
+## Online Demo
+
+Demo URL: **[https://demo.sub2api.org/](https://demo.sub2api.org/)**
+
+Demo account (shared demo environment; self-hosted deployments do not create this account automatically):
+
+| Email | Password |
+|-------|----------|
+| admin@sub2api.org | admin123 |
 
 ## Overview
 
@@ -47,6 +61,16 @@ Sub2API is an AI API gateway platform designed to distribute and manage API quot
 <table>
 
 <tr>
+<td width="180" align="center" valign="middle"><a href="https://shop.pincc.ai/"><img src="assets/partners/logos/pincc-logo.png" alt="pincc" width="150"></a></td>
+<td valign="middle"><b><a href="https://shop.pincc.ai/">PinCC</a></b> is the official relay service built on Sub2API, offering stable access to Claude Code, Codex, Gemini and other popular models — ready to use, no deployment or maintenance required.</td>
+</tr>
+
+<tr>
+<td width="180"><a href="https://www.packyapi.com/register?aff=sub2api"><img src="assets/partners/logos/packycode.png" alt="PackyCode" width="150"></a></td>
+<td>Thanks to PackyCode for sponsoring this project! PackyCode is a reliable and efficient API relay service provider, offering relay services for Claude Code, Codex, Gemini, and more. PackyCode provides special discounts for our software users: register using <a href="https://www.packyapi.com/register?aff=sub2api">this link</a> and enter the "sub2api" promo code during first recharge to get 10% off.</td>
+</tr>
+
+<tr>
 <td width="180"><a href="https://www.openmodel.ai?ref=sub2api"><img src="assets/partners/logos/openmodel.jpg" alt="openmodel" width="150"></a></td>
 <td>One API, every top model! <a href="https://www.openmodel.ai?ref=sub2api">OpenModel</a> is a production-grade, high-availability AI API gateway that makes your applications truly fast and stable: automatic failover, smart routing to the best-performing channel, and a production-grade SLA. An SLA that far surpasses any single provider — making stability your core competitive advantage. Works directly with Claude Code, Codex, and Gemini CLI. Register via this link to get started.</td>
 </tr>
@@ -59,6 +83,11 @@ Sub2API is an AI API gateway platform designed to distribute and manage API quot
 <tr>
 <td width="180"><a href="https://aigocode.com/invite/SUB2API"><img src="assets/partners/logos/aigocode.png" alt="AIGoCode" width="150"></a></td>
 <td>Thanks to AIGoCode for sponsoring this project! AIGoCode is an all-in-one platform that integrates Claude Code, Codex, and the latest Gemini models, providing you with stable, efficient, and highly cost-effective AI coding services. The platform offers flexible subscription plans, zero risk of account suspension, direct access with no VPN required, and lightning-fast responses. AIGoCode has prepared a special benefit for sub2api users: if you register via <a href="https://aigocode.com/invite/SUB2API">this link</a>, you'll receive an extra 10% bonus credit on your first top-up!</td>
+</tr>
+
+<tr>
+<td width="180"><a href="https://apikey.fun/register?aff=SUB2API"><img src="assets/partners/logos/apikey-fun.png" alt="APIKEY.FUN" width="150"></a></td>
+<td>Thanks to APIKEY.FUN for sponsoring this project! <a href="https://apikey.fun/register?aff=SUB2API">APIKEY.FUN</a> is one of the core contributors to the sub2api open-source project, dedicated to providing open, stable, and cost-effective AI API access. The platform supports API relay services for Claude, OpenAI, Gemini, and other popular models, with pricing starting from as low as 7% of the original rate. Register via the exclusive link: <a href="https://apikey.fun/register?aff=SUB2API">APIKEY</a> to enjoy a permanent 5% discount on all recharges.</td>
 </tr>
 
 <tr>
@@ -116,7 +145,7 @@ Sub2API is an AI API gateway platform designed to distribute and manage API quot
 </tr>
 
 <tr>
-<td width="180"><a href="https://roxybrowser.com/invite/bgGKG7"><img src="assets/partners/logos/RoxyBrowser.png" alt="veilx" width="150"></a></td>
+<td width="180"><a href="https://roxybrowser.com/invite/bgGKG7"><img src="assets/partners/logos/RoxyBrowser.png" alt="RoxyBrowser" width="150"></a></td>
 <td>Thanks to RoxyBrowser for sponsoring this project! <a href="https://roxybrowser.com/invite/bgGKG7">RoxyBrowser</a> RoxyBrowser is the perfect partner for Sub2API: it features a built-in native Roxy AI Agent and high-quality native residential IPs, supports batch automation via simple commands, and significantly boosts security and efficiency for multi-account management! Click <a href="https://roxybrowser.com/invite/bgGKG7">this link</a> to sign up and receive a free residential IP package plus a 10% lifetime discount.
 </td>
 </tr>
@@ -335,6 +364,18 @@ docker compose -f docker-compose.local.yml logs -f sub2api
 
 **Recommendation:** Use `docker-compose.local.yml` (deployed by script) for easier data management.
 
+#### Enable the Data Management Feature (datamanagementd)
+
+To enable **Data Management** in the admin dashboard, deploy the additional host-side data management daemon `datamanagementd`.
+
+Key points:
+
+- The main process always probes: `/tmp/sub2api-datamanagement.sock`
+- Data Management is enabled only when this socket is reachable
+- In Docker deployments, mount the host socket into the container at the same path
+
+Detailed deployment steps: `deploy/DATAMANAGEMENTD_CN.md`
+
 #### Access
 
 Open `http://YOUR_SERVER_IP:8080` in your browser.
@@ -467,6 +508,27 @@ default:
 > Please do not rely on Sora in production at this time.
 > Existing `gateway.sora_*` configuration keys are reserved and may not take effect until these issues are resolved.
 
+### Sora Media Signed URLs (Optional After Feature Recovery)
+
+When `gateway.sora_media_signing_key` is configured and `gateway.sora_media_signed_url_ttl_seconds > 0`, the gateway rewrites Sora output media URLs into temporary signed URLs (`/sora/media-signed/...`). These URLs can be opened directly in a browser without an API Key while still providing expiration and tamper protection (the signature covers path + query).
+
+```yaml
+gateway:
+  # Whether /sora/media requires an API Key (default false)
+  sora_media_require_api_key: false
+  # Temporary media signing key (empty disables signing)
+  sora_media_signing_key: "your-signing-key"
+  # Temporary signed URL TTL in seconds
+  sora_media_signed_url_ttl_seconds: 900
+```
+
+> If the signing key is not configured, `/sora/media-signed` returns 503.
+> For stricter access control, set `sora_media_require_api_key` to true so only API-Key-authenticated `/sora/media` requests are allowed.
+
+Access policy:
+- `/sora/media`: internal calls or clients with an API Key can download media
+- `/sora/media-signed`: externally accessible with signature + expiration control
+
 Additional security-related options are available in `config.yaml`:
 
 - `cors.allowed_origins` for CORS allowlist
@@ -479,6 +541,14 @@ Additional security-related options are available in `config.yaml`:
 - `billing.circuit_breaker` to fail closed on billing errors
 - `server.trusted_proxies` to enable X-Forwarded-For parsing
 - `turnstile.required` to require Turnstile in release mode
+
+**Gateway defense-in-depth recommendations (important)**
+
+- `gateway.upstream_response_read_max_bytes`: limits non-streaming upstream response reads (default `8MB`) to prevent abnormal responses from amplifying memory usage.
+- `gateway.proxy_probe_response_read_max_bytes`: limits proxy probe response reads (default `1MB`).
+- `gateway.gemini_debug_response_headers`: defaults to `false`; enable only briefly for troubleshooting to avoid high-frequency logging overhead.
+- `/auth/register`, `/auth/login`, `/auth/login/2fa`, and `/auth/send-verify-code` include server-side fallback rate limiting (fail-close when Redis fails).
+- Recommended layering: WAF/CDN as the first layer; server-side rate limits and response read caps as the second layer. Keep both layers enabled to reduce bypass and misconfiguration risk.
 
 **⚠️ Security Warning: HTTP URL Configuration**
 
@@ -523,6 +593,29 @@ If you disable URL validation or response header filtering, harden your network 
 ```bash
 # 6. Run the application
 ./sub2api
+```
+
+#### HTTP/2 (h2c) and HTTP/1.1 Fallback
+
+The backend plaintext port supports h2c by default and keeps HTTP/1.1 fallback for WebSocket and older clients. Browsers usually do not support h2c; the performance benefit is mainly for reverse proxies or internal network links.
+
+**Reverse proxy example (Caddy):**
+
+```caddyfile
+transport http {
+	versions h2c h1
+}
+```
+
+**Verification:**
+
+```bash
+# h2c prior knowledge
+curl --http2-prior-knowledge -I http://localhost:8080/health
+# HTTP/1.1 fallback
+curl --http1.1 -I http://localhost:8080/health
+# WebSocket fallback verification (requires admin token)
+websocat -H="Sec-WebSocket-Protocol: sub2api-admin, jwt.<ADMIN_TOKEN>" ws://localhost:8080/api/v1/admin/ops/ws/qps
 ```
 
 #### Development Mode

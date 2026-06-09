@@ -16,6 +16,10 @@
 
 </div>
 
+> **Sub2API が公式に使用しているドメインは `sub2api.org` と `pincc.ai` のみです。その他の Sub2API 名義のサイトは第三者によるデプロイまたはサービスである可能性があり、本プロジェクトとは関係ありません。十分にご確認ください。**
+
+---
+
 ## ⚠️ 重要なお知らせ
 
 本プロジェクトをご利用になる前に、以下の内容を必ずよくお読みください：
@@ -23,6 +27,16 @@
 - **🚨 利用規約のリスク**：本プロジェクトの使用は、Anthropic をはじめとする上流プロバイダーの利用規約に違反する可能性があります。ご利用前に各プロバイダーのユーザー規約を必ずご確認ください。使用により生じるすべてのリスクはユーザーご自身が負うものとします。
 - **⚖️ 法令遵守**：お住まいの国または地域の法令を遵守した上で本プロジェクトをご利用ください。いかなる違法な目的での使用も固く禁じます。
 - **📖 免責事項**：本プロジェクトは技術的な学習および研究の目的でのみ提供されます。本プロジェクトの使用により生じたアカウントの停止、サービスの中断、データの損失、その他一切の直接的または間接的な損害について、作者は一切の責任を負いません。
+
+## オンラインデモ
+
+デモ URL: **[https://demo.sub2api.org/](https://demo.sub2api.org/)**
+
+デモアカウント（共有デモ環境です。セルフホスト環境ではこのアカウントは自動作成されません）：
+
+| メール | パスワード |
+|--------|------------|
+| admin@sub2api.org | admin123 |
 
 ## 概要
 
@@ -47,6 +61,16 @@ Sub2API は、AI 製品のサブスクリプションから API クォータを�
 <table>
 
 <tr>
+<td width="180" align="center" valign="middle"><a href="https://shop.pincc.ai/"><img src="assets/partners/logos/pincc-logo.png" alt="pincc" width="150"></a></td>
+<td valign="middle"><b><a href="https://shop.pincc.ai/">PinCC</a></b> は Sub2API 上に構築された公式リレーサービスで、Claude Code、Codex、Gemini などの人気モデルへの安定したアクセスを提供します。デプロイやメンテナンスは不要で、すぐにご利用いただけます。</td>
+</tr>
+
+<tr>
+<td width="180"><a href="https://www.packyapi.com/register?aff=sub2api"><img src="assets/partners/logos/packycode.png" alt="PackyCode" width="150"></a></td>
+<td>PackyCode のご支援に感謝します！PackyCode は Claude Code、Codex、Gemini などのリレーサービスを提供する信頼性の高い API 中継プラットフォームです。本ソフト利用者向けに特別割引があります：<a href="https://www.packyapi.com/register?aff=sub2api">このリンク</a>で登録し、チャージ時に「sub2api」クーポンを入力すると 10% オフになります。</td>
+</tr>
+
+<tr>
 <td width="180"><a href="https://www.openmodel.ai?ref=sub2api"><img src="assets/partners/logos/openmodel.jpg" alt="openmodel" width="150"></a></td>
 <td>1つの API で、トップモデルを使い放題！<a href="https://www.openmodel.ai?ref=sub2api">OpenModel</a> は本番環境グレードで高可用性の AI API ゲートウェイに特化し、アプリを真に高速・安定させます：自動フェイルオーバー、最適なチャネルへのスマートルーティング、本番グレードの SLA 保証。単一プロバイダーをはるかに上回る SLA で、安定性をあなたの核心的な競争力にします。</td>
 </tr>
@@ -59,6 +83,11 @@ Sub2API は、AI 製品のサブスクリプションから API クォータを�
 <tr>
 <td width="180"><a href="https://aigocode.com/invite/SUB2API"><img src="assets/partners/logos/aigocode.png" alt="AIGoCode" width="150"></a></td>
 <td>AIGoCode のご支援に感謝します！AIGoCode は Claude Code、Codex、最新の Gemini モデルを統合したオールインワンプラットフォームで、安定的かつ効率的でコストパフォーマンスに優れた AI コーディングサービスを提供します。柔軟なサブスクリプションプラン、アカウント停止リスクゼロ、VPN 不要の直接アクセス、超高速レスポンスが特長です。AIGoCode は sub2api ユーザー向けに特別特典を用意しています：<a href="https://aigocode.com/invite/SUB2API">こちらのリンク</a>から登録すると、初回チャージ時に 10% のボーナスクレジットを追加プレゼント！</td>
+</tr>
+
+<tr>
+<td width="180"><a href="https://apikey.fun/register?aff=SUB2API"><img src="assets/partners/logos/apikey-fun.png" alt="APIKEY.FUN" width="150"></a></td>
+<td>APIKEY.FUN のご支援に感謝します！<a href="https://apikey.fun/register?aff=SUB2API">APIKEY.FUN</a> は sub2api オープンソースプロジェクトのコアコントリビューターの一つであり、オープンで安定した、コストパフォーマンスに優れた AI API アクセスサービスの提供に取り組んでいます。プラットフォームは Claude、OpenAI、Gemini など人気モデルの API 中継サービスをサポートし、価格は公式料金のわずか 7% から。専用リンク <a href="https://apikey.fun/register?aff=SUB2API">APIKEY</a> から登録すると、すべてのチャージで永久 5% 割引をご利用いただけます。</td>
 </tr>
 
 <tr>
@@ -337,6 +366,18 @@ docker compose -f docker-compose.local.yml logs -f sub2api
 
 **推奨:** データ管理が容易な `docker-compose.local.yml`（スクリプトによるデプロイ）を使用してください。
 
+#### 「データ管理」機能を有効化する（datamanagementd）
+
+管理ダッシュボードの「データ管理」を有効にするには、ホスト側の追加データ管理プロセス `datamanagementd` をデプロイする必要があります。
+
+要点：
+
+- メインプロセスは常に `/tmp/sub2api-datamanagement.sock` を検出します
+- この Socket に接続できる場合のみ、データ管理機能が有効になります
+- Docker 環境では、ホスト側 Socket をコンテナ内の同じパスへマウントしてください
+
+詳細なデプロイ手順: `deploy/DATAMANAGEMENTD_CN.md`
+
 #### アクセス
 
 ブラウザで `http://YOUR_SERVER_IP:8080` を開いてください。
@@ -469,6 +510,27 @@ default:
 > 現時点では本番環境で Sora に依存しないでください。
 > 既存の `gateway.sora_*` 設定キーは予約されていますが、これらの問題が解決されるまで有効にならない場合があります。
 
+### Sora メディア署名付き URL（機能復旧後の任意設定）
+
+`gateway.sora_media_signing_key` を設定し、かつ `gateway.sora_media_signed_url_ttl_seconds > 0` の場合、ゲートウェイは Sora 出力メディア URL を一時的な署名付き URL（`/sora/media-signed/...`）へ書き換えます。これにより API キーなしでブラウザから直接アクセスでき、期限切れ制御と改ざん防止（署名対象は path + query）も利用できます。
+
+```yaml
+gateway:
+  # /sora/media に API キーを必須にするか（デフォルト false）
+  sora_media_require_api_key: false
+  # メディア用の一時署名キー（空の場合は署名を無効化）
+  sora_media_signing_key: "your-signing-key"
+  # 一時署名付き URL の有効期間（秒）
+  sora_media_signed_url_ttl_seconds: 900
+```
+
+> 署名キーを設定していない場合、`/sora/media-signed` は 503 を返します。
+> より厳格なアクセス制御が必要な場合は、`sora_media_require_api_key` を true に設定し、API キー付きの `/sora/media` アクセスのみ許可してください。
+
+アクセスポリシー：
+- `/sora/media`：内部呼び出し、または API キーを持つクライアントのみダウンロード可能
+- `/sora/media-signed`：外部アクセス可能。ただし署名 + 有効期限で制御
+
 `config.yaml` では追加のセキュリティ関連オプションも利用できます:
 
 - `cors.allowed_origins` - CORS 許可リスト
@@ -481,6 +543,14 @@ default:
 - `billing.circuit_breaker` - 課金エラー時にフェイルクローズ
 - `server.trusted_proxies` - X-Forwarded-For パースの有効化
 - `turnstile.required` - リリースモードでの Turnstile 必須化
+
+**ゲートウェイの多層防御に関する推奨事項（重要）**
+
+- `gateway.upstream_response_read_max_bytes`：非ストリーミングの上流レスポンス読み取りサイズを制限します（デフォルト `8MB`）。異常レスポンスによるメモリ増幅を防ぐためです。
+- `gateway.proxy_probe_response_read_max_bytes`：プロキシ探測レスポンスの読み取りサイズを制限します（デフォルト `1MB`）。
+- `gateway.gemini_debug_response_headers`：デフォルトは `false`。高頻度リクエストでのログ負荷を避けるため、トラブルシュート時のみ短時間有効化してください。
+- `/auth/register`、`/auth/login`、`/auth/login/2fa`、`/auth/send-verify-code` にはサーバー側のフォールバックレート制限があります（Redis 障害時は fail-close）。
+- WAF/CDN を第一層、サーバー側レート制限とレスポンス読み取り上限を第二層として併用することを推奨します。バイパスや誤設定リスクを下げるため、両方を維持してください。
 
 **⚠️ セキュリティ警告: HTTP URL 設定**
 
@@ -525,6 +595,29 @@ URL バリデーションまたはレスポンスヘッダーフィルタリン�
 ```bash
 # 6. アプリケーションを実行
 ./sub2api
+```
+
+#### HTTP/2 (h2c) と HTTP/1.1 フォールバック
+
+バックエンドの平文ポートはデフォルトで h2c をサポートし、WebSocket や古いクライアント向けに HTTP/1.1 フォールバックも維持します。ブラウザは通常 h2c をサポートしないため、性能上の利点は主にリバースプロキシや内部ネットワーク経路で得られます。
+
+**リバースプロキシ例（Caddy）：**
+
+```caddyfile
+transport http {
+	versions h2c h1
+}
+```
+
+**検証：**
+
+```bash
+# h2c prior knowledge
+curl --http2-prior-knowledge -I http://localhost:8080/health
+# HTTP/1.1 フォールバック
+curl --http1.1 -I http://localhost:8080/health
+# WebSocket フォールバック検証（管理者 token が必要）
+websocat -H="Sec-WebSocket-Protocol: sub2api-admin, jwt.<ADMIN_TOKEN>" ws://localhost:8080/api/v1/admin/ops/ws/qps
 ```
 
 #### 開発モード

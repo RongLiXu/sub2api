@@ -19,6 +19,14 @@
 > **Sub2API 官方仅使用  `sub2api.org` 与 `pincc.ai` 两个域名。其他使用 Sub2API 名义的网站可能为第三方部署或服务，与本项目无关，请自行甄别。**
 ---
 
+## ⚠️ 重要提醒
+
+使用本项目之前，请务必仔细阅读以下内容：
+
+- **🚨 服务条款风险**：使用本项目可能违反 Anthropic 等上游服务提供商的服务条款。请在使用前自行查阅相关服务商的用户协议；由此产生的全部风险由使用者自行承担。
+- **⚖️ 合规使用**：请仅在符合所在国家或地区法律法规的前提下使用本项目，严禁任何违法用途。
+- **📖 免责声明**：本项目仅用于技术学习与研究。因使用本项目导致的账号封禁、服务中断、数据丢失或任何其他直接/间接损失，作者不承担责任。
+
 ## 在线体验
 
 体验地址：**[https://demo.sub2api.org/](https://demo.sub2api.org/)**
@@ -50,6 +58,7 @@ Sub2API 是一个 AI API 网关平台，用于分发和管理 AI 产品订阅的
 > [想出现在这里？](mailto:support@pincc.ai)
 
 <table>
+
 <tr>
 <td width="180" align="center" valign="middle"><a href="https://shop.pincc.ai/"><img src="assets/partners/logos/pincc-logo.png" alt="pincc" width="150"></a></td>
 <td valign="middle"><b><a href="https://shop.pincc.ai/">PinCC</a></b> 是基于 Sub2API 搭建的官方中转服务，提供 Claude Code、Codex、Gemini 等主流模型的稳定中转，开箱即用，免去自建部署与运维烦恼。</td>
@@ -58,6 +67,11 @@ Sub2API 是一个 AI API 网关平台，用于分发和管理 AI 产品订阅的
 <tr>
 <td width="180"><a href="https://www.packyapi.com/register?aff=sub2api"><img src="assets/partners/logos/packycode.png" alt="PackyCode" width="150"></a></td>
 <td>感谢 PackyCode 赞助了本项目！PackyCode 是一家稳定、高效的API中转服务商，提供 Claude Code、Codex、Gemini 等多种中转服务。PackyCode 为本软件的用户提供了特别优惠，使用<a href="https://www.packyapi.com/register?aff=sub2api">此链接</a>注册并在充值时填写"sub2api"优惠码，首次充值可以享受9折优惠！</td>
+</tr>
+
+<tr>
+<td width="180"><a href="https://www.openmodel.ai?ref=sub2api"><img src="assets/partners/logos/openmodel.jpg" alt="openmodel" width="150"></a></td>
+<td>一个 API，畅用所有顶级模型！<a href="https://www.openmodel.ai?ref=sub2api">OpenModel</a> 是生产级高可用 AI API 网关，让你的应用真正快速、稳定：自动故障转移、智能路由到表现最佳的通道，并提供生产级 SLA。其 SLA 远超单一供应商，让稳定性成为你的核心竞争力。可直接适配 Claude Code、Codex 和 Gemini CLI。通过此链接注册即可开始使用。</td>
 </tr>
 
 <tr>
@@ -128,6 +142,12 @@ Sub2API 是一个 AI API 网关平台，用于分发和管理 AI 产品订阅的
 <tr>
 <td width="180"><a href="https://veilx.io/#/hello/SJRBRVDV"><img src="assets/partners/logos/veilx.png" alt="veilx" width="150"></a></td>
 <td>感谢 Veilx 赞助本项目！ <a href="https://veilx.io/#/hello/SJRBRVDV">Veilx</a> CDN 专为超大规模 API 请求场景打造，针对 AI 中转站业务与 AI API 调用链路进行了深度优化，轻松应对高并发、高频请求与大流量传输，为开发者与企业提供更快、更稳、更低延迟的加速体验。无论是 OpenAI、Claude、Gemini 等 AI 接口中转，还是聊天、绘图、Embedding、流式输出等复杂场景，Veilx 都能显著提升响应速度与连接稳定性，有效降低网络波动带来的超时与失败问题。同时，Veilx 提供中国三网优化回国极速线路，大幅提升中国大陆地区访问海外 AI 服务的速度与稳定性，特别适合全球 AI 中转平台、海外 AI SaaS、跨境业务与高并发 API 系统部署。专为 AI API 而生，让你的 AI 中转服务更快、更稳、更省心。<a href="https://veilx.io/#/hello/SJRBRVDV">购买地址</a>
+</td>
+</tr>
+
+<tr>
+<td width="180"><a href="https://roxybrowser.com/invite/bgGKG7"><img src="assets/partners/logos/RoxyBrowser.png" alt="RoxyBrowser" width="150"></a></td>
+<td>感谢 RoxyBrowser 赞助本项目！<a href="https://roxybrowser.com/invite/bgGKG7">RoxyBrowser</a> 是 Sub2API 的理想伙伴：内置原生 Roxy AI Agent 与高质量原生住宅 IP，支持通过简单命令进行批量自动化，显著提升多账号管理的安全性与效率！点击<a href="https://roxybrowser.com/invite/bgGKG7">此链接</a>注册，可获得免费住宅 IP 套餐，并享受终身 9 折优惠。
 </td>
 </tr>
 
