@@ -86,6 +86,47 @@ func TestParseCodexSessionImportEntriesFallsBackToLineModeForMixedJSONAndToken(t
 	}
 }
 
+func TestParseCodexSessionImportEntriesSupportsMultipleContents(t *testing.T) {
+	accessToken := buildCodexImportTestJWT(t, time.Now().Add(time.Hour), map[string]any{
+		"email": "file-one@example.com",
+	})
+	req := CodexSessionImportRequest{
+		Contents: []string{
+			fmt.Sprintf(`{"access_token":%q,"refresh_token":"rt-file-1","type":"codex","token_source":"ChatGPT_team"}`, accessToken),
+			fmt.Sprintf(`[{"access_token":%q,"refresh_token":"rt-file-2"}]`, buildCodexImportTestJWT(t, time.Now().Add(time.Hour), map[string]any{
+				"email": "file-two@example.com",
+			})),
+		},
+	}
+
+	entries, err := parseCodexSessionImportEntries(req)
+	if err != nil {
+		t.Fatalf("parseCodexSessionImportEntries error = %v", err)
+	}
+	if len(entries) != 2 {
+		t.Fatalf("len(entries) = %d, want 2", len(entries))
+	}
+
+	first, err := normalizeCodexImportEntry(entries[0])
+	if err != nil {
+		t.Fatalf("normalize first file error = %v", err)
+	}
+	if first.RefreshToken != "rt-file-1" {
+		t.Fatalf("refresh token = %q, want rt-file-1", first.RefreshToken)
+	}
+	if first.Extra["codex_import_type"] != "codex" || first.Extra["token_source"] != "ChatGPT_team" {
+		t.Fatalf("codex metadata not preserved: %#v", first.Extra)
+	}
+
+	second, err := normalizeCodexImportEntry(entries[1])
+	if err != nil {
+		t.Fatalf("normalize second file error = %v", err)
+	}
+	if second.Email != "file-two@example.com" {
+		t.Fatalf("email = %q, want file-two@example.com", second.Email)
+	}
+}
+
 func TestNormalizeCodexSessionJSONExtractsCredentialsAndIgnoresSessionToken(t *testing.T) {
 	accessToken := buildCodexImportTestJWT(t, time.Now().Add(time.Hour), map[string]any{
 		"email": "claim@example.com",
@@ -348,6 +389,43 @@ func TestCodexIdentityKeysDoNotMatchByChatGPTUserID(t *testing.T) {
 		if strings.HasPrefix(key, "user:") || strings.HasPrefix(key, "email:") {
 			t.Fatalf("chatgpt_user_id/email must not be used when userID is present without accountID: %v", keys)
 		}
+	}
+}
+
+func TestCodexAccountIndexMatchesByRefreshTokenFingerprint(t *testing.T) {
+	existing := service.Account{
+		ID: 10,
+		Credentials: map[string]any{
+			"refresh_token": "rt-same",
+			"access_token":  "old-access-token",
+		},
+	}
+	index := buildCodexAccountIndex([]service.Account{existing})
+	keys := buildCodexIdentityKeys("", "", "", "new-access-token", "rt-same")
+	matched := index.Find(keys)
+	if matched == nil || matched.ID != existing.ID {
+		t.Fatalf("Find by refresh_token fingerprint = %#v, want ID %d", matched, existing.ID)
+	}
+}
+
+func TestNormalizeCodexJWTReadsOpenAIProfileEmail(t *testing.T) {
+	accessToken := buildCodexImportTestJWT(t, time.Now().Add(time.Hour), map[string]any{
+		"https://api.openai.com/profile": map[string]any{
+			"email": "profile@example.com",
+		},
+	})
+	item, err := normalizeCodexImportEntry(codexImportEntry{Index: 1, Value: map[string]any{
+		"access_token":  accessToken,
+		"refresh_token": "rt-profile",
+	}})
+	if err != nil {
+		t.Fatalf("normalizeCodexImportEntry error = %v", err)
+	}
+	if item.Email != "profile@example.com" {
+		t.Fatalf("email = %q, want profile@example.com", item.Email)
+	}
+	if item.Credentials["email"] != "profile@example.com" {
+		t.Fatalf("credential email = %v, want profile@example.com", item.Credentials["email"])
 	}
 }
 

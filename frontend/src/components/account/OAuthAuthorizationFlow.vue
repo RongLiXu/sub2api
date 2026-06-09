@@ -195,12 +195,51 @@
                 <Icon name="key" size="sm" class="text-blue-500" />
                 {{ t('admin.accounts.oauth.openai.codexSessionInputLabel') }}
                 <span
+                  v-if="selectedCodexFiles.length > 0"
+                  class="rounded-full bg-blue-500 px-2 py-0.5 text-xs text-white"
+                >
+                  {{ t('admin.accounts.oauth.openai.codexSessionFilesCount', { count: selectedCodexFiles.length }) }}
+                </span>
+                <span
                   v-if="parsedCodexSessionCount > 1"
                   class="rounded-full bg-blue-500 px-2 py-0.5 text-xs text-white"
                 >
                   {{ t('admin.accounts.oauth.keysCount', { count: parsedCodexSessionCount }) }}
                 </span>
               </label>
+              <input
+                ref="codexFileInputRef"
+                type="file"
+                accept="application/json,.json"
+                multiple
+                class="hidden"
+                @change="handleCodexFileChange"
+              />
+              <div class="mb-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  class="btn btn-secondary text-sm"
+                  :disabled="loading"
+                  @click="handleSelectCodexFiles"
+                >
+                  <Icon name="upload" size="sm" class="mr-2" />
+                  {{ t('admin.accounts.oauth.openai.codexSessionSelectFiles') }}
+                </button>
+                <button
+                  v-if="selectedCodexFiles.length > 0"
+                  type="button"
+                  class="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                  :disabled="loading"
+                  @click="handleClearCodexFiles"
+                >
+                  {{ t('common.clear') }}
+                </button>
+              </div>
+              <ul v-if="selectedCodexFiles.length > 0" class="mb-3 space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                <li v-for="file in selectedCodexFiles" :key="`${file.name}-${file.size}-${file.lastModified}`" class="truncate font-mono">
+                  {{ file.name }}
+                </li>
+              </ul>
               <textarea
                 v-model="codexSessionInput"
                 rows="8"
@@ -225,7 +264,7 @@
             <button
               type="button"
               class="btn btn-primary w-full"
-              :disabled="loading || !codexSessionInput.trim()"
+              :disabled="loading || (!codexSessionInput.trim() && selectedCodexFiles.length === 0)"
               @click="handleImportCodexSession"
             >
               <svg
@@ -683,7 +722,7 @@ const emit = defineEmits<{
   'validate-mobile-refresh-token': [refreshToken: string]
   'validate-session-token': [sessionToken: string]
   'import-access-token': [accessToken: string]
-  'import-codex-session': [content: string]
+  'import-codex-session': [payload: { content?: string; contents?: string[] }]
   'update:inputMethod': [method: AuthInputMethod]
 }>()
 
@@ -724,6 +763,8 @@ const sessionKeyInput = ref('')
 const refreshTokenInput = ref('')
 const sessionTokenInput = ref('')
 const codexSessionInput = ref('')
+const selectedCodexFiles = ref<File[]>([])
+const codexFileInputRef = ref<HTMLInputElement | null>(null)
 const showHelpDialog = ref(false)
 const oauthState = ref('')
 const projectId = ref('')
@@ -752,12 +793,15 @@ const parsedRefreshTokenCount = computed(() => {
 
 const parsedCodexSessionCount = computed(() => {
   const trimmed = codexSessionInput.value.trim()
-  if (!trimmed) return 0
-  if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 1
-  return trimmed
-    .split('\n')
-    .map((item) => item.trim())
-    .filter((item) => item).length
+  const textCount = (() => {
+    if (!trimmed) return 0
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 1
+    return trimmed
+      .split('\n')
+      .map((item) => item.trim())
+      .filter((item) => item).length
+  })()
+  return textCount + selectedCodexFiles.value.length
 })
 
 // Watchers
@@ -831,9 +875,37 @@ const handleValidateRefreshToken = () => {
   }
 }
 
-const handleImportCodexSession = () => {
-  if (codexSessionInput.value.trim()) {
-    emit('import-codex-session', codexSessionInput.value.trim())
+const handleSelectCodexFiles = () => {
+  codexFileInputRef.value?.click()
+}
+
+const handleCodexFileChange = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  selectedCodexFiles.value = Array.from(input.files || []).filter((file) => {
+    const name = file.name.toLowerCase()
+    return name.endsWith('.json') || file.type === 'application/json' || file.type === ''
+  })
+}
+
+const handleClearCodexFiles = () => {
+  selectedCodexFiles.value = []
+  if (codexFileInputRef.value) {
+    codexFileInputRef.value.value = ''
+  }
+}
+
+const readCodexFiles = async () => {
+  return Promise.all(selectedCodexFiles.value.map((file) => file.text()))
+}
+
+const handleImportCodexSession = async () => {
+  const content = codexSessionInput.value.trim()
+  const contents = await readCodexFiles()
+  if (content || contents.length > 0) {
+    emit('import-codex-session', {
+      content: content || undefined,
+      contents: contents.length > 0 ? contents : undefined
+    })
   }
 }
 
@@ -855,6 +927,7 @@ defineExpose({
     refreshTokenInput.value = ''
     sessionTokenInput.value = ''
     codexSessionInput.value = ''
+    handleClearCodexFiles()
     inputMethod.value = 'manual'
     showHelpDialog.value = false
   }

@@ -661,13 +661,19 @@ const handleAntigravityRefreshTokenReauth = async (refreshTokenInput: string) =>
   }
 }
 
-const handleOpenAIImportCodexSession = async (content: string) => {
+const handleOpenAIImportCodexSession = async (payload: { content?: string; contents?: string[] }) => {
   if (!props.account || !isOpenAI.value) return
 
   openaiOAuth.loading.value = true
   openaiOAuth.error.value = ''
   try {
-    const parsed = parseCodexSessionCredential(content)
+    const inputs = [payload.content, ...(payload.contents || [])]
+      .map((item) => (item || '').trim())
+      .filter(Boolean)
+    if (inputs.length !== 1) {
+      throw new Error(t('admin.accounts.oauth.singleCredentialOnly'))
+    }
+    const parsed = parseCodexSessionCredential(inputs[0])
     const extra = openaiOAuth.buildExtraInfo(parsed.tokenInfo) || {}
     extra.import_source = 'codex_session'
     extra.imported_at = new Date().toISOString()

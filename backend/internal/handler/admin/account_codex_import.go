@@ -89,11 +89,12 @@ type codexImportAccount struct {
 }
 
 type codexJWTClaims struct {
-	Sub        string                `json:"sub"`
-	Email      string                `json:"email"`
-	Exp        int64                 `json:"exp"`
-	Iat        int64                 `json:"iat"`
-	OpenAIAuth *codexJWTOpenAIClaims `json:"https://api.openai.com/auth,omitempty"`
+	Sub           string                 `json:"sub"`
+	Email         string                 `json:"email"`
+	Exp           int64                  `json:"exp"`
+	Iat           int64                  `json:"iat"`
+	OpenAIAuth    *codexJWTOpenAIClaims  `json:"https://api.openai.com/auth,omitempty"`
+	OpenAIProfile *codexJWTOpenAIProfile `json:"https://api.openai.com/profile,omitempty"`
 }
 
 type codexJWTOpenAIClaims struct {
@@ -103,6 +104,10 @@ type codexJWTOpenAIClaims struct {
 	UserID           string                     `json:"user_id"`
 	POID             string                     `json:"poid"`
 	Organizations    []openai.OrganizationClaim `json:"organizations"`
+}
+
+type codexJWTOpenAIProfile struct {
+	Email string `json:"email"`
 }
 
 type codexAccountIndex struct {
@@ -521,6 +526,15 @@ func normalizeCodexImportEntry(entry codexImportEntry) (*codexImportAccount, err
 			[]string{"orgId"},
 		)
 		item.Name = firstCodexString(raw, []string{"name"}, []string{"user", "name"})
+		if importType := firstCodexString(raw, []string{"type"}); importType != "" {
+			item.Extra["codex_import_type"] = importType
+		}
+		if tokenSource := firstCodexString(raw, []string{"token_source"}, []string{"tokenSource"}); tokenSource != "" {
+			item.Extra["token_source"] = tokenSource
+		}
+		if savedAt, ok := firstCodexTime(raw, []string{"saved_at"}, []string{"savedAt"}); ok {
+			item.Extra["token_saved_at"] = savedAt.Format(time.RFC3339)
+		}
 		authProvider := firstCodexString(raw, []string{"auth_provider"}, []string{"authProvider"})
 		if authProvider != "" {
 			item.Extra["auth_provider"] = authProvider
@@ -583,7 +597,7 @@ func normalizeCodexImportEntry(entry codexImportEntry) (*codexImportAccount, err
 
 	fingerprint := codexTokenFingerprint(item.AccessToken)
 	item.Extra["access_token_sha256"] = fingerprint
-	item.IdentityKeys = buildCodexIdentityKeys(item.AccountID, item.UserID, item.Email, item.AccessToken)
+	item.IdentityKeys = buildCodexIdentityKeys(item.AccountID, item.UserID, item.Email, item.AccessToken, item.RefreshToken)
 	item.Name = buildCodexImportAccountName(item, entry.Index)
 
 	return item, nil
@@ -607,6 +621,9 @@ func enrichCodexImportAccountFromJWT(item *codexImportAccount, token string, val
 	}
 	if item.Email == "" {
 		item.Email = strings.TrimSpace(claims.Email)
+	}
+	if item.Email == "" && claims.OpenAIProfile != nil {
+		item.Email = strings.TrimSpace(claims.OpenAIProfile.Email)
 	}
 	if claims.OpenAIAuth == nil {
 		if item.UserID == "" {
@@ -802,8 +819,8 @@ func sanitizeCodexImportCredentialExtras(input map[string]any) map[string]any {
 	return out
 }
 
-func buildCodexIdentityKeys(accountID, userID, email, accessToken string) []string {
-	keys := make([]string, 0, 3)
+func buildCodexIdentityKeys(accountID, userID, email, accessToken string, refreshTokens ...string) []string {
+	keys := make([]string, 0, 4)
 	accountID = strings.TrimSpace(accountID)
 	userID = strings.TrimSpace(userID)
 	email = strings.ToLower(strings.TrimSpace(email))
@@ -823,6 +840,11 @@ func buildCodexIdentityKeys(accountID, userID, email, accessToken string) []stri
 	}
 	if accessToken = strings.TrimSpace(accessToken); accessToken != "" {
 		keys = append(keys, "access:"+codexTokenFingerprint(accessToken))
+	}
+	for _, refreshToken := range refreshTokens {
+		if refreshToken = strings.TrimSpace(refreshToken); refreshToken != "" {
+			keys = append(keys, "refresh:"+codexTokenFingerprint(refreshToken))
+		}
 	}
 	return keys
 }
@@ -847,6 +869,7 @@ func (i *codexAccountIndex) Add(account service.Account) {
 		codexCredentialString(account.Credentials, "chatgpt_user_id"),
 		codexCredentialString(account.Credentials, "email"),
 		codexCredentialString(account.Credentials, "access_token"),
+		codexCredentialString(account.Credentials, "refresh_token"),
 	)
 	for _, key := range keys {
 		i.accountsByKey[key] = account

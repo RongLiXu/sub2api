@@ -4898,10 +4898,11 @@ const formatCodexImportMessages = (messages?: CodexSessionImportMessage[]) => {
     .join('\n')
 }
 
-const handleOpenAIImportCodexSession = async (content: string) => {
+const handleOpenAIImportCodexSession = async (payload: { content?: string; contents?: string[] }) => {
   const oauthClient = openaiOAuth
-  const trimmed = content.trim()
-  if (!trimmed) {
+  const trimmed = (payload.content || '').trim()
+  const contents = (payload.contents || []).map((content) => content.trim()).filter(Boolean)
+  if (!trimmed && contents.length === 0) {
     oauthClient.error.value = t('admin.accounts.oauth.openai.codexSessionEmpty')
     return
   }
@@ -4917,7 +4918,8 @@ const handleOpenAIImportCodexSession = async (content: string) => {
   try {
     const extra = buildOpenAIExtra()
     const result = await adminAPI.accounts.importCodexSession({
-      content: trimmed,
+      ...(trimmed ? { content: trimmed } : {}),
+      ...(contents.length > 0 ? { contents } : {}),
       name: form.name,
       notes: form.notes || null,
       proxy_id: form.proxy_id,
