@@ -1914,21 +1914,126 @@ func (h *AccountHandler) GetUsage(c *gin.Context) {
 		return
 	}
 
-	source := c.DefaultQuery("source", "active")
-	force := c.Query("force") == "true"
-
-	var usage *service.UsageInfo
-	if source == "passive" {
-		usage, err = h.accountUsageService.GetPassiveUsage(c.Request.Context(), accountID)
-	} else {
-		usage, err = h.accountUsageService.GetUsage(c.Request.Context(), accountID, force)
-	}
+	usage, err := h.loadAccountUsage(c.Request.Context(), accountID, c.DefaultQuery("source", "active"), c.Query("force") == "true")
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
 	}
 
 	response.Success(c, usage)
+}
+
+func (h *AccountHandler) loadAccountUsage(ctx context.Context, accountID int64, source string, force bool) (*service.UsageInfo, error) {
+	if source == "passive" {
+		return h.accountUsageService.GetPassiveUsage(ctx, accountID)
+	}
+	return h.accountUsageService.GetUsage(ctx, accountID, force)
+}
+
+// BatchProbeUsageRequest is the request body for active usage probing.
+type BatchProbeUsageRequest struct {
+	AccountIDs []int64 `json:"account_ids" binding:"required"`
+	Force      *bool   `json:"force"`
+}
+
+// BatchProbeUsage probes multiple account usage windows and returns refreshed accounts.
+// POST /api/v1/admin/accounts/usage/probe
+func (h *AccountHandler) BatchProbeUsage(c *gin.Context) {
+	var req BatchProbeUsageRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	accountIDs := normalizeInt64IDList(req.AccountIDs)
+	if len(accountIDs) == 0 {
+		response.BadRequest(c, "account_ids is required")
+		return
+	}
+	if len(accountIDs) > 200 {
+		response.BadRequest(c, "account_ids cannot exceed 200")
+		return
+	}
+
+	force := true
+	if req.Force != nil {
+		force = *req.Force
+	}
+
+	ctx := c.Request.Context()
+	accounts, err := h.adminService.GetAccountsByIDs(ctx, accountIDs)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	foundIDs := make(map[int64]struct{}, len(accounts))
+	for _, acc := range accounts {
+		if acc != nil {
+			foundIDs[acc.ID] = struct{}{}
+		}
+	}
+
+	type usageProbeResult struct {
+		AccountID int64              `json:"account_id"`
+		Success   bool               `json:"success"`
+		Usage     *service.UsageInfo `json:"usage,omitempty"`
+		Account   any                `json:"account,omitempty"`
+		Error     string             `json:"error,omitempty"`
+	}
+
+	resultsByID := make(map[int64]usageProbeResult, len(accountIDs))
+	var mu sync.Mutex
+	g, gctx := errgroup.WithContext(ctx)
+	g.SetLimit(5)
+
+	for _, id := range accountIDs {
+		accountID := id
+		if _, ok := foundIDs[accountID]; !ok {
+			resultsByID[accountID] = usageProbeResult{AccountID: accountID, Success: false, Error: "account not found"}
+			continue
+		}
+		g.Go(func() error {
+			usage, usageErr := h.loadAccountUsage(gctx, accountID, "active", force)
+			result := usageProbeResult{AccountID: accountID}
+			if usageErr != nil {
+				result.Error = usageErr.Error()
+			} else {
+				result.Success = true
+				result.Usage = usage
+				if refreshed, getErr := h.adminService.GetAccount(gctx, accountID); getErr == nil && refreshed != nil {
+					result.Account = h.buildAccountResponseWithRuntime(gctx, refreshed)
+				}
+			}
+			mu.Lock()
+			resultsByID[accountID] = result
+			mu.Unlock()
+			return nil
+		})
+	}
+	_ = g.Wait()
+
+	results := make([]usageProbeResult, 0, len(accountIDs))
+	successCount := 0
+	failedCount := 0
+	for _, id := range accountIDs {
+		result, ok := resultsByID[id]
+		if !ok {
+			result = usageProbeResult{AccountID: id, Success: false, Error: "probe skipped"}
+		}
+		if result.Success {
+			successCount++
+		} else {
+			failedCount++
+		}
+		results = append(results, result)
+	}
+
+	response.Success(c, gin.H{
+		"total":   len(accountIDs),
+		"success": successCount,
+		"failed":  failedCount,
+		"results": results,
+	})
 }
 
 // ClearRateLimit handles clearing account rate limit status

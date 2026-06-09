@@ -372,6 +372,9 @@ func (h *AccountHandler) importData(ctx context.Context, req DataImportRequest) 
 
 	// 收集需要异步设置隐私的 Antigravity OAuth 账号
 	var privacyAccounts []*service.Account
+	// 导入时如果 OpenAI OAuth 已带有 codex 5h/7d 满额快照，异步做一次 usage 归一化，
+	// 让账号立即进入 rate_limited 运行态，避免只在 extra 中显示 100% 但仍可被调度。
+	var openAIUsageAccounts []*service.Account
 
 	for i := range dataPayload.Accounts {
 		item := dataPayload.Accounts[i]
@@ -434,10 +437,34 @@ func (h *AccountHandler) importData(ctx context.Context, req DataImportRequest) 
 		if created.Platform == service.PlatformAntigravity && created.Type == service.AccountTypeOAuth {
 			privacyAccounts = append(privacyAccounts, created)
 		}
+		if created.Platform == service.PlatformOpenAI && created.Type == service.AccountTypeOAuth {
+			openAIUsageAccounts = append(openAIUsageAccounts, created)
+		}
 		result.AccountCreated++
 	}
 
 	// 异步设置 Antigravity 隐私，避免大量导入时阻塞请求
+	if len(openAIUsageAccounts) > 0 && h.accountUsageService != nil {
+		usageService := h.accountUsageService
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					slog.Error("import_openai_usage_probe_panic", "recover", r)
+				}
+			}()
+			bgCtx := context.Background()
+			for _, acc := range openAIUsageAccounts {
+				if acc == nil {
+					continue
+				}
+				if _, err := usageService.GetUsage(bgCtx, acc.ID, false); err != nil {
+					slog.Warn("import_openai_usage_probe_failed", "account_id", acc.ID, "error", err)
+				}
+			}
+			slog.Info("import_openai_usage_probe_done", "count", len(openAIUsageAccounts))
+		}()
+	}
+
 	if len(privacyAccounts) > 0 {
 		adminSvc := h.adminService
 		go func() {

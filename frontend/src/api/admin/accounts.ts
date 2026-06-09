@@ -20,7 +20,8 @@ import type {
   CodexSessionImportResult,
   CloneAccountRequest,
   CheckMixedChannelRequest,
-  CheckMixedChannelResponse
+  CheckMixedChannelResponse,
+  AccountUsageProbeBatchResult
 } from '@/types'
 
 /**
@@ -276,6 +277,14 @@ export async function getUsage(id: number, source?: 'passive' | 'active', force?
   if (force) params.force = 'true'
   const { data } = await apiClient.get<AccountUsageInfo>(`/admin/accounts/${id}/usage`, {
     params: Object.keys(params).length > 0 ? params : undefined
+  })
+  return data
+}
+
+export async function batchProbeUsage(accountIds: number[], force = true): Promise<AccountUsageProbeBatchResult> {
+  const { data } = await apiClient.post<AccountUsageProbeBatchResult>('/admin/accounts/usage/probe', {
+    account_ids: accountIds,
+    force
   })
   return data
 }
@@ -737,6 +746,7 @@ export const accountsAPI = {
   getStats,
   clearError,
   getUsage,
+  batchProbeUsage,
   getTodayStats,
   getBatchTodayStats,
   clearRateLimit,

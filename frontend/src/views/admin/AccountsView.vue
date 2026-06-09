@@ -177,6 +177,7 @@
           @delete="handleBulkDelete"
           @reset-status="handleBulkResetStatus"
           @refresh-token="handleBulkRefreshToken"
+          @probe-usage="handleBulkProbeUsage"
           @edit-selected="openBulkEditSelected"
           @edit-filtered="openBulkEditFiltered"
           @clear="clearSelection"
@@ -520,6 +521,7 @@ const togglingSchedulable = ref<number | null>(null)
 const menu = reactive<{show:boolean, acc:Account|null, pos:{top:number, left:number}|null}>({ show: false, acc: null, pos: null })
 const exportingData = ref(false)
 const cloningAccountId = ref<number | null>(null)
+const probingUsage = ref(false)
 
 // Account tools dropdown
 const showAccountToolsDropdown = ref(false)
@@ -1292,6 +1294,43 @@ const handleBulkRefreshToken = async () => {
   } catch (error) {
     console.error('Failed to bulk refresh token:', error)
     appStore.showError(String(error))
+  }
+}
+const handleBulkProbeUsage = async () => {
+  const accountIds = [...selIds.value]
+  if (accountIds.length === 0 || probingUsage.value) return
+  if (!confirm(t('common.confirm'))) return
+  probingUsage.value = true
+  try {
+    const result = await adminAPI.accounts.batchProbeUsage(accountIds, true)
+    const updatedAccounts: Account[] = []
+    for (const item of result.results || []) {
+      if (item.success && item.account) {
+        updatedAccounts.push(item.account)
+      }
+    }
+    if (updatedAccounts.length > 0) {
+      const updatedById = new Map(updatedAccounts.map(account => [account.id, account]))
+      accounts.value = accounts.value.map(account => {
+        const updated = updatedById.get(account.id)
+        if (!updated) return account
+        const merged = mergeRuntimeFields(account, updated)
+        syncAccountRefs(merged)
+        return merged
+      })
+    }
+    usageManualRefreshToken.value += 1
+    resetAutoRefreshCache()
+    if (result.failed > 0) {
+      appStore.showError(t('admin.accounts.bulkActions.probeUsagePartial', { success: result.success, failed: result.failed }))
+    } else {
+      appStore.showSuccess(t('admin.accounts.bulkActions.probeUsageSuccess', { count: result.success }))
+    }
+  } catch (error: any) {
+    console.error('Failed to bulk probe usage:', error)
+    appStore.showError(error?.message || t('admin.accounts.bulkActions.probeUsageFailed'))
+  } finally {
+    probingUsage.value = false
   }
 }
 const updateSchedulableInList = (accountIds: number[], schedulable: boolean) => {

@@ -529,8 +529,11 @@ func (s *AccountUsageService) getOpenAIUsage(ctx context.Context, account *Accou
 			if progress := buildCodexUsageProgressFromExtra(account.Extra, "7d", now); progress != nil {
 				usage.SevenDay = progress
 			}
+			s.promoteExhaustedOpenAIUsageToRateLimit(ctx, account, usage, "probe")
 		}
 	}
+
+	s.promoteExhaustedOpenAIUsageToRateLimit(ctx, account, usage, "cached")
 
 	if s.usageLogRepo == nil {
 		return usage, nil
@@ -551,6 +554,42 @@ func (s *AccountUsageService) getOpenAIUsage(ctx context.Context, account *Accou
 	}
 
 	return usage, nil
+}
+
+func (s *AccountUsageService) promoteExhaustedOpenAIUsageToRateLimit(ctx context.Context, account *Account, usage *UsageInfo, reason string) {
+	if s == nil || s.accountRepo == nil || account == nil || usage == nil || !account.IsOpenAIOAuth() {
+		return
+	}
+	resetAt, window := exhaustedOpenAIUsageResetAt(usage)
+	if resetAt == nil || !time.Now().Before(*resetAt) {
+		return
+	}
+	if account.RateLimitResetAt != nil && !account.RateLimitResetAt.Before(*resetAt) && time.Now().Before(*account.RateLimitResetAt) {
+		return
+	}
+	if err := s.accountRepo.SetRateLimited(ctx, account.ID, *resetAt); err != nil {
+		slog.Warn("openai_usage_promote_rate_limit_failed", "account_id", account.ID, "window", window, "reason", reason, "reset_at", resetAt, "error", err)
+		return
+	}
+	now := time.Now()
+	account.RateLimitedAt = &now
+	account.RateLimitResetAt = resetAt
+	slog.Info("openai_usage_promoted_rate_limit", "account_id", account.ID, "window", window, "reason", reason, "reset_at", resetAt)
+}
+
+func exhaustedOpenAIUsageResetAt(usage *UsageInfo) (*time.Time, string) {
+	if usage == nil {
+		return nil, ""
+	}
+	// 7d quota has priority: when the weekly bucket is exhausted it is the longer
+	// blocking window and mirrors the 429 header handling path.
+	if usage.SevenDay != nil && usage.SevenDay.Utilization >= 100 && usage.SevenDay.ResetsAt != nil {
+		return usage.SevenDay.ResetsAt, "7d"
+	}
+	if usage.FiveHour != nil && usage.FiveHour.Utilization >= 100 && usage.FiveHour.ResetsAt != nil {
+		return usage.FiveHour.ResetsAt, "5h"
+	}
+	return nil, ""
 }
 
 func shouldRefreshOpenAICodexSnapshot(account *Account, usage *UsageInfo, now time.Time) bool {

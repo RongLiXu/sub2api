@@ -3589,8 +3589,12 @@ export default {
         disableScheduling: '批量停止调度',
         resetStatus: '批量重置状态',
         refreshToken: '批量刷新令牌',
+        probeUsage: '批量探测用量窗口',
         resetStatusSuccess: '已成功重置 {count} 个账号状态',
         refreshTokenSuccess: '已成功刷新 {count} 个账号令牌',
+        probeUsageSuccess: '已成功探测 {count} 个账号用量窗口',
+        probeUsagePartial: '用量窗口探测部分完成：{success} 成功，{failed} 失败',
+        probeUsageFailed: '批量探测用量窗口失败',
         partialSuccess: '操作部分完成：{success} 成功，{failed} 失败'
       },
       bulkEdit: {

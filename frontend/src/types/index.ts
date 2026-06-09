@@ -1159,6 +1159,21 @@ export interface AdminDataImportResult {
   errors?: AdminDataImportError[]
 }
 
+export interface AccountUsageProbeResult {
+  account_id: number
+  success: boolean
+  usage?: AccountUsageInfo
+  account?: Account
+  error?: string
+}
+
+export interface AccountUsageProbeBatchResult {
+  total: number
+  success: number
+  failed: number
+  results: AccountUsageProbeResult[]
+}
+
 export interface CodexSessionImportRequest {
   content?: string
   contents?: string[]

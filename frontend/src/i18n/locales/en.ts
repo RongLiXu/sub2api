@@ -345,6 +345,7 @@ export default {
     clearAccountFilter: 'Clear account filter',
     copyUrl: 'Copy URL',
     refreshToken: 'Refresh Token',
+        probeUsage: 'Probe Usage',
     projectId: 'Project ID',
     location: 'Location',
     tableOfContents: 'Table of contents',
@@ -3430,6 +3431,9 @@ export default {
         refreshToken: 'Refresh Token',
         resetStatusSuccess: 'Successfully reset {count} account(s) status',
         refreshTokenSuccess: 'Successfully refreshed {count} account(s) token',
+        probeUsageSuccess: 'Successfully probed usage windows for {count} account(s)',
+        probeUsagePartial: 'Usage probing partially completed: {success} succeeded, {failed} failed',
+        probeUsageFailed: 'Failed to probe usage windows',
         partialSuccess: 'Partially completed: {success} succeeded, {failed} failed'
       },
       bulkEdit: {
