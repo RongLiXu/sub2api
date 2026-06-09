@@ -125,6 +125,18 @@ describe('usage service tier locale keys', () => {
     expect(th.profile.title).not.toBe(en.profile.title)
   })
 
+  it('keeps account email filter localized in all supported locales', () => {
+    expect(en.admin.accounts.emailFilter).toBe('Filter by email...')
+    expect(zh.admin.accounts.emailFilter).toBe('按邮箱筛选...')
+    expect(ja.admin.accounts.emailFilter).not.toBe(en.admin.accounts.emailFilter)
+    expect(vi.admin.accounts.emailFilter).not.toBe(en.admin.accounts.emailFilter)
+    expect(fr.admin.accounts.emailFilter).not.toBe(en.admin.accounts.emailFilter)
+    expect(ru.admin.accounts.emailFilter).not.toBe(en.admin.accounts.emailFilter)
+    expect(ko.admin.accounts.emailFilter).not.toBe(en.admin.accounts.emailFilter)
+    expect(th.admin.accounts.emailFilter).not.toBe(en.admin.accounts.emailFilter)
+    expect(zhTW.admin.accounts.emailFilter).toBe(zh.admin.accounts.emailFilter)
+  })
+
   it('keeps added locale key structure complete', () => {
     expect(flattenKeys(ja).sort()).toEqual(flattenKeys(en).sort())
     expect(flattenKeys(vi).sort()).toEqual(flattenKeys(en).sort())

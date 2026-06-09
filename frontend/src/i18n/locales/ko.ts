@@ -2866,6 +2866,7 @@ const messages = {
       "crsBack": "뒤로",
       "editAccount": "계정 편집",
       "deleteAccount": "계정 삭제",
+      "emailFilter": "이메일로 필터링...",
       "searchAccounts": "계정 검색...",
       "notes": "메모",
       "notesPlaceholder": "메모 입력",

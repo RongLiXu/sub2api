@@ -2809,6 +2809,7 @@ const messages = {
       "crsBack": "Quay lại",
       "editAccount": "Chỉnh sửa tài khoản",
       "deleteAccount": "Xóa tài khoản",
+      "emailFilter": "Lọc theo email...",
       "searchAccounts": "Tìm kiếm tài khoản...",
       "notes": "Ghi chú",
       "notesPlaceholder": "Nhập ghi chú",

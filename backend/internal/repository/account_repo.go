@@ -462,10 +462,10 @@ func (r *accountRepository) Delete(ctx context.Context, id int64) error {
 }
 
 func (r *accountRepository) List(ctx context.Context, params pagination.PaginationParams) ([]service.Account, *pagination.PaginationResult, error) {
-	return r.ListWithFilters(ctx, params, "", "", "", "", 0, "")
+	return r.ListWithFilters(ctx, params, "", "", "", "", "", 0, "")
 }
 
-func (r *accountRepository) ListWithFilters(ctx context.Context, params pagination.PaginationParams, platform, accountType, status, search string, groupID int64, privacyMode string) ([]service.Account, *pagination.PaginationResult, error) {
+func (r *accountRepository) ListWithFilters(ctx context.Context, params pagination.PaginationParams, platform, accountType, status, search, email string, groupID int64, privacyMode string) ([]service.Account, *pagination.PaginationResult, error) {
 	q := r.client.Account.Query()
 
 	if platform != "" {
@@ -538,6 +538,9 @@ func (r *accountRepository) ListWithFilters(ctx context.Context, params paginati
 	if search != "" {
 		q = q.Where(dbaccount.NameContainsFold(search))
 	}
+	if email != "" {
+		q = q.Where(accountEmailContainsFoldPredicate(email))
+	}
 	if groupID == service.AccountListGroupUngrouped {
 		q = q.Where(dbaccount.Not(dbaccount.HasAccountGroups()))
 	} else if groupID > 0 {
@@ -580,6 +583,19 @@ func (r *accountRepository) ListWithFilters(ctx context.Context, params paginati
 		return nil, nil, err
 	}
 	return outAccounts, paginationResultFromTotal(int64(total), params), nil
+}
+
+func accountEmailContainsFoldPredicate(email string) dbpredicate.Account {
+	needle := "%" + strings.ToLower(escapeLike(strings.TrimSpace(email))) + "%"
+	return dbpredicate.Account(func(s *entsql.Selector) {
+		extraColumn := s.C(dbaccount.FieldExtra)
+		credentialsColumn := s.C(dbaccount.FieldCredentials)
+		s.Where(entsql.Or(
+			entsql.ExprP("LOWER(COALESCE("+extraColumn+"->>'email_address', '')) LIKE ? ESCAPE '\\'", needle),
+			entsql.ExprP("LOWER(COALESCE("+extraColumn+"->>'email', '')) LIKE ? ESCAPE '\\'", needle),
+			entsql.ExprP("LOWER(COALESCE("+credentialsColumn+"->>'email', '')) LIKE ? ESCAPE '\\'", needle),
+		))
+	})
 }
 
 func accountListOrder(params pagination.PaginationParams) []func(*entsql.Selector) {

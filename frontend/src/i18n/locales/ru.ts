@@ -2847,6 +2847,7 @@ const messages = {
       "crsBack": "Назад",
       "editAccount": "Редактировать аккаунт",
       "deleteAccount": "Удалить аккаунт",
+      "emailFilter": "Фильтр по email...",
       "searchAccounts": "Поиск аккаунтов...",
       "notes": "Примечания",
       "notesPlaceholder": "Введите заметки",

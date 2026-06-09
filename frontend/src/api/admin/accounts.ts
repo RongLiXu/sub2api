@@ -39,6 +39,7 @@ export async function list(
     status?: string
     group?: string
     search?: string
+    email?: string
     privacy_mode?: string
     lite?: string
     sort_by?: string
@@ -74,6 +75,7 @@ export async function listWithEtag(
     status?: string
     group?: string
     search?: string
+    email?: string
     privacy_mode?: string
     lite?: string
     sort_by?: string
@@ -582,6 +584,7 @@ export async function exportData(options?: {
     group?: string
     privacy_mode?: string
     search?: string
+    email?: string
     sort_by?: string
     sort_order?: 'asc' | 'desc'
   }
@@ -591,13 +594,14 @@ export async function exportData(options?: {
   if (options?.ids && options.ids.length > 0) {
     params.ids = options.ids.join(',')
   } else if (options?.filters) {
-    const { platform, type, status, group, privacy_mode, search, sort_by, sort_order } = options.filters
+    const { platform, type, status, group, privacy_mode, search, email, sort_by, sort_order } = options.filters
     if (platform) params.platform = platform
     if (type) params.type = type
     if (status) params.status = status
     if (group) params.group = group
     if (privacy_mode) params.privacy_mode = privacy_mode
     if (search) params.search = search
+    if (email) params.email = email
     if (sort_by) params.sort_by = sort_by
     if (sort_order) params.sort_order = sort_order
   }

@@ -2847,6 +2847,7 @@ const messages = {
       "crsBack": "Retour",
       "editAccount": "Modifier le compte",
       "deleteAccount": "Supprimer le compte",
+      "emailFilter": "Filtrer par e-mail...",
       "searchAccounts": "Rechercher des comptes...",
       "notes": "Remarques",
       "notesPlaceholder": "Saisir des notes",

@@ -2866,6 +2866,7 @@ const messages = {
       "crsBack": "กลับ",
       "editAccount": "แก้ไขบัญชี",
       "deleteAccount": "ลบบัญชี",
+      "emailFilter": "กรองตามอีเมล...",
       "searchAccounts": "ค้นหาบัญชี...",
       "notes": "หมายเหตุ",
       "notesPlaceholder": "ใส่บันทึก",

@@ -161,6 +161,7 @@ type BulkUpdateAccountFilters struct {
 	Status      string `json:"status"`
 	Group       string `json:"group"`
 	Search      string `json:"search"`
+	Email       string `json:"email"`
 	PrivacyMode string `json:"privacy_mode"`
 }
 
@@ -235,13 +236,18 @@ func (h *AccountHandler) List(c *gin.Context) {
 	accountType := c.Query("type")
 	status := c.Query("status")
 	search := c.Query("search")
+	email := c.Query("email")
 	privacyMode := strings.TrimSpace(c.Query("privacy_mode"))
 	sortBy := c.DefaultQuery("sort_by", "name")
 	sortOrder := c.DefaultQuery("sort_order", "asc")
-	// 标准化和验证 search 参数
+	// 标准化和验证 search/email 参数
 	search = strings.TrimSpace(search)
 	if len(search) > 100 {
 		search = search[:100]
+	}
+	email = strings.TrimSpace(email)
+	if len(email) > 100 {
+		email = email[:100]
 	}
 	lite := parseBoolQueryWithDefault(c.Query("lite"), false)
 
@@ -263,7 +269,7 @@ func (h *AccountHandler) List(c *gin.Context) {
 		}
 	}
 
-	accounts, total, err := h.adminService.ListAccounts(c.Request.Context(), page, pageSize, platform, accountType, status, search, groupID, privacyMode, sortBy, sortOrder)
+	accounts, total, err := h.adminService.ListAccounts(c.Request.Context(), page, pageSize, platform, accountType, status, search, email, groupID, privacyMode, sortBy, sortOrder)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
@@ -385,7 +391,7 @@ func (h *AccountHandler) List(c *gin.Context) {
 		result[i] = item
 	}
 
-	etag := buildAccountsListETag(result, total, page, pageSize, platform, accountType, status, search, lite)
+	etag := buildAccountsListETag(result, total, page, pageSize, platform, accountType, status, search, email, lite)
 	if etag != "" {
 		c.Header("ETag", etag)
 		c.Header("Vary", "If-None-Match")
@@ -402,7 +408,7 @@ func buildAccountsListETag(
 	items []AccountWithConcurrency,
 	total int64,
 	page, pageSize int,
-	platform, accountType, status, search string,
+	platform, accountType, status, search, email string,
 	lite bool,
 ) string {
 	payload := struct {
@@ -413,6 +419,7 @@ func buildAccountsListETag(
 		AccountType string                   `json:"type"`
 		Status      string                   `json:"status"`
 		Search      string                   `json:"search"`
+		Email       string                   `json:"email"`
 		Lite        bool                     `json:"lite"`
 		Items       []AccountWithConcurrency `json:"items"`
 	}{
@@ -423,6 +430,7 @@ func buildAccountsListETag(
 		AccountType: accountType,
 		Status:      status,
 		Search:      search,
+		Email:       email,
 		Lite:        lite,
 		Items:       items,
 	}
@@ -1748,6 +1756,7 @@ func toServiceBulkUpdateAccountFilters(filters *BulkUpdateAccountFilters) *servi
 		Status:      filters.Status,
 		Group:       filters.Group,
 		Search:      filters.Search,
+		Email:       filters.Email,
 		PrivacyMode: filters.PrivacyMode,
 	}
 }
@@ -2454,7 +2463,7 @@ func (h *AccountHandler) BatchRefreshTier(c *gin.Context) {
 	accounts := make([]*service.Account, 0)
 
 	if len(req.AccountIDs) == 0 {
-		allAccounts, _, err := h.adminService.ListAccounts(ctx, 1, 10000, "gemini", "oauth", "", "", 0, "", "name", "asc")
+		allAccounts, _, err := h.adminService.ListAccounts(ctx, 1, 10000, "gemini", "oauth", "", "", "", 0, "", "name", "asc")
 		if err != nil {
 			response.ErrorFrom(c, err)
 			return

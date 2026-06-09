@@ -467,6 +467,7 @@ type AccountBulkEditTarget =
         status?: string
         group?: string
         search?: string
+        email?: string
         privacy_mode?: string
         sort_by?: string
         sort_order?: AccountSortOrder
@@ -761,6 +762,7 @@ const {
     privacy_mode: '',
     group: '',
     search: '',
+    email: '',
     sort_by: sortState.sort_by,
     sort_order: sortState.sort_order
   }
@@ -965,6 +967,7 @@ const refreshAccountsIncrementally = async () => {
         privacy_mode?: string
         group?: string
         search?: string
+        email?: string
         sort_by?: string
         sort_order?: AccountSortOrder
 
@@ -1402,6 +1405,7 @@ const buildBulkEditFilterSnapshot = () => {
     status: typeof rawParams.status === 'string' ? rawParams.status : '',
     group: typeof rawParams.group === 'string' ? rawParams.group : '',
     search: typeof rawParams.search === 'string' ? rawParams.search : '',
+    email: typeof rawParams.email === 'string' ? rawParams.email : '',
     privacy_mode: typeof rawParams.privacy_mode === 'string' ? rawParams.privacy_mode : '',
     sort_by: typeof rawParams.sort_by === 'string' ? rawParams.sort_by : '',
     sort_order: sortOrder
@@ -1454,9 +1458,15 @@ const buildAccountQueryFilters = () => ({
   group: params.group || '',
   privacy_mode: params.privacy_mode || '',
   search: params.search || '',
+  email: params.email || '',
   sort_by: sortState.sort_by,
   sort_order: sortState.sort_order
 })
+
+const getAccountEmail = (account: Account): string => {
+  const email = account.extra?.email_address || account.extra?.email || account.credentials?.email
+  return typeof email === 'string' ? email : ''
+}
 const accountMatchesCurrentFilters = (account: Account) => {
   const filters = buildAccountQueryFilters()
   if (filters.platform && account.platform !== filters.platform) return false
@@ -1498,6 +1508,8 @@ const accountMatchesCurrentFilters = (account: Account) => {
   }
   const search = String(filters.search || '').trim().toLowerCase()
   if (search && !account.name.toLowerCase().includes(search)) return false
+  const email = String(filters.email || '').trim().toLowerCase()
+  if (email && !getAccountEmail(account).toLowerCase().includes(email)) return false
   return true
 }
 const mergeRuntimeFields = (oldAccount: Account, updatedAccount: Account): Account => ({

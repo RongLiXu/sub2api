@@ -76,6 +76,7 @@ const messages = {
     accounts: {
       vertexProjectIdLabel: 'ID du projet',
       vertexLocationLabel: 'Région',
+      emailFilter: 'Filtrer par e-mail...',
       vertexClientEmailLabel: 'E-mail client',
       gemini: {
         oauthType: {

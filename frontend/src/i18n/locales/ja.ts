@@ -2809,6 +2809,7 @@ const messages = {
       "crsBack": "戻る",
       "editAccount": "アカウントの編集",
       "deleteAccount": "アカウントの削除",
+      "emailFilter": "メールで絞り込み...",
       "searchAccounts": "アカウントを検索...",
       "notes": "注意事項",
       "notesPlaceholder": "メモを入力する",

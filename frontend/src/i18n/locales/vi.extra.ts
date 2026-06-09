@@ -147,6 +147,9 @@ export default {
         }
       }
     },
+    accounts: {
+      emailFilter: 'Lọc theo email...'
+    },
     riskControl: {
       tabs: {
         keywords: 'Chặn từ khóa'

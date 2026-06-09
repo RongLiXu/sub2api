@@ -147,6 +147,9 @@ export default {
         }
       }
     },
+    accounts: {
+      emailFilter: 'メールで絞り込み...'
+    },
     riskControl: {
       tabs: {
         keywords: 'キーワード遮断'
