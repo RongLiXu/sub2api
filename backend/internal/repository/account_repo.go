@@ -591,10 +591,26 @@ func accountEmailContainsFoldPredicate(email string) dbpredicate.Account {
 		extraColumn := s.C(dbaccount.FieldExtra)
 		credentialsColumn := s.C(dbaccount.FieldCredentials)
 		s.Where(entsql.Or(
-			entsql.ExprP("LOWER(COALESCE("+extraColumn+"->>'email_address', '')) LIKE ? ESCAPE '\\'", needle),
-			entsql.ExprP("LOWER(COALESCE("+extraColumn+"->>'email', '')) LIKE ? ESCAPE '\\'", needle),
-			entsql.ExprP("LOWER(COALESCE("+credentialsColumn+"->>'email', '')) LIKE ? ESCAPE '\\'", needle),
+			jsonTextContainsFoldPredicate(extraColumn, "email_address", needle),
+			jsonTextContainsFoldPredicate(extraColumn, "email", needle),
+			jsonTextContainsFoldPredicate(credentialsColumn, "email", needle),
 		))
+	})
+}
+
+func jsonTextContainsFoldPredicate(column, key, needle string) *entsql.Predicate {
+	return entsql.P(func(b *entsql.Builder) {
+		// Build the predicate through the SQL builder so PostgreSQL placeholders
+		// are rendered as $n. Raw ExprP("?") placeholders are not rewritten by ent
+		// and fail in CI PostgreSQL with: pq: type "escape" does not exist.
+		b.WriteString("LOWER(COALESCE(")
+		b.WriteString(column)
+		b.WriteString("->>")
+		b.Arg(key)
+		b.WriteString(", '')) LIKE ")
+		b.Arg(needle)
+		b.WriteString(" ESCAPE ")
+		b.Arg(`\`)
 	})
 }
 
