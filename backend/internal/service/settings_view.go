@@ -45,6 +45,13 @@ type SystemSettings struct {
 	CloudflareFromEmail          string
 	CloudflareFromName           string
 
+	CloudMailAPIURL                string
+	CloudMailAdminEmail            string
+	CloudMailAdminPassword         string
+	CloudMailAdminPasswordConfigured bool
+	CloudMailFromEmail             string
+	CloudMailFromName              string
+
 	TurnstileEnabled             bool
 	TurnstileSiteKey             string
 	TurnstileSecretKey           string

@@ -57,6 +57,11 @@ type SystemSettings struct {
 	CloudflareAccountID          string `json:"cloudflare_account_id"`
 	CloudflareFromEmail          string `json:"cloudflare_from_email"`
 	CloudflareFromName           string `json:"cloudflare_from_name"`
+	CloudMailAPIURL              string `json:"cloudmail_api_url"`
+	CloudMailAdminEmail          string `json:"cloudmail_admin_email"`
+	CloudMailAdminPasswordConfigured bool `json:"cloudmail_admin_password_configured"`
+	CloudMailFromEmail           string `json:"cloudmail_from_email"`
+	CloudMailFromName            string `json:"cloudmail_from_name"`
 
 	TurnstileEnabled             bool   `json:"turnstile_enabled"`
 	TurnstileSiteKey             string `json:"turnstile_site_key"`

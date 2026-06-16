@@ -6398,9 +6398,9 @@
                 {{ t("admin.settings.emailProvider.description") }}
               </p>
             </div>
-            <div class="grid gap-3 p-6 md:grid-cols-3">
+            <div class="grid gap-3 p-6 md:grid-cols-4">
               <label
-                v-for="provider in ['smtp', 'resend', 'cloudflare']"
+                v-for="provider in ['smtp', 'resend', 'cloudflare', 'cloudmail']"
                 :key="provider"
                 class="cursor-pointer rounded-lg border p-4 transition-colors"
                 :class="
@@ -6730,6 +6730,114 @@
                   class="input"
                   :placeholder="t('admin.settings.cloudflareEmail.fromNamePlaceholder')"
                 />
+              </div>
+            </div>
+          </div>
+
+          <div v-if="form.email_verify_enabled && form.email_provider === 'cloudmail'" class="card">
+            <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                {{ t("admin.settings.cloudmail.title") }}
+              </h2>
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {{ t("admin.settings.cloudmail.description") }}
+              </p>
+            </div>
+            <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
+              <div>
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t("admin.settings.cloudmail.apiUrl") }}
+                </label>
+                <input
+                  v-model="form.cloudmail_api_url"
+                  type="url"
+                  class="input"
+                  :placeholder="t('admin.settings.cloudmail.apiUrlPlaceholder')"
+                />
+                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{ t("admin.settings.cloudmail.apiUrlHint") }}
+                </p>
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t("admin.settings.cloudmail.adminEmail") }}
+                </label>
+                <input
+                  v-model="form.cloudmail_admin_email"
+                  type="email"
+                  class="input"
+                  :placeholder="t('admin.settings.cloudmail.adminEmailPlaceholder')"
+                />
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t("admin.settings.cloudmail.adminPassword") }}
+                </label>
+                <input
+                  v-model="form.cloudmail_admin_password"
+                  type="password"
+                  class="input"
+                  autocomplete="new-password"
+                  @keydown="cloudmailPasswordManuallyEdited = true"
+                  @paste="cloudmailPasswordManuallyEdited = true"
+                  :placeholder="
+                    form.cloudmail_admin_password_configured
+                      ? t('admin.settings.cloudmail.adminPasswordConfiguredPlaceholder')
+                      : t('admin.settings.cloudmail.adminPasswordPlaceholder')
+                  "
+                />
+                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{
+                    form.cloudmail_admin_password_configured
+                      ? t("admin.settings.cloudmail.adminPasswordConfiguredHint")
+                      : t("admin.settings.cloudmail.adminPasswordHint")
+                  }}
+                </p>
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t("admin.settings.cloudmail.fromName") }}
+                </label>
+                <input
+                  v-model="form.cloudmail_from_name"
+                  type="text"
+                  class="input"
+                  :placeholder="t('admin.settings.cloudmail.fromNamePlaceholder')"
+                />
+              </div>
+              <div class="md:col-span-2">
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t("admin.settings.cloudmail.fromEmail") }}
+                </label>
+                <div class="flex gap-2">
+                  <input
+                    v-model="form.cloudmail_from_email"
+                    type="text"
+                    class="input flex-1"
+                    :list="'cloudmail-accounts-datalist'"
+                    :placeholder="t('admin.settings.cloudmail.fromEmailPlaceholder')"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-secondary whitespace-nowrap"
+                    :disabled="loadingCloudMailAccounts"
+                    @click="loadCloudMailAccounts"
+                  >
+                    {{ loadingCloudMailAccounts ? t("common.loading") : t("admin.settings.cloudmail.loadAccounts") }}
+                  </button>
+                </div>
+                <datalist id="cloudmail-accounts-datalist">
+                  <option
+                    v-for="acc in cloudMailAccounts"
+                    :key="acc.accountId"
+                    :value="acc.email"
+                  >
+                    {{ acc.email }} ({{ acc.name }})
+                  </option>
+                </datalist>
+                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{ t("admin.settings.cloudmail.fromEmailHint") }}
+                </p>
               </div>
             </div>
           </div>
@@ -7204,6 +7312,9 @@ const sendingTestEmail = ref(false);
 const smtpPasswordManuallyEdited = ref(false);
 const resendApiKeyManuallyEdited = ref(false);
 const cloudflareApiTokenManuallyEdited = ref(false);
+const cloudmailPasswordManuallyEdited = ref(false);
+const loadingCloudMailAccounts = ref(false);
+const cloudMailAccounts = ref<Array<{ accountId: number; email: string; name: string }>>([]);
 const testEmailAddress = ref("");
 const registrationEmailSuffixWhitelistTags = ref<string[]>([]);
 const registrationEmailSuffixWhitelistDraft = ref("");
@@ -7716,6 +7827,7 @@ type SettingsForm = Omit<
   smtp_password: string;
   resend_api_key: string;
   cloudflare_api_token: string;
+  cloudmail_admin_password: string;
   turnstile_secret_key: string;
   linuxdo_connect_client_secret: string;
   dingtalk_connect_client_secret: string;
@@ -7826,6 +7938,13 @@ const form = reactive<SettingsForm>({
   cloudflare_account_id: "",
   cloudflare_from_email: "",
   cloudflare_from_name: "",
+  // Cloud-Mail
+  cloudmail_api_url: "",
+  cloudmail_admin_email: "",
+  cloudmail_admin_password: "",
+  cloudmail_admin_password_configured: false,
+  cloudmail_from_email: "",
+  cloudmail_from_name: "",
   // Cloudflare Turnstile
   turnstile_enabled: false,
   turnstile_site_key: "",
@@ -8950,6 +9069,11 @@ async function saveSettings() {
       cloudflare_account_id: form.cloudflare_account_id,
       cloudflare_from_email: form.cloudflare_from_email,
       cloudflare_from_name: form.cloudflare_from_name,
+      cloudmail_api_url: form.cloudmail_api_url,
+      cloudmail_admin_email: form.cloudmail_admin_email,
+      cloudmail_admin_password: form.cloudmail_admin_password || undefined,
+      cloudmail_from_email: form.cloudmail_from_email,
+      cloudmail_from_name: form.cloudmail_from_name,
       turnstile_enabled: form.turnstile_enabled,
       turnstile_site_key: form.turnstile_site_key,
       turnstile_secret_key: form.turnstile_secret_key || undefined,
@@ -9265,6 +9389,29 @@ async function testSmtpConnection() {
   }
 }
 
+async function loadCloudMailAccounts() {
+  if (!form.cloudmail_api_url || !form.cloudmail_admin_email || !form.cloudmail_admin_password) {
+    appStore.showError(t("admin.settings.cloudmail.fillCredentialsFirst"));
+    return;
+  }
+  loadingCloudMailAccounts.value = true;
+  try {
+    const result = await adminAPI.settings.listCloudMailAccounts({
+      api_url: form.cloudmail_api_url,
+      email: form.cloudmail_admin_email,
+      password: form.cloudmail_admin_password,
+    });
+    cloudMailAccounts.value = result.accounts || [];
+    if (cloudMailAccounts.value.length === 0) {
+      appStore.showInfo(t("admin.settings.cloudmail.noAccounts"));
+    }
+  } catch (e: any) {
+    appStore.showError(e?.message || t("admin.settings.cloudmail.loadAccountsError"));
+  } finally {
+    loadingCloudMailAccounts.value = false;
+  }
+}
+
 async function sendTestEmail() {
   if (!testEmailAddress.value) {
     appStore.showError(t("admin.settings.testEmail.enterRecipientHint"));
@@ -9281,6 +9428,9 @@ async function sendTestEmail() {
       : "";
     const cloudflareApiTokenForSend = cloudflareApiTokenManuallyEdited.value
       ? form.cloudflare_api_token
+      : "";
+    const cloudmailPasswordForSend = cloudmailPasswordManuallyEdited.value
+      ? form.cloudmail_admin_password
       : "";
     const result = await adminAPI.settings.sendTestEmail({
       email: testEmailAddress.value,
@@ -9300,6 +9450,11 @@ async function sendTestEmail() {
       cloudflare_account_id: form.cloudflare_account_id,
       cloudflare_from_email: form.cloudflare_from_email,
       cloudflare_from_name: form.cloudflare_from_name,
+      cloudmail_api_url: form.cloudmail_api_url,
+      cloudmail_admin_email: form.cloudmail_admin_email,
+      cloudmail_admin_password: cloudmailPasswordForSend,
+      cloudmail_from_email: form.cloudmail_from_email,
+      cloudmail_from_name: form.cloudmail_from_name,
     });
     // API returns { message: "..." } on success, errors are thrown as exceptions
     appStore.showSuccess(result.message || t("admin.settings.testEmailSent"));

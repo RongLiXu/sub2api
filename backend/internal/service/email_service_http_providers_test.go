@@ -119,3 +119,103 @@ func TestPostEmailJSONRedactsAuthorizationFromError(t *testing.T) {
 	require.Contains(t, err.Error(), "status 401")
 	require.False(t, strings.Contains(err.Error(), "secret-token"))
 }
+
+// ── Cloud-Mail provider tests ──
+
+func TestNormalizeEmailProviderAcceptsCloudMail(t *testing.T) {
+	provider, err := NormalizeEmailProvider("cloudmail")
+	require.NoError(t, err)
+	require.Equal(t, EmailProviderCloudMail, provider)
+
+	provider, err = NormalizeEmailProvider("CLOUDMAIL")
+	require.NoError(t, err)
+	require.Equal(t, EmailProviderCloudMail, provider)
+}
+
+func TestSendEmailWithCloudMailConfigRequiresConfig(t *testing.T) {
+	svc := NewEmailService(&emailProviderSettingRepoStub{}, nil)
+
+	// nil config
+	err := svc.SendEmailWithCloudMailConfig(context.Background(), nil, "to@example.com", "Subject", "<p>Body</p>")
+	require.ErrorIs(t, err, ErrEmailNotConfigured)
+
+	// empty APIURL
+	err = svc.SendEmailWithCloudMailConfig(context.Background(), &CloudMailConfig{
+		APIURL: "",
+	}, "to@example.com", "Subject", "<p>Body</p>")
+	require.ErrorIs(t, err, ErrEmailNotConfigured)
+}
+
+func TestSendEmailWithCloudMailConfigPostsExpectedPayload(t *testing.T) {
+	var loginBody, sendBody map[string]any
+	var sendAuth string
+	callCount := 0
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		callCount++
+		if r.URL.Path == "/login" && r.Method == http.MethodPost {
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&loginBody))
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"code":200,"data":{"token":"test-jwt-token"}}`))
+			return
+		}
+		if r.URL.Path == "/account/list" && r.Method == http.MethodGet {
+			sendAuth = r.Header.Get("Authorization")
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"code":200,"data":[{"accountId":42,"email":"noreply@example.com","name":"Test"}]}`))
+			return
+		}
+		if r.URL.Path == "/email/send" && r.Method == http.MethodPost {
+			sendAuth = r.Header.Get("Authorization")
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&sendBody))
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	svc := NewEmailService(&emailProviderSettingRepoStub{}, nil)
+	err := svc.SendEmailWithCloudMailConfig(context.Background(), &CloudMailConfig{
+		APIURL:     server.URL,
+		AdminEmail: "admin@example.com",
+		AdminPassword: "admin-pass",
+		FromEmail:  "noreply@example.com",
+		FromName:   "Sub2API",
+	}, "user@example.com", "Hello", "<p>Hi</p>")
+	require.NoError(t, err)
+
+	// Verify login
+	require.Equal(t, "admin@example.com", loginBody["email"])
+	require.Equal(t, "admin-pass", loginBody["password"])
+
+	// Verify send
+	require.Equal(t, "Bearer test-jwt-token", sendAuth)
+	require.Equal(t, float64(42), sendBody["accountId"])
+	require.Equal(t, "Hello", sendBody["subject"])
+	require.Equal(t, "<p>Hi</p>", sendBody["content"])
+	require.Equal(t, "send", sendBody["sendType"])
+}
+
+func TestListCloudMailAccountsReturnsAccounts(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/login" {
+			_, _ = w.Write([]byte(`{"code":200,"data":{"token":"jwt"}}`))
+			return
+		}
+		if r.URL.Path == "/account/list" {
+			_, _ = w.Write([]byte(`{"code":200,"data":[{"accountId":1,"email":"a@x.com","name":"A"},{"accountId":2,"email":"b@x.com","name":"B"}]}`))
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer server.Close()
+
+	svc := NewEmailService(&emailProviderSettingRepoStub{}, nil)
+	accounts, err := svc.ListCloudMailAccounts(context.Background(), server.URL, "admin@x.com", "pass")
+	require.NoError(t, err)
+	require.Len(t, accounts, 2)
+	require.Equal(t, "a@x.com", accounts[0].Email)
+	require.Equal(t, "b@x.com", accounts[1].Email)
+}

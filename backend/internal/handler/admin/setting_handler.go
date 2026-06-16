@@ -148,6 +148,11 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		CloudflareAccountID:                    settings.CloudflareAccountID,
 		CloudflareFromEmail:                    settings.CloudflareFromEmail,
 		CloudflareFromName:                     settings.CloudflareFromName,
+		CloudMailAPIURL:                        settings.CloudMailAPIURL,
+		CloudMailAdminEmail:                    settings.CloudMailAdminEmail,
+		CloudMailAdminPasswordConfigured:       settings.CloudMailAdminPasswordConfigured,
+		CloudMailFromEmail:                     settings.CloudMailFromEmail,
+		CloudMailFromName:                      settings.CloudMailFromName,
 		TurnstileEnabled:                       settings.TurnstileEnabled,
 		TurnstileSiteKey:                       settings.TurnstileSiteKey,
 		TurnstileSecretKeyConfigured:           settings.TurnstileSecretKeyConfigured,
@@ -428,6 +433,12 @@ type UpdateSettingsRequest struct {
 	CloudflareAccountID string `json:"cloudflare_account_id"`
 	CloudflareFromEmail string `json:"cloudflare_from_email"`
 	CloudflareFromName  string `json:"cloudflare_from_name"`
+
+	CloudMailAPIURL      string `json:"cloudmail_api_url"`
+	CloudMailAdminEmail  string `json:"cloudmail_admin_email"`
+	CloudMailAdminPassword string `json:"cloudmail_admin_password"`
+	CloudMailFromEmail   string `json:"cloudmail_from_email"`
+	CloudMailFromName    string `json:"cloudmail_from_name"`
 
 	// Cloudflare Turnstile 设置
 	TurnstileEnabled   bool   `json:"turnstile_enabled"`
@@ -779,6 +790,11 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 	req.CloudflareAccountID = strings.TrimSpace(req.CloudflareAccountID)
 	req.CloudflareFromEmail = strings.TrimSpace(req.CloudflareFromEmail)
 	req.CloudflareFromName = strings.TrimSpace(req.CloudflareFromName)
+	req.CloudMailAPIURL = strings.TrimSpace(req.CloudMailAPIURL)
+	req.CloudMailAdminEmail = strings.TrimSpace(req.CloudMailAdminEmail)
+	req.CloudMailAdminPassword = strings.TrimSpace(req.CloudMailAdminPassword)
+	req.CloudMailFromEmail = strings.TrimSpace(req.CloudMailFromEmail)
+	req.CloudMailFromName = strings.TrimSpace(req.CloudMailFromName)
 	if req.SMTPPort <= 0 {
 		req.SMTPPort = 587
 	}
@@ -840,6 +856,24 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		}
 		if req.CloudflareFromEmail == "" {
 			response.BadRequest(c, "Cloudflare from email is required when Cloudflare is selected")
+			return
+		}
+	}
+	if req.EmailProvider == service.EmailProviderCloudMail {
+		if req.CloudMailAPIURL == "" {
+			response.BadRequest(c, "Cloud-Mail API URL is required when Cloud-Mail is selected")
+			return
+		}
+		if req.CloudMailAdminEmail == "" {
+			response.BadRequest(c, "Cloud-Mail admin email is required when Cloud-Mail is selected")
+			return
+		}
+		if req.CloudMailAdminPassword == "" && previousSettings.CloudMailAdminPassword == "" {
+			response.BadRequest(c, "Cloud-Mail admin password is required when Cloud-Mail is selected")
+			return
+		}
+		if req.CloudMailFromEmail == "" {
+			response.BadRequest(c, "Cloud-Mail from email is required when Cloud-Mail is selected")
 			return
 		}
 	}
@@ -1583,6 +1617,11 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		CloudflareAccountID:              req.CloudflareAccountID,
 		CloudflareFromEmail:              req.CloudflareFromEmail,
 		CloudflareFromName:               req.CloudflareFromName,
+		CloudMailAPIURL:                  req.CloudMailAPIURL,
+		CloudMailAdminEmail:              req.CloudMailAdminEmail,
+		CloudMailAdminPassword:           req.CloudMailAdminPassword,
+		CloudMailFromEmail:               req.CloudMailFromEmail,
+		CloudMailFromName:                req.CloudMailFromName,
 		TurnstileEnabled:                 req.TurnstileEnabled,
 		TurnstileSiteKey:                 req.TurnstileSiteKey,
 		TurnstileSecretKey:               req.TurnstileSecretKey,
@@ -2070,6 +2109,11 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		CloudflareAccountID:                    updatedSettings.CloudflareAccountID,
 		CloudflareFromEmail:                    updatedSettings.CloudflareFromEmail,
 		CloudflareFromName:                     updatedSettings.CloudflareFromName,
+		CloudMailAPIURL:                        updatedSettings.CloudMailAPIURL,
+		CloudMailAdminEmail:                    updatedSettings.CloudMailAdminEmail,
+		CloudMailAdminPasswordConfigured:       updatedSettings.CloudMailAdminPasswordConfigured,
+		CloudMailFromEmail:                     updatedSettings.CloudMailFromEmail,
+		CloudMailFromName:                      updatedSettings.CloudMailFromName,
 		TurnstileEnabled:                       updatedSettings.TurnstileEnabled,
 		TurnstileSiteKey:                       updatedSettings.TurnstileSiteKey,
 		TurnstileSecretKeyConfigured:           updatedSettings.TurnstileSecretKeyConfigured,
@@ -2382,6 +2426,21 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	}
 	if before.CloudflareFromName != after.CloudflareFromName {
 		changed = append(changed, "cloudflare_from_name")
+	}
+	if before.CloudMailAPIURL != after.CloudMailAPIURL {
+		changed = append(changed, "cloudmail_api_url")
+	}
+	if before.CloudMailAdminEmail != after.CloudMailAdminEmail {
+		changed = append(changed, "cloudmail_admin_email")
+	}
+	if req.CloudMailAdminPassword != "" {
+		changed = append(changed, "cloudmail_admin_password")
+	}
+	if before.CloudMailFromEmail != after.CloudMailFromEmail {
+		changed = append(changed, "cloudmail_from_email")
+	}
+	if before.CloudMailFromName != after.CloudMailFromName {
+		changed = append(changed, "cloudmail_from_name")
 	}
 	if before.TurnstileEnabled != after.TurnstileEnabled {
 		changed = append(changed, "turnstile_enabled")
@@ -3086,6 +3145,11 @@ type SendTestEmailRequest struct {
 	CloudflareAccountID string `json:"cloudflare_account_id"`
 	CloudflareFromEmail string `json:"cloudflare_from_email"`
 	CloudflareFromName  string `json:"cloudflare_from_name"`
+	CloudMailAPIURL      string `json:"cloudmail_api_url"`
+	CloudMailAdminEmail  string `json:"cloudmail_admin_email"`
+	CloudMailAdminPassword string `json:"cloudmail_admin_password"`
+	CloudMailFromEmail   string `json:"cloudmail_from_email"`
+	CloudMailFromName    string `json:"cloudmail_from_name"`
 }
 
 // SendTestEmail 发送测试邮件
@@ -3110,6 +3174,11 @@ func (h *SettingHandler) SendTestEmail(c *gin.Context) {
 	req.CloudflareAccountID = strings.TrimSpace(req.CloudflareAccountID)
 	req.CloudflareFromEmail = strings.TrimSpace(req.CloudflareFromEmail)
 	req.CloudflareFromName = strings.TrimSpace(req.CloudflareFromName)
+	req.CloudMailAPIURL = strings.TrimSpace(req.CloudMailAPIURL)
+	req.CloudMailAdminEmail = strings.TrimSpace(req.CloudMailAdminEmail)
+	req.CloudMailAdminPassword = strings.TrimSpace(req.CloudMailAdminPassword)
+	req.CloudMailFromEmail = strings.TrimSpace(req.CloudMailFromEmail)
+	req.CloudMailFromName = strings.TrimSpace(req.CloudMailFromName)
 
 	provider, err := service.NormalizeEmailProvider(req.EmailProvider)
 	if err != nil {
@@ -3240,6 +3309,33 @@ func (h *SettingHandler) SendTestEmail(c *gin.Context) {
 			FromEmail: req.CloudflareFromEmail,
 			FromName:  req.CloudflareFromName,
 		}, req.Email, subject, body)
+	case service.EmailProviderCloudMail:
+		if req.CloudMailAPIURL == "" || req.CloudMailAdminEmail == "" {
+			if cfg, err := h.emailService.GetCloudMailConfig(c.Request.Context()); err == nil && cfg != nil {
+				if req.CloudMailAPIURL == "" {
+					req.CloudMailAPIURL = cfg.APIURL
+				}
+				if req.CloudMailAdminEmail == "" {
+					req.CloudMailAdminEmail = cfg.AdminEmail
+				}
+				if req.CloudMailAdminPassword == "" {
+					req.CloudMailAdminPassword = cfg.AdminPassword
+				}
+				if req.CloudMailFromEmail == "" {
+					req.CloudMailFromEmail = cfg.FromEmail
+				}
+				if req.CloudMailFromName == "" {
+					req.CloudMailFromName = cfg.FromName
+				}
+			}
+		}
+		sendErr = h.emailService.SendEmailWithCloudMailConfig(c.Request.Context(), &service.CloudMailConfig{
+			APIURL:     req.CloudMailAPIURL,
+			AdminEmail: req.CloudMailAdminEmail,
+			AdminPassword: req.CloudMailAdminPassword,
+			FromEmail:  req.CloudMailFromEmail,
+			FromName:   req.CloudMailFromName,
+		}, req.Email, subject, body)
 	}
 	if sendErr != nil {
 		response.BadRequest(c, "Failed to send test email: "+sendErr.Error())
@@ -3247,6 +3343,31 @@ func (h *SettingHandler) SendTestEmail(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{"message": "Test email sent successfully"})
+}
+
+// ListCloudMailAccountsRequest is the request body for listing cloud-mail sender accounts.
+type ListCloudMailAccountsRequest struct {
+	APIURL   string `json:"api_url" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// ListCloudMailAccounts proxies a request to cloud-mail to list available sender email accounts.
+// POST /api/v1/admin/settings/cloudmail-accounts
+func (h *SettingHandler) ListCloudMailAccounts(c *gin.Context) {
+	var req ListCloudMailAccountsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "api_url, email, and password are required")
+		return
+	}
+
+	accounts, err := h.emailService.ListCloudMailAccounts(c.Request.Context(), req.APIURL, req.Email, req.Password)
+	if err != nil {
+		response.BadRequest(c, "Failed to load cloud-mail accounts: "+err.Error())
+		return
+	}
+
+	response.Success(c, gin.H{"accounts": accounts})
 }
 
 // GetAdminAPIKey 获取管理员 API Key 状态

@@ -446,7 +446,7 @@ export interface SystemSettings {
   smtp_from_email: string;
   smtp_from_name: string;
   smtp_use_tls: boolean;
-  email_provider: "smtp" | "resend" | "cloudflare";
+  email_provider: "smtp" | "resend" | "cloudflare" | "cloudmail";
   resend_api_key_configured: boolean;
   resend_from_email: string;
   resend_from_name: string;
@@ -455,6 +455,12 @@ export interface SystemSettings {
   cloudflare_account_id: string;
   cloudflare_from_email: string;
   cloudflare_from_name: string;
+  // Cloud-Mail settings
+  cloudmail_api_url: string;
+  cloudmail_admin_email: string;
+  cloudmail_admin_password_configured: boolean;
+  cloudmail_from_email: string;
+  cloudmail_from_name: string;
   // Cloudflare Turnstile settings
   turnstile_enabled: boolean;
   turnstile_site_key: string;
@@ -720,7 +726,7 @@ export interface UpdateSettingsRequest {
   smtp_from_email?: string;
   smtp_from_name?: string;
   smtp_use_tls?: boolean;
-  email_provider?: "smtp" | "resend" | "cloudflare";
+  email_provider?: "smtp" | "resend" | "cloudflare" | "cloudmail";
   resend_api_key?: string;
   resend_from_email?: string;
   resend_from_name?: string;
@@ -729,6 +735,11 @@ export interface UpdateSettingsRequest {
   cloudflare_account_id?: string;
   cloudflare_from_email?: string;
   cloudflare_from_name?: string;
+  cloudmail_api_url?: string;
+  cloudmail_admin_email?: string;
+  cloudmail_admin_password?: string;
+  cloudmail_from_email?: string;
+  cloudmail_from_name?: string;
   turnstile_enabled?: boolean;
   turnstile_site_key?: string;
   turnstile_secret_key?: string;
@@ -945,7 +956,7 @@ export interface SendTestEmailRequest {
   smtp_from_email: string;
   smtp_from_name: string;
   smtp_use_tls: boolean;
-  email_provider?: "smtp" | "resend" | "cloudflare";
+  email_provider?: "smtp" | "resend" | "cloudflare" | "cloudmail";
   resend_api_key?: string;
   resend_from_email?: string;
   resend_from_name?: string;
@@ -954,6 +965,11 @@ export interface SendTestEmailRequest {
   cloudflare_account_id?: string;
   cloudflare_from_email?: string;
   cloudflare_from_name?: string;
+  cloudmail_api_url?: string;
+  cloudmail_admin_email?: string;
+  cloudmail_admin_password?: string;
+  cloudmail_from_email?: string;
+  cloudmail_from_name?: string;
 }
 
 /**
@@ -966,6 +982,34 @@ export async function sendTestEmail(
 ): Promise<{ message: string }> {
   const { data } = await apiClient.post<{ message: string }>(
     "/admin/settings/send-test-email",
+    request,
+  );
+  return data;
+}
+
+// ==================== Cloud-Mail Account Listing ====================
+
+export interface ListCloudMailAccountsRequest {
+  api_url: string;
+  email: string;
+  password: string;
+}
+
+export interface CloudMailAccount {
+  accountId: number;
+  email: string;
+  name: string;
+}
+
+export interface ListCloudMailAccountsResponse {
+  accounts: CloudMailAccount[];
+}
+
+export async function listCloudMailAccounts(
+  request: ListCloudMailAccountsRequest,
+): Promise<ListCloudMailAccountsResponse> {
+  const { data } = await apiClient.post<ListCloudMailAccountsResponse>(
+    "/admin/settings/cloudmail-accounts",
     request,
   );
   return data;
@@ -1378,6 +1422,7 @@ export const settingsAPI = {
   updateSettings,
   testSmtpConnection,
   sendTestEmail,
+  listCloudMailAccounts,
   getEmailTemplates,
   getEmailTemplate,
   updateEmailTemplate,

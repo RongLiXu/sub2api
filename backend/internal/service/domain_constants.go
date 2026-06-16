@@ -160,6 +160,11 @@ const (
 	SettingKeyCloudflareAccountID = "cloudflare_account_id" // Cloudflare Account ID
 	SettingKeyCloudflareFromEmail = "cloudflare_from_email" // Cloudflare 发件人地址
 	SettingKeyCloudflareFromName  = "cloudflare_from_name"  // Cloudflare 发件人名称
+	SettingKeyCloudMailAPIURL      = "cloudmail_api_url"      // Cloud-Mail 实例地址
+	SettingKeyCloudMailAdminEmail  = "cloudmail_admin_email"  // Cloud-Mail 管理员邮箱
+	SettingKeyCloudMailAdminPassword = "cloudmail_admin_password" // Cloud-Mail 管理员密码（加密存储）
+	SettingKeyCloudMailFromEmail   = "cloudmail_from_email"   // Cloud-Mail 发件人邮箱
+	SettingKeyCloudMailFromName    = "cloudmail_from_name"    // Cloud-Mail 发件人名称
 
 	// Cloudflare Turnstile 设置
 	SettingKeyTurnstileEnabled   = "turnstile_enabled"    // 是否启用 Turnstile 验证

@@ -1800,6 +1800,15 @@ func (s *SettingService) buildSystemSettingsUpdates(ctx context.Context, setting
 	updates[SettingKeyCloudflareFromEmail] = settings.CloudflareFromEmail
 	updates[SettingKeyCloudflareFromName] = settings.CloudflareFromName
 
+	// Cloud-Mail settings (only update password when non-empty)
+	updates[SettingKeyCloudMailAPIURL] = settings.CloudMailAPIURL
+	updates[SettingKeyCloudMailAdminEmail] = settings.CloudMailAdminEmail
+	if settings.CloudMailAdminPassword != "" {
+		updates[SettingKeyCloudMailAdminPassword] = settings.CloudMailAdminPassword
+	}
+	updates[SettingKeyCloudMailFromEmail] = settings.CloudMailFromEmail
+	updates[SettingKeyCloudMailFromName] = settings.CloudMailFromName
+
 	// Cloudflare Turnstile 设置（只有非空才更新密钥）
 	updates[SettingKeyTurnstileEnabled] = strconv.FormatBool(settings.TurnstileEnabled)
 	updates[SettingKeyTurnstileSiteKey] = settings.TurnstileSiteKey
@@ -3040,6 +3049,11 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 		CloudflareAccountID:              strings.TrimSpace(settings[SettingKeyCloudflareAccountID]),
 		CloudflareFromEmail:              strings.TrimSpace(settings[SettingKeyCloudflareFromEmail]),
 		CloudflareFromName:               strings.TrimSpace(settings[SettingKeyCloudflareFromName]),
+		CloudMailAPIURL:                  strings.TrimSpace(settings[SettingKeyCloudMailAPIURL]),
+		CloudMailAdminEmail:              strings.TrimSpace(settings[SettingKeyCloudMailAdminEmail]),
+		CloudMailAdminPasswordConfigured: settings[SettingKeyCloudMailAdminPassword] != "",
+		CloudMailFromEmail:               strings.TrimSpace(settings[SettingKeyCloudMailFromEmail]),
+		CloudMailFromName:                strings.TrimSpace(settings[SettingKeyCloudMailFromName]),
 		TurnstileEnabled:                 settings[SettingKeyTurnstileEnabled] == "true",
 		TurnstileSiteKey:                 settings[SettingKeyTurnstileSiteKey],
 		TurnstileSecretKeyConfigured:     settings[SettingKeyTurnstileSecretKey] != "",
