@@ -44,15 +44,15 @@ export default {
     channels: {
       noGroupsSelected: 'Nền tảng {platform} chưa chọn nhóm nào. Hãy chọn ít nhất một nhóm hoặc tắt nền tảng này.',
       emptyModelsInPricing: 'Nền tảng {platform} có mục giá chưa thêm mô hình. Hãy thêm mô hình hoặc xóa mục đó.',
-      syncLatestModels: 'Đồng bộ mô hình mới nhất',
-      syncingModels: 'Đang đồng bộ...',
-      syncModelsSuccess: 'Đã đồng bộ {count} mô hình mới',
-      syncModelsAlreadyUpToDate: 'Danh sách mô hình đã là mới nhất',
-      syncModelsError: 'Đồng bộ mô hình thất bại',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
-        inclusive: '(bao gồm)'
+        inclusive: '(bao gồm)',
+        syncLatestModels: 'Đồng bộ mô hình mới nhất',
+        syncingModels: 'Đang đồng bộ...',
+        syncModelsSuccess: 'Đã đồng bộ {count} mô hình mới',
+        syncModelsAlreadyUpToDate: 'Danh sách mô hình đã là mới nhất',
+        syncModelsError: 'Đồng bộ mô hình thất bại'
       },
       validation: {
         minTokensNegative: 'Khoảng #{index}: số token tối thiểu ({min}) không được âm',

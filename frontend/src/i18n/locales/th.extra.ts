@@ -142,15 +142,15 @@ const recentI18nPatch = {
     channels: {
       noGroupsSelected: 'แพลตฟอร์ม {platform} ยังไม่ได้เลือกกลุ่ม โปรดเลือกอย่างน้อยหนึ่งกลุ่มหรือปิดใช้งานแพลตฟอร์มนี้',
       emptyModelsInPricing: 'แพลตฟอร์ม {platform} มีรายการราคาที่ไม่มีโมเดล โปรดเพิ่มโมเดลหรือลบรายการนั้น',
-      syncLatestModels: 'ซิงก์โมเดลล่าสุด',
-      syncingModels: 'กำลังซิงก์...',
-      syncModelsSuccess: 'ซิงก์โมเดลใหม่แล้ว {count} รายการ',
-      syncModelsAlreadyUpToDate: 'รายการโมเดลเป็นเวอร์ชันล่าสุดแล้ว',
-      syncModelsError: 'ซิงก์โมเดลไม่สำเร็จ',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
-        inclusive: '(รวม)'
+        inclusive: '(รวม)',
+        syncLatestModels: 'ซิงก์โมเดลล่าสุด',
+        syncingModels: 'กำลังซิงก์...',
+        syncModelsSuccess: 'ซิงก์โมเดลใหม่แล้ว {count} รายการ',
+        syncModelsAlreadyUpToDate: 'รายการโมเดลเป็นเวอร์ชันล่าสุดแล้ว',
+        syncModelsError: 'ซิงก์โมเดลไม่สำเร็จ'
       },
       validation: {
         minTokensNegative: 'ช่วง #{index}: จำนวน token ต่ำสุด ({min}) ต้องไม่ติดลบ',

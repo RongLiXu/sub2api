@@ -142,15 +142,15 @@ const recentI18nPatch = {
     channels: {
       noGroupsSelected: 'Aucun groupe sélectionné pour la plateforme {platform}. Sélectionnez au moins un groupe ou désactivez cette plateforme.',
       emptyModelsInPricing: 'Une règle de tarification de la plateforme {platform} ne contient aucun modèle. Ajoutez des modèles ou supprimez cette règle.',
-      syncLatestModels: 'Synchroniser les derniers modèles',
-      syncingModels: 'Synchronisation...',
-      syncModelsSuccess: '{count} nouveau(x) modèle(s) synchronisé(s)',
-      syncModelsAlreadyUpToDate: 'La liste des modèles est déjà à jour',
-      syncModelsError: 'Échec de la synchronisation des modèles',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
-        inclusive: '(incl.)'
+        inclusive: '(incl.)',
+        syncLatestModels: 'Synchroniser les derniers modèles',
+        syncingModels: 'Synchronisation...',
+        syncModelsSuccess: '{count} nouveau(x) modèle(s) synchronisé(s)',
+        syncModelsAlreadyUpToDate: 'La liste des modèles est déjà à jour',
+        syncModelsError: 'Échec de la synchronisation des modèles'
       },
       validation: {
         minTokensNegative: 'Intervalle #{index} : le nombre minimal de tokens ({min}) ne peut pas être négatif',

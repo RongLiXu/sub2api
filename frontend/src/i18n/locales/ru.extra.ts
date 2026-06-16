@@ -142,15 +142,15 @@ const recentI18nPatch = {
     channels: {
       noGroupsSelected: 'Для платформы {platform} не выбраны группы. Выберите хотя бы одну группу или отключите платформу.',
       emptyModelsInPricing: 'В платформе {platform} есть правило тарификации без моделей. Добавьте модели или удалите это правило.',
-      syncLatestModels: 'Синхронизировать последние модели',
-      syncingModels: 'Синхронизация...',
-      syncModelsSuccess: 'Синхронизировано новых моделей: {count}',
-      syncModelsAlreadyUpToDate: 'Список моделей уже актуален',
-      syncModelsError: 'Не удалось синхронизировать модели',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
-        inclusive: '(вкл.)'
+        inclusive: '(вкл.)',
+        syncLatestModels: 'Синхронизировать последние модели',
+        syncingModels: 'Синхронизация...',
+        syncModelsSuccess: 'Синхронизировано новых моделей: {count}',
+        syncModelsAlreadyUpToDate: 'Список моделей уже актуален',
+        syncModelsError: 'Не удалось синхронизировать модели'
       },
       validation: {
         minTokensNegative: 'Интервал #{index}: минимальное число токенов ({min}) не может быть отрицательным',

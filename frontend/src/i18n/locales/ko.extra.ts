@@ -142,15 +142,15 @@ const recentI18nPatch = {
     channels: {
       noGroupsSelected: '{platform} 플랫폼에 선택된 그룹이 없습니다. 하나 이상의 그룹을 선택하거나 이 플랫폼을 비활성화하세요.',
       emptyModelsInPricing: '{platform} 플랫폼에 모델이 없는 가격 항목이 있습니다. 모델을 추가하거나 해당 항목을 삭제하세요.',
-      syncLatestModels: '최신 모델 동기화',
-      syncingModels: '동기화 중...',
-      syncModelsSuccess: '새 모델 {count}개를 동기화했습니다',
-      syncModelsAlreadyUpToDate: '모델 목록이 이미 최신입니다',
-      syncModelsError: '모델 동기화에 실패했습니다',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
-        inclusive: '(포함)'
+        inclusive: '(포함)',
+        syncLatestModels: '최신 모델 동기화',
+        syncingModels: '동기화 중...',
+        syncModelsSuccess: '새 모델 {count}개를 동기화했습니다',
+        syncModelsAlreadyUpToDate: '모델 목록이 이미 최신입니다',
+        syncModelsError: '모델 동기화에 실패했습니다'
       },
       validation: {
         minTokensNegative: '구간 #{index}: 최소 토큰 수({min})는 음수일 수 없습니다',
