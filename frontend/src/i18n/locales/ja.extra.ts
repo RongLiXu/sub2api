@@ -44,15 +44,15 @@ export default {
     channels: {
       noGroupsSelected: '{platform} プラットフォームでグループが選択されていません。少なくとも 1 つのグループを選択するか、このプラットフォームを無効にしてください。',
       emptyModelsInPricing: '{platform} プラットフォームにモデル未設定の価格項目があります。モデルを追加するか、その項目を削除してください。',
-      syncLatestModels: '最新モデルを同期',
-      syncingModels: '同期中...',
-      syncModelsSuccess: '{count} 件の新しいモデルを同期しました',
-      syncModelsAlreadyUpToDate: 'モデル一覧はすでに最新です',
-      syncModelsError: 'モデルの同期に失敗しました',
       form: {
         minTokens: 'Min',
         maxTokens: 'Max',
-        inclusive: '（含む）'
+        inclusive: '（含む）',
+        syncLatestModels: '最新モデルを同期',
+        syncingModels: '同期中...',
+        syncModelsSuccess: '{count} 件の新しいモデルを同期しました',
+        syncModelsAlreadyUpToDate: 'モデル一覧はすでに最新です',
+        syncModelsError: 'モデルの同期に失敗しました'
       },
       validation: {
         minTokensNegative: '区間 #{index}: 最小 token 数（{min}）は負数にできません',

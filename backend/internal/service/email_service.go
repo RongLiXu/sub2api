@@ -1,15 +1,19 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/subtle"
 	"crypto/tls"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
 	"math/big"
 	"net"
+	"net/http"
 	"net/smtp"
 	"net/url"
 	"strconv"
@@ -24,6 +28,7 @@ var (
 	ErrInvalidVerifyCode     = infraerrors.BadRequest("INVALID_VERIFY_CODE", "invalid or expired verification code")
 	ErrVerifyCodeTooFrequent = infraerrors.TooManyRequests("VERIFY_CODE_TOO_FREQUENT", "please wait before requesting a new code")
 	ErrVerifyCodeMaxAttempts = infraerrors.TooManyRequests("VERIFY_CODE_MAX_ATTEMPTS", "too many failed attempts, please request a new code")
+	ErrInvalidEmailProvider  = infraerrors.BadRequest("INVALID_EMAIL_PROVIDER", "email provider must be smtp, resend, cloudflare, or cloudmail")
 
 	// Password reset errors
 	ErrInvalidResetToken = infraerrors.BadRequest("INVALID_RESET_TOKEN", "invalid or expired password reset token")
@@ -92,6 +97,42 @@ type SMTPConfig struct {
 	UseTLS   bool
 }
 
+const (
+	EmailProviderSMTP       = "smtp"
+	EmailProviderResend     = "resend"
+	EmailProviderCloudflare = "cloudflare"
+	EmailProviderCloudMail  = "cloudmail"
+
+	defaultResendAPIBaseURL = "https://api.resend.com"
+
+	emailHTTPTimeout = 20 * time.Second
+)
+
+// ResendConfig stores Resend Email API configuration.
+type ResendConfig struct {
+	APIKey     string
+	FromEmail  string
+	FromName   string
+	APIBaseURL string
+}
+
+// CloudflareEmailConfig stores Cloudflare Email Sending API configuration.
+type CloudflareEmailConfig struct {
+	APIToken  string
+	AccountID string
+	FromEmail string
+	FromName  string
+}
+
+// CloudMailConfig stores Cloud-Mail HTTP API configuration.
+type CloudMailConfig struct {
+	APIURL     string
+	AdminEmail string
+	AdminPassword string
+	FromEmail  string
+	FromName   string
+}
+
 // EmailService 邮件服务
 type EmailService struct {
 	settingRepo              SettingRepository
@@ -127,6 +168,25 @@ func emailRecipientName(email string) string {
 		return trimmed[:at]
 	}
 	return trimmed
+}
+
+func NormalizeEmailProvider(provider string) (string, error) {
+	switch strings.ToLower(strings.TrimSpace(provider)) {
+	case "", EmailProviderSMTP:
+		return EmailProviderSMTP, nil
+	case EmailProviderResend:
+		return EmailProviderResend, nil
+	case EmailProviderCloudflare:
+		return EmailProviderCloudflare, nil
+	case EmailProviderCloudMail:
+		return EmailProviderCloudMail, nil
+	default:
+		return "", ErrInvalidEmailProvider
+	}
+}
+
+func DefaultResendAPIBaseURL() string {
+	return defaultResendAPIBaseURL
 }
 
 // GetSMTPConfig 从数据库获取SMTP配置
@@ -173,15 +233,128 @@ func (s *EmailService) GetSMTPConfig(ctx context.Context) (*SMTPConfig, error) {
 
 // SendEmail 发送邮件（使用数据库中保存的配置）
 func (s *EmailService) SendEmail(ctx context.Context, to, subject, body string) error {
-	config, err := s.GetSMTPConfig(ctx)
+	provider, err := s.GetEmailProvider(ctx)
 	if err != nil {
 		return err
 	}
-	return s.SendEmailWithConfig(config, to, subject, body)
+
+	switch provider {
+	case EmailProviderSMTP:
+		config, err := s.GetSMTPConfig(ctx)
+		if err != nil {
+			return err
+		}
+		return s.SendEmailWithConfig(config, to, subject, body)
+	case EmailProviderResend:
+		config, err := s.GetResendConfig(ctx)
+		if err != nil {
+			return err
+		}
+		return s.SendEmailWithResendConfig(ctx, config, to, subject, body)
+	case EmailProviderCloudflare:
+		config, err := s.GetCloudflareEmailConfig(ctx)
+		if err != nil {
+			return err
+		}
+		return s.SendEmailWithCloudflareConfig(ctx, config, to, subject, body)
+	case EmailProviderCloudMail:
+		config, err := s.GetCloudMailConfig(ctx)
+		if err != nil {
+			return err
+		}
+		return s.SendEmailWithCloudMailConfig(ctx, config, to, subject, body)
+	default:
+		return ErrInvalidEmailProvider
+	}
 }
 
 const smtpDialTimeout = 10 * time.Second
 const smtpIOTimeout = 20 * time.Second
+
+// GetEmailProvider returns the configured email provider, defaulting blank values to SMTP.
+func (s *EmailService) GetEmailProvider(ctx context.Context) (string, error) {
+	settings, err := s.settingRepo.GetMultiple(ctx, []string{SettingKeyEmailProvider})
+	if err != nil {
+		return "", fmt.Errorf("get email provider: %w", err)
+	}
+	return NormalizeEmailProvider(settings[SettingKeyEmailProvider])
+}
+
+func (s *EmailService) GetResendConfig(ctx context.Context) (*ResendConfig, error) {
+	settings, err := s.settingRepo.GetMultiple(ctx, []string{
+		SettingKeyResendAPIKey,
+		SettingKeyResendFromEmail,
+		SettingKeyResendFromName,
+		SettingKeyResendAPIBaseURL,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get resend settings: %w", err)
+	}
+
+	baseURL, err := NormalizeResendAPIBaseURL(settings[SettingKeyResendAPIBaseURL])
+	if err != nil {
+		return nil, err
+	}
+
+	config := &ResendConfig{
+		APIKey:     strings.TrimSpace(settings[SettingKeyResendAPIKey]),
+		FromEmail:  strings.TrimSpace(settings[SettingKeyResendFromEmail]),
+		FromName:   strings.TrimSpace(settings[SettingKeyResendFromName]),
+		APIBaseURL: baseURL,
+	}
+	if config.APIKey == "" || config.FromEmail == "" {
+		return nil, ErrEmailNotConfigured
+	}
+	return config, nil
+}
+
+func (s *EmailService) GetCloudflareEmailConfig(ctx context.Context) (*CloudflareEmailConfig, error) {
+	settings, err := s.settingRepo.GetMultiple(ctx, []string{
+		SettingKeyCloudflareAPIToken,
+		SettingKeyCloudflareAccountID,
+		SettingKeyCloudflareFromEmail,
+		SettingKeyCloudflareFromName,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get cloudflare email settings: %w", err)
+	}
+
+	config := &CloudflareEmailConfig{
+		APIToken:  strings.TrimSpace(settings[SettingKeyCloudflareAPIToken]),
+		AccountID: strings.TrimSpace(settings[SettingKeyCloudflareAccountID]),
+		FromEmail: strings.TrimSpace(settings[SettingKeyCloudflareFromEmail]),
+		FromName:  strings.TrimSpace(settings[SettingKeyCloudflareFromName]),
+	}
+	if config.APIToken == "" || config.AccountID == "" || config.FromEmail == "" {
+		return nil, ErrEmailNotConfigured
+	}
+	return config, nil
+}
+
+func (s *EmailService) GetCloudMailConfig(ctx context.Context) (*CloudMailConfig, error) {
+	settings, err := s.settingRepo.GetMultiple(ctx, []string{
+		SettingKeyCloudMailAPIURL,
+		SettingKeyCloudMailAdminEmail,
+		SettingKeyCloudMailAdminPassword,
+		SettingKeyCloudMailFromEmail,
+		SettingKeyCloudMailFromName,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get cloudmail settings: %w", err)
+	}
+
+	config := &CloudMailConfig{
+		APIURL:     strings.TrimSpace(settings[SettingKeyCloudMailAPIURL]),
+		AdminEmail: strings.TrimSpace(settings[SettingKeyCloudMailAdminEmail]),
+		AdminPassword: settings[SettingKeyCloudMailAdminPassword],
+		FromEmail:  strings.TrimSpace(settings[SettingKeyCloudMailFromEmail]),
+		FromName:   strings.TrimSpace(settings[SettingKeyCloudMailFromName]),
+	}
+	if config.APIURL == "" || config.AdminEmail == "" || config.AdminPassword == "" || config.FromEmail == "" {
+		return nil, ErrEmailNotConfigured
+	}
+	return config, nil
+}
 
 // SendEmailWithConfig 使用指定配置发送邮件
 func (s *EmailService) SendEmailWithConfig(config *SMTPConfig, to, subject, body string) error {
@@ -205,6 +378,339 @@ func (s *EmailService) SendEmailWithConfig(config *SMTPConfig, to, subject, body
 	}
 
 	return s.sendMailPlain(addr, auth, config.From, to, []byte(msg), config.Host)
+}
+
+// SendEmailWithResendConfig sends an HTML email via Resend's HTTP API.
+func (s *EmailService) SendEmailWithResendConfig(ctx context.Context, config *ResendConfig, to, subject, body string) error {
+	if config == nil || strings.TrimSpace(config.APIKey) == "" || strings.TrimSpace(config.FromEmail) == "" {
+		return ErrEmailNotConfigured
+	}
+
+	baseURL, err := NormalizeResendAPIBaseURL(config.APIBaseURL)
+	if err != nil {
+		return err
+	}
+
+	payload := map[string]any{
+		"from":    formatEmailAddress(config.FromName, config.FromEmail),
+		"to":      []string{sanitizeEmailHeader(to)},
+		"subject": sanitizeEmailHeader(subject),
+		"html":    body,
+	}
+	return postEmailJSON(ctx, baseURL+"/emails", "Bearer "+strings.TrimSpace(config.APIKey), payload)
+}
+
+// SendEmailWithCloudflareConfig sends an HTML email via Cloudflare Email Sending API.
+func (s *EmailService) SendEmailWithCloudflareConfig(ctx context.Context, config *CloudflareEmailConfig, to, subject, body string) error {
+	if config == nil || strings.TrimSpace(config.APIToken) == "" || strings.TrimSpace(config.AccountID) == "" || strings.TrimSpace(config.FromEmail) == "" {
+		return ErrEmailNotConfigured
+	}
+
+	endpoint := fmt.Sprintf("https://api.cloudflare.com/client/v4/accounts/%s/email/routing/send", url.PathEscape(strings.TrimSpace(config.AccountID)))
+	payload := map[string]any{
+		"from":    formatEmailAddress(config.FromName, config.FromEmail),
+		"to":      []string{sanitizeEmailHeader(to)},
+		"subject": sanitizeEmailHeader(subject),
+		"html":    body,
+	}
+	return postEmailJSON(ctx, endpoint, "Bearer "+strings.TrimSpace(config.APIToken), payload)
+}
+
+// SendEmailWithCloudMailConfig sends an HTML email via self-hosted Cloud-Mail HTTP API.
+func (s *EmailService) SendEmailWithCloudMailConfig(ctx context.Context, config *CloudMailConfig, to, subject, body string) error {
+	if config == nil || strings.TrimSpace(config.APIURL) == "" || strings.TrimSpace(config.AdminEmail) == "" || config.AdminPassword == "" || strings.TrimSpace(config.FromEmail) == "" {
+		return ErrEmailNotConfigured
+	}
+
+	apiURL := strings.TrimRight(strings.TrimSpace(config.APIURL), "/")
+
+	// Step 1: login to get JWT
+	type loginReq struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	loginResp, err := postCloudMailJSON(ctx, apiURL+"/login", "", loginReq{
+		Email:    strings.TrimSpace(config.AdminEmail),
+		Password: config.AdminPassword,
+	})
+	if err != nil {
+		return fmt.Errorf("cloudmail login: %w", err)
+	}
+	token, err := extractCloudMailToken(loginResp)
+	if err != nil {
+		return fmt.Errorf("cloudmail login: %w", err)
+	}
+
+	// Step 2: find accountId for the configured from email
+	accountID, err := s.findCloudMailAccountID(ctx, apiURL, token, strings.TrimSpace(config.FromEmail))
+	if err != nil {
+		return fmt.Errorf("cloudmail find account: %w", err)
+	}
+
+	// Step 3: send email
+	sendPayload := map[string]any{
+		"accountId":    accountID,
+		"receiveEmail": []string{sanitizeEmailHeader(to)},
+		"subject":      sanitizeEmailHeader(subject),
+		"content":      body,
+		"sendType":     "send",
+	}
+	auth := "Bearer " + token
+	return postCloudMailJSONNoAuth(ctx, apiURL+"/email/send", auth, sendPayload)
+}
+
+// CloudMailAccount represents an email account in cloud-mail.
+type CloudMailAccount struct {
+	AccountID int    `json:"accountId"`
+	Email     string `json:"email"`
+	Name      string `json:"name"`
+}
+
+// cloudMailLoginResponse wraps the cloud-mail login API response.
+type cloudMailLoginResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		Token string `json:"token"`
+	} `json:"data"`
+}
+
+// cloudMailListAccountsResponse wraps the cloud-mail account list API response.
+type cloudMailListAccountsResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    []CloudMailAccount `json:"data"`
+}
+
+func extractCloudMailToken(body []byte) (string, error) {
+	var resp cloudMailLoginResponse
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return "", fmt.Errorf("parse login response: %w", err)
+	}
+	if resp.Code != 200 {
+		return "", fmt.Errorf("login failed: %s", resp.Message)
+	}
+	if resp.Data.Token == "" {
+		return "", fmt.Errorf("no token in login response")
+	}
+	return resp.Data.Token, nil
+}
+
+func (s *EmailService) findCloudMailAccountID(ctx context.Context, apiURL, token, fromEmail string) (int, error) {
+	var resp cloudMailListAccountsResponse
+	err := postCloudMailJSONWithAuth(ctx, apiURL+"/account/list", token, &resp)
+	if err != nil {
+		return 0, fmt.Errorf("list accounts: %w", err)
+	}
+	if resp.Code != 200 {
+		return 0, fmt.Errorf("list accounts failed: %s", resp.Message)
+	}
+
+	fromEmailLower := strings.ToLower(strings.TrimSpace(fromEmail))
+	for _, acc := range resp.Data {
+		if strings.ToLower(strings.TrimSpace(acc.Email)) == fromEmailLower {
+			return acc.AccountID, nil
+		}
+	}
+	return 0, fmt.Errorf("no account found with email %s on cloud-mail instance", fromEmail)
+}
+
+// ListCloudMailAccounts fetches the list of available email accounts from a cloud-mail instance.
+func (s *EmailService) ListCloudMailAccounts(ctx context.Context, apiURL, email, password string) ([]CloudMailAccount, error) {
+	apiURL = strings.TrimRight(strings.TrimSpace(apiURL), "/")
+
+	// Step 1: login
+	loginResp, err := postCloudMailJSON(ctx, apiURL+"/login", "", map[string]string{
+		"email":    strings.TrimSpace(email),
+		"password": password,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("cloudmail login: %w", err)
+	}
+	token, err := extractCloudMailToken(loginResp)
+	if err != nil {
+		return nil, fmt.Errorf("cloudmail login: %w", err)
+	}
+
+	// Step 2: list accounts
+	var listResp cloudMailListAccountsResponse
+	if err := postCloudMailJSONWithAuth(ctx, apiURL+"/account/list", token, &listResp); err != nil {
+		return nil, fmt.Errorf("list accounts: %w", err)
+	}
+	if listResp.Code != 200 {
+		return nil, fmt.Errorf("list accounts failed: %s", listResp.Message)
+	}
+
+	return listResp.Data, nil
+}
+
+// postCloudMailJSON sends a JSON POST to cloud-mail and returns the raw response body.
+func postCloudMailJSON(ctx context.Context, endpoint, authorization string, payload any) ([]byte, error) {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("marshal payload: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, emailHTTPTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if authorization != "" {
+		req.Header.Set("Authorization", authorization)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("send request: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	respBody, err := io.ReadAll(io.LimitReader(resp.Body, 8192))
+	if err != nil {
+		return nil, fmt.Errorf("read response: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("cloud-mail returned status %d: %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
+	}
+
+	return respBody, nil
+}
+
+// postCloudMailJSONWithAuth sends a GET request to cloud-mail with auth header and parses the JSON response into dest.
+func postCloudMailJSONWithAuth(ctx context.Context, endpoint, token string, dest any) error {
+	ctx, cancel := context.WithTimeout(ctx, emailHTTPTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("send request: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	respBody, err := io.ReadAll(io.LimitReader(resp.Body, 8192))
+	if err != nil {
+		return fmt.Errorf("read response: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("cloud-mail returned status %d: %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
+	}
+
+	if err := json.Unmarshal(respBody, dest); err != nil {
+		return fmt.Errorf("parse response: %w", err)
+	}
+
+	return nil
+}
+
+// postCloudMailJSONNoAuth sends a JSON POST to cloud-mail with pre-set auth header (for /email/send).
+func postCloudMailJSONNoAuth(ctx context.Context, endpoint, authorization string, payload any) error {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("marshal payload: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, emailHTTPTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", authorization)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("send email request: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return nil
+	}
+
+	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	message := strings.TrimSpace(string(respBody))
+	if token := strings.TrimSpace(strings.TrimPrefix(authorization, "Bearer ")); token != "" {
+		message = strings.ReplaceAll(message, token, "[redacted]")
+	}
+	return fmt.Errorf("cloud-mail returned status %d: %s", resp.StatusCode, message)
+}
+
+func NormalizeResendAPIBaseURL(raw string) (string, error) {
+	base := strings.TrimRight(strings.TrimSpace(raw), "/")
+	if base == "" {
+		base = defaultResendAPIBaseURL
+	}
+	parsed, err := url.Parse(base)
+	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+		return "", infraerrors.BadRequest("INVALID_RESEND_API_BASE_URL", "invalid Resend API base URL")
+	}
+	if parsed.Scheme != "https" && !(parsed.Scheme == "http" && isLocalResendAPIHost(parsed.Hostname())) {
+		return "", infraerrors.BadRequest("INVALID_RESEND_API_BASE_URL", "Resend API base URL must use https")
+	}
+	parsed.RawQuery = ""
+	parsed.Fragment = ""
+	return strings.TrimRight(parsed.String(), "/"), nil
+}
+
+func isLocalResendAPIHost(host string) bool {
+	host = strings.ToLower(strings.TrimSpace(host))
+	return host == "localhost" || host == "127.0.0.1" || host == "::1"
+}
+
+func formatEmailAddress(name, email string) string {
+	email = sanitizeEmailHeader(email)
+	if strings.TrimSpace(name) == "" {
+		return email
+	}
+	return fmt.Sprintf("%s <%s>", sanitizeEmailHeader(name), email)
+}
+
+func postEmailJSON(ctx context.Context, endpoint, authorization string, payload any) error {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("marshal email payload: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, emailHTTPTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("create email request: %w", err)
+	}
+	req.Header.Set("Authorization", authorization)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("send email request: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return nil
+	}
+
+	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	message := strings.TrimSpace(string(respBody))
+	if token := strings.TrimSpace(strings.TrimPrefix(authorization, "Bearer ")); token != "" {
+		message = strings.ReplaceAll(message, token, "[redacted]")
+	}
+	return fmt.Errorf("email provider returned status %d: %s", resp.StatusCode, message)
 }
 
 // sendMailPlain sends mail without TLS using a dialer with timeout.

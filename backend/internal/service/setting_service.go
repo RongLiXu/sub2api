@@ -1767,6 +1767,17 @@ func (s *SettingService) buildSystemSettingsUpdates(ctx context.Context, setting
 	updates[SettingKeyLoginAgreementDocuments] = loginAgreementDocumentsJSON
 
 	// 邮件服务设置（只有非空才更新密码）
+	provider, err := NormalizeEmailProvider(settings.EmailProvider)
+	if err != nil {
+		return nil, err
+	}
+	settings.EmailProvider = provider
+	resendBaseURL, err := NormalizeResendAPIBaseURL(settings.ResendAPIBaseURL)
+	if err != nil {
+		return nil, err
+	}
+	settings.ResendAPIBaseURL = resendBaseURL
+	updates[SettingKeyEmailProvider] = settings.EmailProvider
 	updates[SettingKeySMTPHost] = settings.SMTPHost
 	updates[SettingKeySMTPPort] = strconv.Itoa(settings.SMTPPort)
 	updates[SettingKeySMTPUsername] = settings.SMTPUsername
@@ -1776,6 +1787,27 @@ func (s *SettingService) buildSystemSettingsUpdates(ctx context.Context, setting
 	updates[SettingKeySMTPFrom] = settings.SMTPFrom
 	updates[SettingKeySMTPFromName] = settings.SMTPFromName
 	updates[SettingKeySMTPUseTLS] = strconv.FormatBool(settings.SMTPUseTLS)
+	if settings.ResendAPIKey != "" {
+		updates[SettingKeyResendAPIKey] = settings.ResendAPIKey
+	}
+	updates[SettingKeyResendFromEmail] = settings.ResendFromEmail
+	updates[SettingKeyResendFromName] = settings.ResendFromName
+	updates[SettingKeyResendAPIBaseURL] = settings.ResendAPIBaseURL
+	if settings.CloudflareAPIToken != "" {
+		updates[SettingKeyCloudflareAPIToken] = settings.CloudflareAPIToken
+	}
+	updates[SettingKeyCloudflareAccountID] = settings.CloudflareAccountID
+	updates[SettingKeyCloudflareFromEmail] = settings.CloudflareFromEmail
+	updates[SettingKeyCloudflareFromName] = settings.CloudflareFromName
+
+	// Cloud-Mail settings (only update password when non-empty)
+	updates[SettingKeyCloudMailAPIURL] = settings.CloudMailAPIURL
+	updates[SettingKeyCloudMailAdminEmail] = settings.CloudMailAdminEmail
+	if settings.CloudMailAdminPassword != "" {
+		updates[SettingKeyCloudMailAdminPassword] = settings.CloudMailAdminPassword
+	}
+	updates[SettingKeyCloudMailFromEmail] = settings.CloudMailFromEmail
+	updates[SettingKeyCloudMailFromName] = settings.CloudMailFromName
 
 	// Cloudflare Turnstile 设置（只有非空才更新密钥）
 	updates[SettingKeyTurnstileEnabled] = strconv.FormatBool(settings.TurnstileEnabled)
@@ -2807,6 +2839,8 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeyLoginAgreementMode:                        defaultLoginAgreementMode,
 		SettingKeyLoginAgreementUpdatedAt:                   defaultLoginAgreementDate,
 		SettingKeyLoginAgreementDocuments:                   loginAgreementDocumentsJSON,
+		SettingKeyEmailProvider:                             EmailProviderSMTP,
+		SettingKeyResendAPIBaseURL:                          defaultResendAPIBaseURL,
 		SettingKeyAPIKeyACLTrustForwardedIP:                 "false",
 		SettingKeySiteName:                                  "Sub2API",
 		SettingKeySiteLogo:                                  "",
@@ -2979,6 +3013,14 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 	} else if s != nil && s.cfg != nil {
 		apiKeyACLTrustForwardedIP = s.cfg.Security.TrustForwardedIPForAPIKeyACL
 	}
+	emailProvider, err := NormalizeEmailProvider(settings[SettingKeyEmailProvider])
+	if err != nil {
+		emailProvider = strings.TrimSpace(settings[SettingKeyEmailProvider])
+	}
+	resendBaseURL, err := NormalizeResendAPIBaseURL(settings[SettingKeyResendAPIBaseURL])
+	if err != nil {
+		resendBaseURL = defaultResendAPIBaseURL
+	}
 	result := &SystemSettings{
 		RegistrationEnabled:              settings[SettingKeyRegistrationEnabled] == "true",
 		EmailVerifyEnabled:               emailVerifyEnabled,
@@ -2998,6 +3040,20 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 		SMTPFromName:                     settings[SettingKeySMTPFromName],
 		SMTPUseTLS:                       settings[SettingKeySMTPUseTLS] == "true",
 		SMTPPasswordConfigured:           settings[SettingKeySMTPPassword] != "",
+		EmailProvider:                    emailProvider,
+		ResendAPIKeyConfigured:           settings[SettingKeyResendAPIKey] != "",
+		ResendFromEmail:                  strings.TrimSpace(settings[SettingKeyResendFromEmail]),
+		ResendFromName:                   strings.TrimSpace(settings[SettingKeyResendFromName]),
+		ResendAPIBaseURL:                 resendBaseURL,
+		CloudflareAPITokenConfigured:     settings[SettingKeyCloudflareAPIToken] != "",
+		CloudflareAccountID:              strings.TrimSpace(settings[SettingKeyCloudflareAccountID]),
+		CloudflareFromEmail:              strings.TrimSpace(settings[SettingKeyCloudflareFromEmail]),
+		CloudflareFromName:               strings.TrimSpace(settings[SettingKeyCloudflareFromName]),
+		CloudMailAPIURL:                  strings.TrimSpace(settings[SettingKeyCloudMailAPIURL]),
+		CloudMailAdminEmail:              strings.TrimSpace(settings[SettingKeyCloudMailAdminEmail]),
+		CloudMailAdminPasswordConfigured: settings[SettingKeyCloudMailAdminPassword] != "",
+		CloudMailFromEmail:               strings.TrimSpace(settings[SettingKeyCloudMailFromEmail]),
+		CloudMailFromName:                strings.TrimSpace(settings[SettingKeyCloudMailFromName]),
 		TurnstileEnabled:                 settings[SettingKeyTurnstileEnabled] == "true",
 		TurnstileSiteKey:                 settings[SettingKeyTurnstileSiteKey],
 		TurnstileSecretKeyConfigured:     settings[SettingKeyTurnstileSecretKey] != "",
@@ -3068,6 +3124,8 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 
 	// 敏感信息直接返回，方便测试连接时使用
 	result.SMTPPassword = settings[SettingKeySMTPPassword]
+	result.ResendAPIKey = strings.TrimSpace(settings[SettingKeyResendAPIKey])
+	result.CloudflareAPIToken = strings.TrimSpace(settings[SettingKeyCloudflareAPIToken])
 	result.TurnstileSecretKey = settings[SettingKeyTurnstileSecretKey]
 
 	// LinuxDo Connect 设置：

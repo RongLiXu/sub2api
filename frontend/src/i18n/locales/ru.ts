@@ -1,6 +1,7 @@
 import en from './en'
 import { mergeLocaleMessages, pruneLocaleMessagePaths } from './mergeLocaleMessages'
 import { removedLocalePathsFromEnglish } from './legacyRemovedLocalePaths'
+import ruExtra from './ru.extra'
 
 const messages = {
   "home": {
@@ -6667,4 +6668,4 @@ const messages = {
   }
 }
 
-export default pruneLocaleMessagePaths(mergeLocaleMessages(en, messages), [...removedLocalePathsFromEnglish])
+export default pruneLocaleMessagePaths(mergeLocaleMessages(mergeLocaleMessages(en, messages), ruExtra), [...removedLocalePathsFromEnglish])
