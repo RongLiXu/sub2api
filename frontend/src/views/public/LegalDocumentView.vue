@@ -89,7 +89,6 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
 import { getPublicSettings } from '@/api/auth'
 import { getLocale } from '@/i18n'
@@ -122,10 +121,6 @@ const siteLogo = computed(() => sanitizeUrl(settings.value?.site_logo || '', {
 const updatedAt = computed(() =>
   isAdminComplianceDocument.value ? '' : settings.value?.login_agreement_updated_at || ''
 )
-const documentTypeLabel = computed(() =>
-  isAdminComplianceDocument.value ? t('legal.adminCompliance') : t('legal.loginAgreement')
-)
-
 const currentDocument = computed<LoginAgreementDocument | null>(() => {
   if (isAdminComplianceDocument.value) {
     return {
