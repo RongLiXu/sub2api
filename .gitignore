@@ -139,3 +139,7 @@ frontend/coverage/
 aicodex
 output/
 ip.txt
+
+.reasonix/
+.codegraph/
+openai-team-guide/
