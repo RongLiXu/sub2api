@@ -64,6 +64,7 @@ describe('useModelWhitelist', () => {
   it('zhipu 模型列表包含最新 GLM 旗舰模型', () => {
     const models = getModelsByPlatform('zhipu')
 
+    expect(models).toContain('glm-5.2')
     expect(models).toContain('glm-5.1')
     expect(models).toContain('glm-5')
     expect(models).toContain('glm-5-turbo')
@@ -74,6 +75,7 @@ describe('useModelWhitelist', () => {
     expect(models).toContain('glm-4.6v')
     expect(models).toContain('glm-4.6v-flashx')
     expect(models).toContain('glm-4.6v-flash')
+    expect(models.indexOf('glm-5.2')).toBeLessThan(models.indexOf('glm-5.1'))
     expect(models.indexOf('glm-5.1')).toBeLessThan(models.indexOf('glm-4'))
   })
 

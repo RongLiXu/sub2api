@@ -1352,6 +1352,7 @@ func TestDefaultEffortForThinkingEnabled(t *testing.T) {
 		want  *string // nil = expect no fallback
 	}{
 		// passback-required 上游中不支持 effort 档位的国产模型→补默认 high
+		{name: "glm-5.2", model: "glm-5.2", want: strPtr("high")},
 		{name: "glm-5.1", model: "glm-5.1", want: strPtr("high")},
 		{name: "glm-4.7", model: "glm-4.7", want: strPtr("high")},
 		{name: "kimi-k2.6", model: "kimi-k2.6", want: strPtr("high")},

@@ -537,6 +537,15 @@ func TestBundledPricing_ZhipuGLMUsesOfficialListPrices(t *testing.T) {
 	require.InDelta(t, 8e-6, glm51.TokenPricingTiers[1].InputCostPerToken, 1e-12)   // ¥8 / 1M tokens
 	require.InDelta(t, 28e-6, glm51.TokenPricingTiers[1].OutputCostPerToken, 1e-12) // ¥28 / 1M tokens
 
+	glm52 := pricingData["glm-5.2"]
+	require.NotNil(t, glm52)
+	require.InDelta(t, 6e-6, glm52.InputCostPerToken, 1e-12)         // ¥6 / 1M tokens
+	require.InDelta(t, 24e-6, glm52.OutputCostPerToken, 1e-12)       // ¥24 / 1M tokens
+	require.InDelta(t, 1.3e-6, glm52.CacheReadInputTokenCost, 1e-12) // ¥1.3 / 1M tokens
+	require.Len(t, glm52.TokenPricingTiers, 2)
+	require.InDelta(t, 8e-6, glm52.TokenPricingTiers[1].InputCostPerToken, 1e-12)   // ¥8 / 1M tokens
+	require.InDelta(t, 28e-6, glm52.TokenPricingTiers[1].OutputCostPerToken, 1e-12) // ¥28 / 1M tokens
+
 	glm47 := pricingData["glm-4.7"]
 	require.NotNil(t, glm47)
 	require.Len(t, glm47.TokenPricingTiers, 3)
