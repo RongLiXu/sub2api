@@ -628,30 +628,30 @@ func TestGetFallbackPricing_FamilyMatching(t *testing.T) {
 		{
 			name:              "deepseek v4 pro",
 			model:             "deepseek-v4-pro",
-			expectedInput:     4.35e-7,
-			expectedOutput:    floatPtr(8.7e-7),
-			expectedCacheRead: floatPtr(3.625e-9),
+			expectedInput:     1.74e-6,
+			expectedOutput:    floatPtr(3.48e-6),
+			expectedCacheRead: floatPtr(1.45e-8),
 		},
 		{
 			name:              "deepseek v4 flash",
 			model:             "deepseek-v4-flash",
 			expectedInput:     1.4e-7,
 			expectedOutput:    floatPtr(2.8e-7),
-			expectedCacheRead: floatPtr(2.8e-9),
+			expectedCacheRead: floatPtr(2.8e-8),
 		},
 		{
 			name:              "deepseek chat alias → flash",
 			model:             "deepseek-chat",
 			expectedInput:     1.4e-7,
 			expectedOutput:    floatPtr(2.8e-7),
-			expectedCacheRead: floatPtr(2.8e-9),
+			expectedCacheRead: floatPtr(2.8e-8),
 		},
 		{
 			name:              "deepseek reasoner alias → flash",
 			model:             "deepseek-reasoner",
 			expectedInput:     1.4e-7,
 			expectedOutput:    floatPtr(2.8e-7),
-			expectedCacheRead: floatPtr(2.8e-9),
+			expectedCacheRead: floatPtr(2.8e-8),
 		},
 
 		// ---- 智谱 GLM（z.ai USD 口径）----

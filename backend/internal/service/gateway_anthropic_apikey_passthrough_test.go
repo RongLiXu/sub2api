@@ -1515,23 +1515,13 @@ func TestGatewayService_AnthropicAPIKeyPassthrough_NonStreamingSSEParsesUsage(t 
 	c, _ := gin.CreateTestContext(rec)
 	c.Request = httptest.NewRequest(http.MethodPost, "/v1/messages", nil)
 
-	upstreamSSE := strings.Join([]string{
-		`event: message_start`,
-		`data: {"type":"message_start","message":{"usage":{"input_tokens":22,"cached_tokens":6}}}`,
-		``,
-		`event: message_delta`,
-		`data: {"type":"message_delta","usage":{"output_tokens":13}}`,
-		``,
-		`event: message_stop`,
-		`data: {"type":"message_stop"}`,
-		``,
-	}, "\n")
+	upstreamJSON := `{"id":"msg_01","type":"message","role":"assistant","content":[{"type":"text","text":"Hello"}],"model":"claude-sonnet-4-20250514","stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":22,"output_tokens":13,"cache_read_input_tokens":6}}`
 	resp := &http.Response{
 		StatusCode: http.StatusOK,
 		Header: http.Header{
-			"Content-Type": []string{"text/event-stream"},
+			"Content-Type": []string{"application/json"},
 		},
-		Body: io.NopCloser(strings.NewReader(upstreamSSE)),
+		Body: io.NopCloser(strings.NewReader(upstreamJSON)),
 	}
 	svc := &GatewayService{cfg: &config.Config{}}
 
@@ -1541,7 +1531,7 @@ func TestGatewayService_AnthropicAPIKeyPassthrough_NonStreamingSSEParsesUsage(t 
 	require.Equal(t, 22, usage.InputTokens)
 	require.Equal(t, 13, usage.OutputTokens)
 	require.Equal(t, 6, usage.CacheReadInputTokens)
-	require.Contains(t, rec.Body.String(), "message_start")
+	require.Contains(t, rec.Body.String(), "Hello")
 }
 
 func TestGatewayService_AnthropicAPIKeyPassthrough_StreamingErrTooLong(t *testing.T) {

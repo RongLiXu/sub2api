@@ -31,11 +31,11 @@ func TestExtractResponsesReasoningEffortFromBody(t *testing.T) {
 	require.NotNil(t, got)
 	require.Equal(t, "high", *got)
 
-	maxGot := ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"deepseek-v4-pro","reasoning":{"effort":"max"}}`))
+	maxGot := ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"deepseek-v4-pro","reasoning":{"effort":"max"}}`), "deepseek-v4-pro")
 	require.NotNil(t, maxGot)
 	require.Equal(t, "xhigh", *maxGot)
 
-	maxGot := ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"deepseek-v4-pro","reasoning":{"effort":"max"}}`))
+	maxGot = ExtractResponsesReasoningEffortFromBody([]byte(`{"model":"deepseek-v4-pro","reasoning":{"effort":"max"}}`), "deepseek-v4-pro")
 	require.NotNil(t, maxGot)
 	require.Equal(t, "xhigh", *maxGot)
 
