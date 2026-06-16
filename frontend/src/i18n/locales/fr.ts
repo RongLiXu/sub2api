@@ -374,6 +374,15 @@ const messages = {
     "channelStatus": "Etat des canaux",
     "riskControl": "Centre de risque"
   },
+  "navGroup": {
+    "myServices": "Mes services",
+    "consumption": "Achats & Paiements",
+    "account": "Compte & Social",
+    "operations": "Aperçu des opérations",
+    "usersAndPermissions": "Utilisateurs & Permissions",
+    "channelsAndBilling": "Canaux & Facturation",
+    "paymentCenter": "Centre de paiement"
+  },
   "modelsPage": {
     "headerEyebrow": "Place publique des modeles",
     "navHome": "Accueil",

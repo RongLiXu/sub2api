@@ -374,6 +374,15 @@ const messages = {
     "channelStatus": "Статус каналов",
     "riskControl": "Центр контроля рисков"
   },
+  "navGroup": {
+    "myServices": "Мои услуги",
+    "consumption": "Покупки и оплата",
+    "account": "Аккаунт и соцсети",
+    "operations": "Обзор операций",
+    "usersAndPermissions": "Пользователи и права",
+    "channelsAndBilling": "Каналы и биллинг",
+    "paymentCenter": "Платежный центр"
+  },
   "modelsPage": {
     "headerEyebrow": "Публичный каталог моделей",
     "navHome": "Главная",

@@ -393,6 +393,15 @@ const messages = {
     "channelStatus": "สถานะของช่อง",
     "riskControl": "การควบคุมความเสี่ยง"
   },
+  "navGroup": {
+    "myServices": "บริการของฉัน",
+    "consumption": "การซื้อและการชำระเงิน",
+    "account": "บัญชีและสังคม",
+    "operations": "ภาพรวมการดำเนินงาน",
+    "usersAndPermissions": "ผู้ใช้และสิทธิ์",
+    "channelsAndBilling": "ช่องทางและการเรียกเก็บเงิน",
+    "paymentCenter": "ศูนย์การชำระเงิน"
+  },
   "modelsPage": {
     "headerEyebrow": "พลาซ่าโมเดลสาธารณะ",
     "navHome": "บ้าน",

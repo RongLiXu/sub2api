@@ -439,6 +439,17 @@ export default {
     riskControl: '风控中心',
   },
 
+  // Sidebar group titles
+  navGroup: {
+    myServices: '我的服务',
+    consumption: '消费与支付',
+    account: '账户与社交',
+    operations: '运营总览',
+    usersAndPermissions: '用户与权限',
+    channelsAndBilling: '渠道与计费',
+    paymentCenter: '支付中心',
+  },
+
   modelsPage: {
     headerEyebrow: '公开模型广场',
     navHome: '首页',

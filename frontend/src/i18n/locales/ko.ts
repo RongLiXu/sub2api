@@ -393,6 +393,15 @@ const messages = {
     "channelStatus": "채널 상태",
     "riskControl": "리스크 제어"
   },
+  "navGroup": {
+    "myServices": "내 서비스",
+    "consumption": "소비 및 결제",
+    "account": "계정 및 소셜",
+    "operations": "운영 개요",
+    "usersAndPermissions": "사용자 및 권한",
+    "channelsAndBilling": "채널 및 요금",
+    "paymentCenter": "결제 센터"
+  },
   "modelsPage": {
     "headerEyebrow": "공개 모델 광장",
     "navHome": "홈",

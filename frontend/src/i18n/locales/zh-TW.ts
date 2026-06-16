@@ -374,6 +374,15 @@ const messages = {
     "channelStatus": "頻道狀態",
     "riskControl": "風控中心"
   },
+  "navGroup": {
+    "myServices": "我的服務",
+    "consumption": "消費與支付",
+    "account": "帳戶與社交",
+    "operations": "運營總覽",
+    "usersAndPermissions": "用戶與權限",
+    "channelsAndBilling": "渠道與計費",
+    "paymentCenter": "支付中心"
+  },
   "modelsPage": {
     "headerEyebrow": "公開模型廣場",
     "navHome": "首頁",

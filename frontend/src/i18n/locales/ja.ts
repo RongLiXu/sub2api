@@ -369,6 +369,15 @@ const messages = {
     "channelStatus": "チャンネルステータス",
     "riskControl": "風控センター"
   },
+  "navGroup": {
+    "myServices": "マイサービス",
+    "consumption": "消費と支払い",
+    "account": "アカウントとソーシャル",
+    "operations": "運用概要",
+    "usersAndPermissions": "ユーザーと権限",
+    "channelsAndBilling": "チャンネルと課金",
+    "paymentCenter": "支払いセンター"
+  },
   "modelsPage": {
     "headerEyebrow": "公開モデル広場",
     "navHome": "ホーム",

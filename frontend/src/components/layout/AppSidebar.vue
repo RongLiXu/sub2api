@@ -23,119 +23,152 @@
 
     <!-- Navigation -->
     <nav class="sidebar-nav scrollbar-hide">
-      <!-- Admin View: Admin menu first, then personal menu -->
+      <!-- Admin View: grouped by business domain -->
       <template v-if="isAdmin">
-        <!-- Admin Section -->
-        <div class="sidebar-section">
-          <template v-for="item in adminNavItems" :key="item.path">
-            <!-- Collapsible group (has children) -->
-            <template v-if="item.children?.length">
-              <button
-                type="button"
-                class="sidebar-link mb-1 w-full"
-                :class="{
-                  'sidebar-link-active': isGroupActive(item) && !isGroupExpanded(item),
-                  'sidebar-link-collapsed': sidebarCollapsed
-                }"
+        <!-- Admin Management Groups -->
+        <template v-for="group in adminNavGroups" :key="group.title">
+          <div v-if="group.items.length" class="sidebar-section">
+            <div
+              v-if="group.title"
+              class="sidebar-section-title"
+              :class="{ 'sidebar-section-title-collapsed': sidebarCollapsed }"
+              :aria-hidden="sidebarCollapsed ? 'true' : 'false'"
+            >
+              <span
+                class="sidebar-section-title-text"
+                :class="{ 'sidebar-section-title-text-collapsed': sidebarCollapsed }"
+              >{{ group.title }}</span>
+            </div>
+            <template v-for="item in group.items" :key="item.path">
+              <!-- Collapsible group (has children) -->
+              <template v-if="item.children?.length">
+                <button
+                  type="button"
+                  class="sidebar-link mb-1 w-full"
+                  :class="{
+                    'sidebar-link-active': isGroupActive(item) && !isGroupExpanded(item),
+                    'sidebar-link-collapsed': sidebarCollapsed
+                  }"
+                  :title="sidebarCollapsed ? item.label : undefined"
+                  @click="handleGroupClick(item)"
+                >
+                  <component :is="item.icon" class="h-5 w-5 flex-shrink-0" />
+                  <span
+                    class="sidebar-label sidebar-label-flex"
+                    :class="{ 'sidebar-label-collapsed': sidebarCollapsed }"
+                    :aria-hidden="sidebarCollapsed ? 'true' : 'false'"
+                  >
+                    <span class="min-w-0 truncate">{{ item.label }}</span>
+                    <ChevronDownIcon
+                      class="h-4 w-4 flex-shrink-0 transition-transform duration-200"
+                      :class="isGroupExpanded(item) ? 'rotate-180' : ''"
+                    />
+                  </span>
+                </button>
+                <!-- Children -->
+                <div v-if="!sidebarCollapsed && isGroupExpanded(item)" class="mb-1 ml-4 border-l border-gray-200 pl-2 dark:border-dark-600">
+                  <router-link
+                    v-for="child in item.children"
+                    :key="child.path"
+                    :to="child.path"
+                    class="sidebar-link mb-0.5 py-1.5 text-sm"
+                    :class="{ 'sidebar-link-active': route.path === child.path }"
+                    @click="handleMenuItemClick(child.path)"
+                  >
+                    <component :is="child.icon" class="h-4 w-4 flex-shrink-0" />
+                    <span>{{ child.label }}</span>
+                  </router-link>
+                </div>
+              </template>
+              <!-- Normal item (no children) -->
+              <router-link
+                v-else
+                :to="item.path"
+                class="sidebar-link mb-1"
+                :class="{ 'sidebar-link-active': isActive(item.path), 'sidebar-link-collapsed': sidebarCollapsed }"
                 :title="sidebarCollapsed ? item.label : undefined"
-                @click="handleGroupClick(item)"
+                :id="
+                  item.path === '/admin/accounts'
+                    ? 'sidebar-channel-manage'
+                    : item.path === '/admin/groups'
+                      ? 'sidebar-group-manage'
+                      : item.path === '/admin/redeem'
+                        ? 'sidebar-wallet'
+                        : undefined
+                "
+                @click="handleMenuItemClick(item.path)"
               >
-                <component :is="item.icon" class="h-5 w-5 flex-shrink-0" />
-                <span
-                  class="sidebar-label sidebar-label-flex"
-                  :class="{ 'sidebar-label-collapsed': sidebarCollapsed }"
-                  :aria-hidden="sidebarCollapsed ? 'true' : 'false'"
-                >
-                  <span class="min-w-0 truncate">{{ item.label }}</span>
-                  <ChevronDownIcon
-                    class="h-4 w-4 flex-shrink-0 transition-transform duration-200"
-                    :class="isGroupExpanded(item) ? 'rotate-180' : ''"
-                  />
-                </span>
-              </button>
-              <!-- Children -->
-              <div v-if="!sidebarCollapsed && isGroupExpanded(item)" class="mb-1 ml-4 border-l border-gray-200 pl-2 dark:border-dark-600">
-                <router-link
-                  v-for="child in item.children"
-                  :key="child.path"
-                  :to="child.path"
-                  class="sidebar-link mb-0.5 py-1.5 text-sm"
-                  :class="{ 'sidebar-link-active': route.path === child.path }"
-                  @click="handleMenuItemClick(child.path)"
-                >
-                  <component :is="child.icon" class="h-4 w-4 flex-shrink-0" />
-                  <span>{{ child.label }}</span>
-                </router-link>
-              </div>
+                <span v-if="item.iconSvg" class="h-5 w-5 flex-shrink-0 sidebar-svg-icon" v-html="sanitizeSvg(item.iconSvg)"></span>
+                <component v-else :is="item.icon" class="h-5 w-5 flex-shrink-0" />
+                <span class="sidebar-label" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">{{ item.label }}</span>
+              </router-link>
             </template>
-            <!-- Normal item (no children) -->
+          </div>
+        </template>
+
+        <!-- Personal Groups for Admin (hidden in simple mode) -->
+        <template v-for="group in personalNavGroups" :key="group.title">
+          <div v-if="group.items.length" class="sidebar-section">
+            <div
+              v-if="group.title"
+              class="sidebar-section-title"
+              :class="{ 'sidebar-section-title-collapsed': sidebarCollapsed }"
+              :aria-hidden="sidebarCollapsed ? 'true' : 'false'"
+            >
+              <span
+                class="sidebar-section-title-text"
+                :class="{ 'sidebar-section-title-text-collapsed': sidebarCollapsed }"
+              >{{ group.title }}</span>
+            </div>
             <router-link
-              v-else
+              v-for="item in group.items"
+              :key="item.path"
               :to="item.path"
               class="sidebar-link mb-1"
               :class="{ 'sidebar-link-active': isActive(item.path), 'sidebar-link-collapsed': sidebarCollapsed }"
               :title="sidebarCollapsed ? item.label : undefined"
-              :id="
-                item.path === '/admin/accounts'
-                  ? 'sidebar-channel-manage'
-                  : item.path === '/admin/groups'
-                    ? 'sidebar-group-manage'
-                    : item.path === '/admin/redeem'
-                      ? 'sidebar-wallet'
-                      : undefined
-              "
+              :data-tour="item.path === '/keys' ? 'sidebar-my-keys' : undefined"
               @click="handleMenuItemClick(item.path)"
             >
               <span v-if="item.iconSvg" class="h-5 w-5 flex-shrink-0 sidebar-svg-icon" v-html="sanitizeSvg(item.iconSvg)"></span>
               <component v-else :is="item.icon" class="h-5 w-5 flex-shrink-0" />
               <span class="sidebar-label" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">{{ item.label }}</span>
             </router-link>
-          </template>
-        </div>
-
-        <!-- Personal Section for Admin (hidden in simple mode) -->
-        <div v-if="!authStore.isSimpleMode" class="sidebar-section">
-          <div class="sidebar-section-title" :class="{ 'sidebar-section-title-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">
-            <span class="sidebar-section-title-text" :class="{ 'sidebar-section-title-text-collapsed': sidebarCollapsed }">
-              {{ t('nav.myAccount') }}
-            </span>
           </div>
-
-          <router-link
-            v-for="item in personalNavItems"
-            :key="item.path"
-            :to="item.path"
-            class="sidebar-link mb-1"
-            :class="{ 'sidebar-link-active': isActive(item.path), 'sidebar-link-collapsed': sidebarCollapsed }"
-            :title="sidebarCollapsed ? item.label : undefined"
-            :data-tour="item.path === '/keys' ? 'sidebar-my-keys' : undefined"
-            @click="handleMenuItemClick(item.path)"
-          >
-            <span v-if="item.iconSvg" class="h-5 w-5 flex-shrink-0 sidebar-svg-icon" v-html="sanitizeSvg(item.iconSvg)"></span>
-            <component v-else :is="item.icon" class="h-5 w-5 flex-shrink-0" />
-            <span class="sidebar-label" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">{{ item.label }}</span>
-          </router-link>
-        </div>
+        </template>
       </template>
 
       <!-- Regular User View -->
       <template v-else-if="!appStore.backendModeEnabled">
-        <div class="sidebar-section">
-          <router-link
-            v-for="item in userNavItems"
-            :key="item.path"
-            :to="item.path"
-            class="sidebar-link mb-1"
-            :class="{ 'sidebar-link-active': isActive(item.path), 'sidebar-link-collapsed': sidebarCollapsed }"
-            :title="sidebarCollapsed ? item.label : undefined"
-            :data-tour="item.path === '/keys' ? 'sidebar-my-keys' : undefined"
-            @click="handleMenuItemClick(item.path)"
-          >
-            <span v-if="item.iconSvg" class="h-5 w-5 flex-shrink-0 sidebar-svg-icon" v-html="sanitizeSvg(item.iconSvg)"></span>
-            <component v-else :is="item.icon" class="h-5 w-5 flex-shrink-0" />
-            <span class="sidebar-label" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">{{ item.label }}</span>
-          </router-link>
-        </div>
+        <template v-for="group in userNavGroups" :key="group.title">
+          <div v-if="group.items.length" class="sidebar-section">
+            <div
+              v-if="group.title"
+              class="sidebar-section-title"
+              :class="{ 'sidebar-section-title-collapsed': sidebarCollapsed }"
+              :aria-hidden="sidebarCollapsed ? 'true' : 'false'"
+            >
+              <span
+                class="sidebar-section-title-text"
+                :class="{ 'sidebar-section-title-text-collapsed': sidebarCollapsed }"
+              >{{ group.title }}</span>
+            </div>
+            <router-link
+              v-for="item in group.items"
+              :key="item.path"
+              :to="item.path"
+              class="sidebar-link mb-1"
+              :class="{ 'sidebar-link-active': isActive(item.path), 'sidebar-link-collapsed': sidebarCollapsed }"
+              :title="sidebarCollapsed ? item.label : undefined"
+              :data-tour="item.path === '/keys' ? 'sidebar-my-keys' : undefined"
+              @click="handleMenuItemClick(item.path)"
+            >
+              <span v-if="item.iconSvg" class="h-5 w-5 flex-shrink-0 sidebar-svg-icon" v-html="sanitizeSvg(item.iconSvg)"></span>
+              <component v-else :is="item.icon" class="h-5 w-5 flex-shrink-0" />
+              <span class="sidebar-label" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">{{ item.label }}</span>
+            </router-link>
+          </div>
+        </template>
       </template>
     </nav>
 
@@ -207,6 +240,11 @@ interface NavItem {
    * 开关切换时菜单自动更新。
    */
   featureFlag?: () => boolean | undefined
+}
+
+interface NavGroup {
+  title: string
+  items: NavItem[]
 }
 
 // applyFeatureFlags 递归过滤掉 featureFlag() === false 的节点（含子节点）。
@@ -685,19 +723,67 @@ function buildSelfNavItems(withDashboard: boolean): NavItem[] {
   return items
 }
 
-// finalizeNav 合并三重过滤：featureFlag 过滤 + simple 模式过滤。
-function finalizeNav(items: NavItem[]): NavItem[] {
+// User navigation groups (for regular users)
+const userNavGroups = computed((): NavGroup[] => {
+  const items = buildSelfNavItems(true)
   const visible = applyFeatureFlags(items)
-  return authStore.isSimpleMode ? visible.filter(item => !item.hideInSimpleMode) : visible
-}
 
-// User navigation items (for regular users)
-const userNavItems = computed((): NavItem[] => finalizeNav(buildSelfNavItems(true)))
+  if (authStore.isSimpleMode) {
+    const filtered = visible.filter(item => !item.hideInSimpleMode)
+    return [{ title: '', items: filtered }]
+  }
 
-// Personal navigation items (for admin's "My Account" section, without Dashboard).
-// Admins access 可用渠道 from this section just like regular users — there is no
-// separate admin entry, since the page is purely a user-facing view.
-const personalNavItems = computed((): NavItem[] => finalizeNav(buildSelfNavItems(false)))
+  const isInPaths = (paths: string[]) => (item: NavItem) => paths.includes(item.path)
+  const isCustom = (item: NavItem) => item.path.startsWith('/custom/')
+
+  const groups: NavGroup[] = [
+    {
+      title: t('navGroup.myServices'),
+      items: visible.filter(isInPaths(['/dashboard', '/keys', '/available-channels', '/monitor', '/usage'])),
+    },
+    {
+      title: t('navGroup.consumption'),
+      items: visible.filter(isInPaths(['/purchase', '/subscriptions', '/orders', '/redeem'])),
+    },
+    {
+      title: t('navGroup.account'),
+      items: [...visible.filter(isInPaths(['/profile', '/affiliate'])), ...visible.filter(isCustom)],
+    },
+  ]
+
+  return groups.filter(g => g.items.length > 0)
+})
+
+// Personal navigation groups (for admin's "My Account" section, without Dashboard).
+// Same grouping as user but without Dashboard.
+const personalNavGroups = computed((): NavGroup[] => {
+  const items = buildSelfNavItems(false)
+  const visible = applyFeatureFlags(items)
+
+  if (authStore.isSimpleMode) {
+    return []
+  }
+
+  const isInPaths = (paths: string[]) => (item: NavItem) => paths.includes(item.path)
+  const isCustom = (item: NavItem) => item.path.startsWith('/custom/')
+
+  const groups: NavGroup[] = [
+    {
+      title: t('navGroup.myServices'),
+      items: visible.filter(isInPaths(['/keys', '/available-channels', '/monitor', '/usage'])),
+    },
+    {
+      title: t('navGroup.consumption'),
+      items: visible.filter(isInPaths(['/purchase', '/subscriptions', '/orders', '/redeem'])),
+    },
+    {
+      title: t('navGroup.account'),
+      items: [...visible.filter(isInPaths(['/profile', '/affiliate'])), ...visible.filter(isCustom)],
+    },
+  ]
+
+  return groups.filter(g => g.items.length > 0)
+})
 
 // Custom menu items filtered by visibility
 const customMenuItemsForUser = computed(() => {
@@ -713,31 +799,20 @@ const customMenuItemsForAdmin = computed(() => {
     .sort((a, b) => a.sort_order - b.sort_order)
 })
 
-// Admin navigation items
-const adminNavItems = computed((): NavItem[] => {
-  const baseItems: NavItem[] = [
+// Admin navigation groups
+const adminNavGroups = computed((): NavGroup[] => {
+  // Group 1: 运营总览
+  const opsItems: NavItem[] = [
     { path: '/admin/dashboard', label: t('nav.dashboard'), icon: DashboardIcon },
     { path: '/admin/ops', label: t('nav.ops'), icon: ChartIcon, featureFlag: flagOpsMonitoring },
+    { path: '/admin/usage', label: t('nav.usage'), icon: ChartIcon },
+  ]
+
+  // Group 2: 用户与权限
+  const userPermissionItems: NavItem[] = [
     { path: '/admin/users', label: t('nav.users'), icon: UsersIcon, hideInSimpleMode: true },
     { path: '/admin/groups', label: t('nav.groups'), icon: FolderIcon, hideInSimpleMode: true },
-    {
-      path: '/admin/channels',
-      label: t('nav.channelManagement'),
-      icon: ChannelIcon,
-      hideInSimpleMode: true,
-      expandOnly: true,
-      children: [
-        { path: '/admin/channels/pricing', label: t('nav.channelPricing'), icon: PriceTagIcon },
-        { path: '/admin/channels/monitor', label: t('nav.channelMonitor'), icon: SignalIcon, featureFlag: flagChannelMonitor },
-      ],
-    },
-    { path: '/admin/subscriptions', label: t('nav.subscriptions'), icon: CreditCardIcon, hideInSimpleMode: true },
-    { path: '/admin/accounts', label: t('nav.accounts'), icon: GlobeIcon },
-    { path: '/admin/announcements', label: t('nav.announcements'), icon: BellIcon },
-    { path: '/admin/proxies', label: t('nav.proxies'), icon: ServerIcon },
     { path: '/admin/risk-control', label: t('nav.riskControl'), icon: ShieldIcon, hideInSimpleMode: true, featureFlag: flagRiskControl },
-    { path: '/admin/redeem', label: t('nav.redeemCodes'), icon: TicketIcon, hideInSimpleMode: true },
-    { path: '/admin/promo-codes', label: t('nav.promoCodes'), icon: GiftIcon, hideInSimpleMode: true },
     {
       path: '/admin/affiliates',
       label: t('nav.affiliateManagement'),
@@ -751,6 +826,31 @@ const adminNavItems = computed((): NavItem[] => {
         { path: '/admin/affiliates/transfers', label: t('nav.affiliateTransferRecords'), icon: CreditCardIcon },
       ],
     },
+  ]
+
+  // Group 3: 渠道与计费
+  const channelBillingItems: NavItem[] = [
+    {
+      path: '/admin/channels',
+      label: t('nav.channelManagement'),
+      icon: ChannelIcon,
+      hideInSimpleMode: true,
+      expandOnly: true,
+      children: [
+        { path: '/admin/channels/pricing', label: t('nav.channelPricing'), icon: PriceTagIcon },
+        { path: '/admin/channels/monitor', label: t('nav.channelMonitor'), icon: SignalIcon, featureFlag: flagChannelMonitor },
+      ],
+    },
+    { path: '/admin/accounts', label: t('nav.accounts'), icon: GlobeIcon },
+    { path: '/admin/proxies', label: t('nav.proxies'), icon: ServerIcon },
+    { path: '/admin/announcements', label: t('nav.announcements'), icon: BellIcon },
+    { path: '/admin/subscriptions', label: t('nav.subscriptions'), icon: CreditCardIcon, hideInSimpleMode: true },
+    { path: '/admin/redeem', label: t('nav.redeemCodes'), icon: TicketIcon, hideInSimpleMode: true },
+    { path: '/admin/promo-codes', label: t('nav.promoCodes'), icon: GiftIcon, hideInSimpleMode: true },
+  ]
+
+  // Group 4: 支付中心
+  const paymentItems: NavItem[] = [
     {
       path: '/admin/orders',
       label: t('nav.orderManagement'),
@@ -764,27 +864,34 @@ const adminNavItems = computed((): NavItem[] => {
         { path: '/admin/orders/plans', label: t('nav.paymentPlans'), icon: CreditCardIcon },
       ],
     },
-    { path: '/admin/usage', label: t('nav.usage'), icon: ChartIcon }
   ]
 
-  const visible = applyFeatureFlags(baseItems)
+  // Apply feature flags to each group
+  const groups: NavGroup[] = [
+    { title: t('navGroup.operations'), items: applyFeatureFlags(opsItems) },
+    { title: t('navGroup.usersAndPermissions'), items: applyFeatureFlags(userPermissionItems) },
+    { title: t('navGroup.channelsAndBilling'), items: applyFeatureFlags(channelBillingItems) },
+    { title: t('navGroup.paymentCenter'), items: applyFeatureFlags(paymentItems) },
+  ]
 
-  // 简单模式下，在系统设置前插入 API密钥
+  // 简单模式
   if (authStore.isSimpleMode) {
-    const filtered = visible.filter(item => !item.hideInSimpleMode)
-    filtered.push({ path: '/keys', label: t('nav.apiKeys'), icon: KeyIcon })
-    filtered.push({ path: '/admin/settings', label: t('nav.settings'), icon: CogIcon })
+    const allItems = groups.flatMap(g => g.items.filter(item => !item.hideInSimpleMode))
+    allItems.push({ path: '/keys', label: t('nav.apiKeys'), icon: KeyIcon })
+    allItems.push({ path: '/admin/settings', label: t('nav.settings'), icon: CogIcon })
     for (const cm of customMenuItemsForAdmin.value) {
-      filtered.push({ path: `/custom/${cm.id}`, label: cm.label, icon: null, iconSvg: cm.icon_svg })
+      allItems.push({ path: `/custom/${cm.id}`, label: cm.label, icon: null, iconSvg: cm.icon_svg })
     }
-    return filtered
+    return [{ title: '', items: allItems }]
   }
 
-  visible.push({ path: '/admin/settings', label: t('nav.settings'), icon: CogIcon })
+  // 非简单模式：将系统设置和自定义菜单加入「运营总览」组
+  groups[0].items.push({ path: '/admin/settings', label: t('nav.settings'), icon: CogIcon })
   for (const cm of customMenuItemsForAdmin.value) {
-    visible.push({ path: `/custom/${cm.id}`, label: cm.label, icon: null, iconSvg: cm.icon_svg })
+    groups[0].items.push({ path: `/custom/${cm.id}`, label: cm.label, icon: null, iconSvg: cm.icon_svg })
   }
-  return visible
+
+  return groups.filter(g => g.items.length > 0)
 })
 
 function toggleSidebar() {

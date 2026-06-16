@@ -369,6 +369,15 @@ const messages = {
     "channelStatus": "Trạng thái kênh",
     "riskControl": "Trung tâm kiểm soát rủi ro"
   },
+  "navGroup": {
+    "myServices": "Dịch vụ của tôi",
+    "consumption": "Mua hàng & Thanh toán",
+    "account": "Tài khoản & Xã hội",
+    "operations": "Tổng quan vận hành",
+    "usersAndPermissions": "Người dùng & Phân quyền",
+    "channelsAndBilling": "Kênh & Thanh toán",
+    "paymentCenter": "Trung tâm thanh toán"
+  },
   "modelsPage": {
     "headerEyebrow": "Chợ mô hình công khai",
     "navHome": "Trang chủ",

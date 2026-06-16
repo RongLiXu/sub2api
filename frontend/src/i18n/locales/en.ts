@@ -445,6 +445,17 @@ export default {
     riskControl: 'Risk Control',
   },
 
+  // Sidebar group titles
+  navGroup: {
+    myServices: 'My Services',
+    consumption: 'Consumption & Payment',
+    account: 'Account & Social',
+    operations: 'Operations Overview',
+    usersAndPermissions: 'Users & Permissions',
+    channelsAndBilling: 'Channels & Billing',
+    paymentCenter: 'Payment Center',
+  },
+
   modelsPage: {
     headerEyebrow: 'Public Model Plaza',
     navHome: 'Home',
