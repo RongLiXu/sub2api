@@ -434,11 +434,11 @@ type UpdateSettingsRequest struct {
 	CloudflareFromEmail string `json:"cloudflare_from_email"`
 	CloudflareFromName  string `json:"cloudflare_from_name"`
 
-	CloudMailAPIURL      string `json:"cloudmail_api_url"`
-	CloudMailAdminEmail  string `json:"cloudmail_admin_email"`
+	CloudMailAPIURL        string `json:"cloudmail_api_url"`
+	CloudMailAdminEmail    string `json:"cloudmail_admin_email"`
 	CloudMailAdminPassword string `json:"cloudmail_admin_password"`
-	CloudMailFromEmail   string `json:"cloudmail_from_email"`
-	CloudMailFromName    string `json:"cloudmail_from_name"`
+	CloudMailFromEmail     string `json:"cloudmail_from_email"`
+	CloudMailFromName      string `json:"cloudmail_from_name"`
 
 	// Cloudflare Turnstile 设置
 	TurnstileEnabled   bool   `json:"turnstile_enabled"`
@@ -3128,28 +3128,28 @@ func (h *SettingHandler) TestSMTPConnection(c *gin.Context) {
 
 // SendTestEmailRequest 发送测试邮件请求
 type SendTestEmailRequest struct {
-	Email               string `json:"email" binding:"required,email"`
-	SMTPHost            string `json:"smtp_host"`
-	SMTPPort            int    `json:"smtp_port"`
-	SMTPUsername        string `json:"smtp_username"`
-	SMTPPassword        string `json:"smtp_password"`
-	SMTPFrom            string `json:"smtp_from_email"`
-	SMTPFromName        string `json:"smtp_from_name"`
-	SMTPUseTLS          bool   `json:"smtp_use_tls"`
-	EmailProvider       string `json:"email_provider"`
-	ResendAPIKey        string `json:"resend_api_key"`
-	ResendFromEmail     string `json:"resend_from_email"`
-	ResendFromName      string `json:"resend_from_name"`
-	ResendAPIBaseURL    string `json:"resend_api_base_url"`
-	CloudflareAPIToken  string `json:"cloudflare_api_token"`
-	CloudflareAccountID string `json:"cloudflare_account_id"`
-	CloudflareFromEmail string `json:"cloudflare_from_email"`
-	CloudflareFromName  string `json:"cloudflare_from_name"`
-	CloudMailAPIURL      string `json:"cloudmail_api_url"`
-	CloudMailAdminEmail  string `json:"cloudmail_admin_email"`
+	Email                  string `json:"email" binding:"required,email"`
+	SMTPHost               string `json:"smtp_host"`
+	SMTPPort               int    `json:"smtp_port"`
+	SMTPUsername           string `json:"smtp_username"`
+	SMTPPassword           string `json:"smtp_password"`
+	SMTPFrom               string `json:"smtp_from_email"`
+	SMTPFromName           string `json:"smtp_from_name"`
+	SMTPUseTLS             bool   `json:"smtp_use_tls"`
+	EmailProvider          string `json:"email_provider"`
+	ResendAPIKey           string `json:"resend_api_key"`
+	ResendFromEmail        string `json:"resend_from_email"`
+	ResendFromName         string `json:"resend_from_name"`
+	ResendAPIBaseURL       string `json:"resend_api_base_url"`
+	CloudflareAPIToken     string `json:"cloudflare_api_token"`
+	CloudflareAccountID    string `json:"cloudflare_account_id"`
+	CloudflareFromEmail    string `json:"cloudflare_from_email"`
+	CloudflareFromName     string `json:"cloudflare_from_name"`
+	CloudMailAPIURL        string `json:"cloudmail_api_url"`
+	CloudMailAdminEmail    string `json:"cloudmail_admin_email"`
 	CloudMailAdminPassword string `json:"cloudmail_admin_password"`
-	CloudMailFromEmail   string `json:"cloudmail_from_email"`
-	CloudMailFromName    string `json:"cloudmail_from_name"`
+	CloudMailFromEmail     string `json:"cloudmail_from_email"`
+	CloudMailFromName      string `json:"cloudmail_from_name"`
 }
 
 // SendTestEmail 发送测试邮件
@@ -3330,11 +3330,11 @@ func (h *SettingHandler) SendTestEmail(c *gin.Context) {
 			}
 		}
 		sendErr = h.emailService.SendEmailWithCloudMailConfig(c.Request.Context(), &service.CloudMailConfig{
-			APIURL:     req.CloudMailAPIURL,
-			AdminEmail: req.CloudMailAdminEmail,
+			APIURL:        req.CloudMailAPIURL,
+			AdminEmail:    req.CloudMailAdminEmail,
 			AdminPassword: req.CloudMailAdminPassword,
-			FromEmail:  req.CloudMailFromEmail,
-			FromName:   req.CloudMailFromName,
+			FromEmail:     req.CloudMailFromEmail,
+			FromName:      req.CloudMailFromName,
 		}, req.Email, subject, body)
 	}
 	if sendErr != nil {

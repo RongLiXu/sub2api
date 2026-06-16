@@ -658,7 +658,7 @@ func NormalizeResendAPIBaseURL(raw string) (string, error) {
 	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
 		return "", infraerrors.BadRequest("INVALID_RESEND_API_BASE_URL", "invalid Resend API base URL")
 	}
-	if parsed.Scheme != "https" && !(parsed.Scheme == "http" && isLocalResendAPIHost(parsed.Hostname())) {
+	if parsed.Scheme != "https" && (parsed.Scheme != "http" || !isLocalResendAPIHost(parsed.Hostname())) {
 		return "", infraerrors.BadRequest("INVALID_RESEND_API_BASE_URL", "Resend API base URL must use https")
 	}
 	parsed.RawQuery = ""
