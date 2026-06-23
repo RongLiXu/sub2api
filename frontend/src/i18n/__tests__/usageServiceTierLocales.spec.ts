@@ -101,6 +101,18 @@ describe('usage service tier locale keys', () => {
     expect(zhTW.usage.serviceTierStandard).toBe('Standard')
   })
 
+  it('keeps admin usage cache token labels localized in added locales', () => {
+    expect(ja.usage.cacheBreakdown).toBe('キャッシュトークン内訳')
+    expect(vi.usage.cacheBreakdown).toBe('Chi tiết token cache')
+    expect(fr.usage.cacheBreakdown).toBe('Détail des tokens cache')
+    expect(ru.usage.cacheBreakdown).toBe('Разбивка токенов кэша')
+    expect(ko.usage.cacheBreakdown).toBe('캐시 토큰 상세')
+    expect(th.usage.cacheBreakdown).toBe('รายละเอียด token แคช')
+    expect(zhTW.usage.cacheBreakdown).toBe('快取 Token 明細')
+    expect(zhTW.usage.cacheCreationTokensLabel).toBe('快取建立')
+    expect(zhTW.usage.cacheReadTokensLabel).toBe('快取讀取')
+  })
+
   it('keeps risk control navigation localized in ja, vi, and zh-TW', () => {
     expect(ja.nav.riskControl).toBe('風控センター')
     expect(vi.nav.riskControl).toBe('Trung tâm kiểm soát rủi ro')

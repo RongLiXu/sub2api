@@ -6,6 +6,12 @@ export default {
     cacheWriteTokens: 'キャッシュ書き込み',
     noDailyUsage: '日次使用量データがありません'
   },
+  usage: {
+    cacheTotal: 'キャッシュ',
+    cacheBreakdown: 'キャッシュトークン内訳',
+    cacheCreationTokensLabel: 'キャッシュ作成',
+    cacheReadTokensLabel: 'キャッシュ読み取り'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'このサイトでは WeChat モバイルアプリログインのみが設定されています。ネイティブアプリから WeChat SDK 経由で続行してください。'

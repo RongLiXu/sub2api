@@ -104,6 +104,12 @@ const recentI18nPatch = {
     cacheWriteTokens: 'เขียนแคช',
     noDailyUsage: 'ยังไม่มีข้อมูลการใช้งานรายวัน'
   },
+  usage: {
+    cacheTotal: 'แคช',
+    cacheBreakdown: 'รายละเอียด token แคช',
+    cacheCreationTokensLabel: 'สร้างแคช',
+    cacheReadTokensLabel: 'อ่านแคช'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'ไซต์นี้ตั้งค่าเฉพาะการเข้าสู่ระบบ WeChat ผ่านแอปมือถือ โปรดดำเนินการต่อจากแอป native ผ่าน WeChat SDK'

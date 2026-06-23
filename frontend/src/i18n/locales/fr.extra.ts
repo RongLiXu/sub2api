@@ -104,6 +104,12 @@ const recentI18nPatch = {
     cacheWriteTokens: 'Ecriture cache',
     noDailyUsage: 'Aucune donnee d usage quotidienne'
   },
+  usage: {
+    cacheTotal: 'Cache',
+    cacheBreakdown: 'Détail des tokens cache',
+    cacheCreationTokensLabel: 'Création cache',
+    cacheReadTokensLabel: 'Lecture cache'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'Ce site ne configure que la connexion WeChat via application mobile. Continuez depuis l’application native via le SDK WeChat.'

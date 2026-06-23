@@ -6,6 +6,12 @@ export default {
     cacheWriteTokens: 'Ghi cache',
     noDailyUsage: 'Khong co du lieu su dung theo ngay'
   },
+  usage: {
+    cacheTotal: 'Cache',
+    cacheBreakdown: 'Chi tiết token cache',
+    cacheCreationTokensLabel: 'Tạo cache',
+    cacheReadTokensLabel: 'Đọc cache'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'Trang này chỉ cấu hình đăng nhập WeChat bằng ứng dụng di động. Vui lòng tiếp tục từ ứng dụng native qua WeChat SDK.'

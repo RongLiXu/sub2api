@@ -104,6 +104,12 @@ const recentI18nPatch = {
     cacheWriteTokens: '캐시 쓰기',
     noDailyUsage: '일별 사용량 데이터가 없습니다'
   },
+  usage: {
+    cacheTotal: '캐시',
+    cacheBreakdown: '캐시 토큰 상세',
+    cacheCreationTokensLabel: '캐시 생성',
+    cacheReadTokensLabel: '캐시 읽기'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: '이 사이트에는 WeChat 모바일 앱 로그인만 설정되어 있습니다. 네이티브 앱에서 WeChat SDK를 통해 계속하세요.'

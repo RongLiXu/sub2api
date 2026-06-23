@@ -104,6 +104,12 @@ const recentI18nPatch = {
     cacheWriteTokens: 'Запись кэша',
     noDailyUsage: 'Нет данных по ежедневному использованию'
   },
+  usage: {
+    cacheTotal: 'Кэш',
+    cacheBreakdown: 'Разбивка токенов кэша',
+    cacheCreationTokensLabel: 'Создание кэша',
+    cacheReadTokensLabel: 'Чтение кэша'
+  },
   auth: {
     oauthFlow: {
       wechatNativeAppRequired: 'На этом сайте настроен только вход WeChat через мобильное приложение. Продолжите из нативного приложения через WeChat SDK.'

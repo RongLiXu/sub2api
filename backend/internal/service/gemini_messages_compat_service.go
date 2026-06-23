@@ -3427,7 +3427,7 @@ func cleanToolSchema(schema any) any {
 			// 递归清理嵌套对象
 			cleaned[key] = cleanToolSchema(value)
 		}
-		// JSON Schema draft 2020-12 的 type 必须使用小写标准值
+		// Gemini FunctionDeclaration Schema 的 type 使用大写枚举值。
 		if typeVal, ok := cleaned["type"].(string); ok {
 			cleaned["type"] = strings.ToUpper(typeVal)
 		} else if typeValues, ok := cleaned["type"].([]any); ok {
