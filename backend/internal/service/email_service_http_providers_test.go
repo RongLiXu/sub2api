@@ -177,11 +177,11 @@ func TestSendEmailWithCloudMailConfigPostsExpectedPayload(t *testing.T) {
 
 	svc := NewEmailService(&emailProviderSettingRepoStub{}, nil)
 	err := svc.SendEmailWithCloudMailConfig(context.Background(), &CloudMailConfig{
-		APIURL:     server.URL,
-		AdminEmail: "admin@example.com",
+		APIURL:        server.URL,
+		AdminEmail:    "admin@example.com",
 		AdminPassword: "admin-pass",
-		FromEmail:  "noreply@example.com",
-		FromName:   "Sub2API",
+		FromEmail:     "noreply@example.com",
+		FromName:      "Sub2API",
 	}, "user@example.com", "Hello", "<p>Hi</p>")
 	require.NoError(t, err)
 

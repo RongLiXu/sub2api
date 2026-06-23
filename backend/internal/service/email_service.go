@@ -126,11 +126,11 @@ type CloudflareEmailConfig struct {
 
 // CloudMailConfig stores Cloud-Mail HTTP API configuration.
 type CloudMailConfig struct {
-	APIURL     string
-	AdminEmail string
+	APIURL        string
+	AdminEmail    string
 	AdminPassword string
-	FromEmail  string
-	FromName   string
+	FromEmail     string
+	FromName      string
 }
 
 // EmailService 邮件服务
@@ -344,11 +344,11 @@ func (s *EmailService) GetCloudMailConfig(ctx context.Context) (*CloudMailConfig
 	}
 
 	config := &CloudMailConfig{
-		APIURL:     strings.TrimSpace(settings[SettingKeyCloudMailAPIURL]),
-		AdminEmail: strings.TrimSpace(settings[SettingKeyCloudMailAdminEmail]),
+		APIURL:        strings.TrimSpace(settings[SettingKeyCloudMailAPIURL]),
+		AdminEmail:    strings.TrimSpace(settings[SettingKeyCloudMailAdminEmail]),
 		AdminPassword: settings[SettingKeyCloudMailAdminPassword],
-		FromEmail:  strings.TrimSpace(settings[SettingKeyCloudMailFromEmail]),
-		FromName:   strings.TrimSpace(settings[SettingKeyCloudMailFromName]),
+		FromEmail:     strings.TrimSpace(settings[SettingKeyCloudMailFromEmail]),
+		FromName:      strings.TrimSpace(settings[SettingKeyCloudMailFromName]),
 	}
 	if config.APIURL == "" || config.AdminEmail == "" || config.AdminPassword == "" || config.FromEmail == "" {
 		return nil, ErrEmailNotConfigured
@@ -477,8 +477,8 @@ type cloudMailLoginResponse struct {
 
 // cloudMailListAccountsResponse wraps the cloud-mail account list API response.
 type cloudMailListAccountsResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+	Code    int                `json:"code"`
+	Message string             `json:"message"`
 	Data    []CloudMailAccount `json:"data"`
 }
 
