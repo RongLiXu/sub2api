@@ -18,6 +18,10 @@ type Model struct {
 
 // DefaultModels OpenAI models list
 var DefaultModels = []Model{
+	// GPT-5.6 系列（2026-06-24 发布，有限预览）
+	{ID: "gpt-5.6", Object: "model", Created: 1776988800, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.6 Sol"},
+	{ID: "gpt-5.6-garlic", Object: "model", Created: 1776988800, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.6 Terra"},
+	{ID: "gpt-5.6-fingerling", Object: "model", Created: 1776988800, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.6 Luna"},
 	{ID: "gpt-5.5-pro", Object: "model", Created: 1745366400, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.5 Pro"},
 	{ID: "gpt-5.5", Object: "model", Created: 1745366400, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.5"},
 	{ID: "gpt-5.4-pro", Object: "model", Created: 1772668800, OwnedBy: "openai", Type: "model", DisplayName: "GPT-5.4 Pro"},

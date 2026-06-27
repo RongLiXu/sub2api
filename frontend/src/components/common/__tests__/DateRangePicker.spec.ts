@@ -19,12 +19,16 @@ const messages: Record<string, string> = {
   'dates.selectDateRange': 'Select date range'
 }
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: (key: string) => messages[key] ?? key,
-    locale: ref('en')
-  })
-}))
+vi.mock('vue-i18n', async () => {
+  const actual = await vi.importActual<typeof import('vue-i18n')>('vue-i18n')
+  return {
+    ...actual,
+    useI18n: () => ({
+      t: (key: string) => messages[key] ?? key,
+      locale: ref('en')
+    })
+  }
+})
 
 const formatLocalDate = (date: Date): string => {
   const year = date.getFullYear()

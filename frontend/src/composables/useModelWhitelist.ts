@@ -4,9 +4,8 @@
 
 // OpenAI
 const openaiModels = [
-  // GPT-5.2 系列
-  'gpt-5.2', 'gpt-5.2-2025-12-11', 'gpt-5.2-chat-latest',
-  'gpt-5.2-pro', 'gpt-5.2-pro-2025-12-11',
+  // GPT-5.6 系列（2026-06-24 发布，有限预览）
+  'gpt-5.6', 'gpt-5.6-garlic', 'gpt-5.6-fingerling',
   // GPT-5.5 系列
   'gpt-5.5-pro', 'gpt-5.5',
   // GPT-5.4 系列
@@ -14,6 +13,9 @@ const openaiModels = [
   // GPT-5.3 / Codex 系列
   'gpt-5.3-codex', 'gpt-5.3-codex-spark', 'codex-auto-review',
   'gpt-4o-audio-preview', 'gpt-4o-realtime-preview',
+  // GPT-5.2 系列
+  'gpt-5.2', 'gpt-5.2-2025-12-11', 'gpt-5.2-chat-latest',
+  'gpt-5.2-pro', 'gpt-5.2-pro-2025-12-11',
   // GPT Image 系列
   'gpt-image-1', 'gpt-image-1.5', 'gpt-image-2',
   // OpenAI 兼容上游常用模型（如 DeepSeek / MiMo）
@@ -33,6 +35,7 @@ export const claudeModels = [
   'claude-sonnet-4-20250514', 'claude-opus-4-20250514',
   'claude-opus-4-1-20250805',
   'claude-sonnet-4-5-20250929', 'claude-haiku-4-5-20251001',
+  'claude-haiku-4-5',
   'claude-opus-4-5-20251101',
   'claude-opus-4-6',
   'claude-opus-4-7',
