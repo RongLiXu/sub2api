@@ -327,7 +327,27 @@ const messages = {
         "minutes": "{m}m",
         "withSuffix": "{time} 後解除"
       }
-    }
+    },
+    "upload": "上传",
+    "remove": "移除",
+    "fileTooLarge": "文件过大（{size} KB），最大允许 {max} KB",
+    "invalidImageFile": "请选择图片文件",
+    "fileReadFailed": "读取文件失败",
+    "logoAlt": "Logo",
+    "closeModal": "关闭弹窗",
+    "closeNotification": "关闭通知",
+    "toggleMenu": "切换菜单",
+    "userMenu": "用户菜单",
+    "selectOptionAria": "选择选项",
+    "paginationNav": "分页导航",
+    "clearUserFilter": "清除用户筛选",
+    "clearApiKeyFilter": "清除 API Key 筛选",
+    "clearAccountFilter": "清除账号筛选",
+    "copyUrl": "复制 URL",
+    "refreshToken": "Refresh Token",
+    "projectId": "Project ID",
+    "location": "Location",
+    "tableOfContents": "目录"
   },
   "nav": {
     "dashboard": "儀表板",
@@ -573,7 +593,8 @@ const messages = {
       "wechatAvailabilityUnknown": "暫時無法確認微信登入可用性，請刷新後重試。",
       "wechatSystemBrowserOnly": "目前微信登入流程僅支援在系統瀏覽器中繼續。",
       "wechatBrowserOnly": "目前微信登入流程僅支援在微信內建瀏覽器中繼續。",
-      "wechatNotConfigured": "微信登入尚未設定。"
+      "wechatNotConfigured": "微信登入尚未設定。",
+      "wechatNativeAppRequired": "当前仅配置微信移动应用登录，需要在原生 App 中通过微信 SDK 发起授权。"
     },
     "linuxdoCallbackPageTitle": "LinuxDo 登入回呼",
     "oidcCallbackPageTitle": "OIDC 登入回呼",
@@ -592,7 +613,9 @@ const messages = {
       "callbackHint": "按需將授權碼和狀態值複製回後台授權流程。",
       "code": "授權碼",
       "state": "狀態",
-      "fullUrl": "完整URL"
+      "fullUrl": "完整URL",
+      "invalidCallbackTitle": "无效的登录回调",
+      "invalidCallbackHint": "当前页面缺少有效的授权结果，请返回登录页重新发起快捷登录。"
     },
     "forgotPassword": "忘記密碼？",
     "forgotPasswordTitle": "重設密碼",
@@ -620,7 +643,44 @@ const messages = {
     "invalidResetLink": "無效的重置鏈接",
     "invalidResetLinkHint": "此密碼重設連結無效或已過期。請重新請求一個新連結。",
     "requestNewResetLink": "請求新的重置鏈接",
-    "invalidOrExpiredToken": "密碼重置連結無效或已過期。請重新請求一個新連結。"
+    "invalidOrExpiredToken": "密碼重置連結無效或已過期。請重新請求一個新連結。",
+    "errors": {
+      "USER_NOT_ACTIVE": "账号已被禁用"
+    },
+    "emailSuffixAllowedMore": "等 {count} 项",
+    "dingtalk": {
+      "signIn": "钉钉登录",
+      "callbackTitle": "正在完成钉钉登录",
+      "callbackProcessing": "正在验证钉钉登录信息，请稍候...",
+      "callbackHint": "如果页面未自动跳转，请返回登录页重试。",
+      "callbackMissingToken": "登录信息缺失，请返回重试。",
+      "backToLogin": "返回登录",
+      "invitationRequired": "该钉钉账号尚未注册，站点已开启邀请码注册，请输入邀请码以完成注册。",
+      "invalidPendingToken": "注册凭证已失效，请重新使用钉钉登录。",
+      "completeRegistration": "完成注册",
+      "completing": "正在完成注册...",
+      "completeRegistrationFailed": "注册失败，请检查邀请码后重试。",
+      "createAccountTitle": "创建钉钉账户",
+      "registrationDisabledRedirectToBind": "当前已禁止注册新账户，请使用已有账户邮箱和密码绑定钉钉登录",
+      "error": {
+        "title": "钉钉登录失败",
+        "csrf": "登录会话已过期，请重新扫码登录",
+        "corp_rejected": "您的钉钉账号不属于本企业，请联系管理员",
+        "dingtalk_not_enabled": "钉钉登录暂未启用",
+        "upstream_error": "钉钉服务暂时不可用，请稍后重试",
+        "missing_browser_session": "浏览器会话丢失，请重新登录",
+        "missing_params": "请求参数不完整",
+        "invalid_state": "登录状态异常",
+        "provider_error": "钉钉授权失败",
+        "session_error": "会话创建失败，请重试",
+        "retry": "重新登录"
+      }
+    },
+    "emailOAuth": {
+      "signIn": "使用 {providerName} 登录"
+    },
+    "dingtalkCallbackPageTitle": "钉钉登录回调",
+    "dingtalkProviderName": "钉钉"
   },
   "public": {
     "legalDocument": {
@@ -676,7 +736,20 @@ const messages = {
     "viewUsage": "查看使用記錄",
     "checkDetailedLogs": "查看詳細的使用日誌",
     "redeemCode": "兌換碼",
-    "addBalanceWithCode": "使用兌換碼儲值"
+    "addBalanceWithCode": "使用兌換碼儲值",
+    "platformBreakdown": "按平台拆分",
+    "platformBreakdownEmpty": "暂无平台用量",
+    "platformCount": "{count} 个平台",
+    "platformOther": "其他",
+    "platformQuota": {
+      "title": "配额用量",
+      "daily": "日",
+      "weekly": "周",
+      "monthly": "月（近30天）",
+      "resetsAt": "{time} 重置",
+      "noLimit": "不限制",
+      "disabled": "已禁用"
+    }
   },
   "groups": {
     "subscription": "訂閱"
@@ -925,7 +998,68 @@ const messages = {
     "exportExcelSuccess": "使用資料匯出成功（Excel格式）",
     "exportExcelFailed": "使用資料匯出失敗",
     "imageUnit": "張",
-    "userAgent": "User-Agent"
+    "userAgent": "User-Agent",
+    "resetNow": "现在",
+    "resetPending": "待刷新",
+    "cyber": "安全策略",
+    "cacheHit": "缓存命中",
+    "cacheCreate": "缓存创建",
+    "cacheHitRate": "缓存命中率",
+    "imageTotalPrice": "图片总价",
+    "imageCount": "图片张数",
+    "imageBillingSize": "计费尺寸",
+    "imageInputSize": "输入尺寸",
+    "imageOutputSize": "输出尺寸",
+    "imageOutputTokens": "图片输出 Token",
+    "imageOutputTokenPrice": "图片输出单价",
+    "imageOutputCost": "图片输出成本",
+    "imageSizeSource": "尺寸来源",
+    "imageSizeBreakdown": "尺寸明细",
+    "imageSizeSourceOutput": "上游输出",
+    "imageSizeSourceInput": "请求输入",
+    "imageSizeSourceDefault": "默认计费档位",
+    "imageSizeSourceLegacy": "历史记录",
+    "imageSizeSourceMissing": "未记录",
+    "imageSizeNotRecorded": "未记录",
+    "imageSizeLegacyUnstandardized": "历史非标准",
+    "imageSizeUnknown": "未知",
+    "tabs": {
+      "usage": "用量明细",
+      "errors": "错误请求"
+    },
+    "errors": {
+      "time": "时间",
+      "model": "模型",
+      "endpoint": "端点",
+      "status": "状态码",
+      "category": "分类",
+      "platform": "平台",
+      "message": "错误信息",
+      "keyName": "Key 名称",
+      "keyDeleted": "已删除",
+      "allKeys": "全部 Key",
+      "modelPlaceholder": "搜索模型",
+      "allCategories": "全部分类",
+      "empty": "暂无错误请求",
+      "failedToLoad": "加载错误请求失败",
+      "categories": {
+        "auth": "认证失败",
+        "rate_limit": "限流",
+        "quota": "余额/订阅",
+        "invalid_request": "参数错误",
+        "service_unavailable": "服务暂时不可用",
+        "upstream": "上游错误",
+        "internal": "平台错误",
+        "other": "其他",
+        "cyber": "安全策略"
+      },
+      "detail": {
+        "title": "错误请求详情",
+        "responseBody": "上游响应内容",
+        "upstreamStatus": "上游状态码",
+        "loadFailed": "加载详情失败，请稍后重试"
+      }
+    }
   },
   "monitorCommon": {
     "status": {
@@ -1272,7 +1406,8 @@ const messages = {
         "email": "信箱",
         "linuxdo": "LinuxDo",
         "oidc": "{providerName}",
-        "wechat": "微信"
+        "wechat": "微信",
+        "dingtalk": "钉钉"
       },
       "notes": {
         "emailManagedFromProfile": "主郵件信箱在資料表單中管理",
@@ -1315,7 +1450,9 @@ const messages = {
     "serverError": "伺服器錯誤",
     "networkError": "網路錯誤",
     "timeout": "請求超時",
-    "tryAgain": "請重試"
+    "tryAgain": "請重試",
+    "pageNotFoundDescription": "你访问的页面不存在，或已被移动。",
+    "needHelp": "需要帮助？"
   },
   "dates": {
     "today": "今天",
@@ -1791,7 +1928,12 @@ const messages = {
         "lastActive": "最後活躍時間",
         "lastUsed": "最後使用時間",
         "created": "創建時間",
-        "actions": "操作"
+        "actions": "操作",
+        "balancePlatformQuota": "余额(平台配额)",
+        "usageAnthropic": "用量 (Claude)",
+        "usageOpenAI": "用量 (OpenAI)",
+        "usageGemini": "用量 (Gemini)",
+        "usageAntigravity": "用量 (Antigravity)"
       },
       "today": "今日",
       "total": "近30天",
@@ -1993,6 +2135,58 @@ const messages = {
         "failedToReorder": "更新排序失敗",
         "keyExists": "屬性鍵已存在",
         "dragToReorder": "拖曳排序"
+      },
+      "apiKeyGroupFilter": "API Key 分组",
+      "apiKeyGroupExclusive": "专用分组",
+      "apiKeyGroupPublic": "公开分组",
+      "apiKeyGroupSubscription": "订阅分组",
+      "apiKeyGroupDisabled": "已禁用分组",
+      "authorizedGroupFilter": "授权分组",
+      "allAuthorizedGroups": "全部授权分组",
+      "searchAuthorizedGroups": "搜索授权分组...",
+      "allApiKeyGroups": "全部 API Key 分组",
+      "searchApiKeyGroups": "搜索 API Key 分组...",
+      "sortBy": "排序方式",
+      "sortCurrentPageOnly": "仅对本页数据排序",
+      "columnAlwaysVisible": "该列固定显示，不可隐藏",
+      "platformBreakdown": "按平台拆分",
+      "platformBreakdownEmpty": "暂无平台明细",
+      "platformBreakdownHint": "悬浮查看各平台用量",
+      "platformOther": "其他",
+      "platformQuota": {
+        "menuItem": "平台限额",
+        "title": "平台限额",
+        "subtitle": "为用户 {email} 配置各上游平台的日 / 周 / 月用量上限",
+        "columns": {
+          "platform": "平台",
+          "daily": "日 (USD)",
+          "weekly": "周 (USD)",
+          "monthly": "月 (USD, 30天滚动)",
+          "usage": "当前用量"
+        },
+        "placeholder": "不限制",
+        "save": "保存",
+        "saving": "保存中...",
+        "cancel": "取消",
+        "clearAll": "全部清空（取消所有限额）",
+        "clearAllConfirm": "确认清空全部平台的日 / 周 / 月限额？所有平台将变为\"无限额\"，本地无法撤销，需要在保存前手动重填。",
+        "reset": {
+          "button": "重置该窗口",
+          "confirm": "确认重置该用户 {platform} 平台的 {window} 用量？此操作立即生效。",
+          "success": "已重置 {platform} {window} 用量",
+          "failed": "重置失败"
+        },
+        "updateSuccess": "平台限额已更新",
+        "updateFailed": "保存失败",
+        "loadFailed": "加载失败",
+        "hint": "留空 = 不限制该窗口。",
+        "windowDaily": "日",
+        "windowWeekly": "周",
+        "windowMonthly": "月",
+        "cellNotConfigured": "未配置",
+        "cellColumnTooltip": "仅展示已设限额的平台",
+        "subscriptionWarning": "此用户有活跃订阅，平台限额仅在余额（标准）模式下生效，订阅模式请求不受此限额约束。",
+        "invalidNumber": "以下字段填写不是合法数字，请修正后再保存：{fields}"
       }
     },
     "groups": {
@@ -2159,7 +2353,13 @@ const messages = {
       },
       "imagePricing": {
         "title": "圖片產生計費",
-        "description": "設定圖片產生模型的圖片產生價格，留空則使用預設價格"
+        "description": "設定圖片產生模型的圖片產生價格，留空則使用預設價格",
+        "allowImageGeneration": "允许当前分组生图",
+        "independentMultiplier": "生图倍率独立",
+        "imageMultiplier": "生图独立倍率",
+        "modeHint": "默认关闭独立倍率时，图片费用 = 图片价格 × 当前分组有效倍率；开启独立倍率后，图片费用 = 图片价格 × 生图独立倍率。",
+        "finalPricePreview": "最终单张价格预览",
+        "notConfigured": "未配置"
       },
       "modelsList": {
         "title": "自訂 /v1/models 模型列表",
@@ -2212,7 +2412,8 @@ const messages = {
         "tooltipEdit": "選擇一個或多個相同平台的分組，儲存後目前分組的帳號會被替換為這些分組的帳號（去重）。",
         "selectPlaceholder": "選擇分組複製其帳號...",
         "hint": "可選多個分組，帳號會自動去重",
-        "hintEdit": "⚠️ 注意：這會替換目前分組的所有帳號綁定"
+        "hintEdit": "⚠️ 注意：這會替換目前分組的所有帳號綁定",
+        "groupOptionLabel": "{name} ({count} 个账号)"
       },
       "modelRouting": {
         "title": "模型路由設定",
@@ -2254,7 +2455,16 @@ const messages = {
         "geminiText": "Gemini Text",
         "geminiImage": "Gemini Image",
         "hint": "至少選擇一個模型系列"
-      }
+      },
+      "accountFilter": {
+        "title": "账号过滤控制",
+        "oauthOnly": "仅允许 OAuth 账号",
+        "oauthOnlyEnabled": "已启用 — 排除 API Key 类型账号",
+        "privacyOnly": "仅允许隐私保护已设置的账号",
+        "privacyOnlyEnabled": "已启用 — Privacy 未设置的账号将被排除",
+        "disabled": "未启用"
+      },
+      "rateMultiplierBadge": "{rate}x 倍率"
     },
     "availableChannels": {
       "title": "可用管道",
@@ -2406,7 +2616,36 @@ const messages = {
         "ruleAccountsHint": "留空表示符合所有帳號",
         "ruleModelPricing": "模型定價",
         "noGroupsInChannel": "上方平台標籤頁未選擇分組",
-        "unnamed": "未命名"
+        "unnamed": "未命名",
+        "minTokens": "Min",
+        "maxTokens": "Max",
+        "inclusive": "（含）",
+        "codexImageGenerationBridge": "Codex 图片生成桥接",
+        "codexImageGenerationBridgeHint": "开启后，OpenAI 分组的 Codex /responses 文本请求可能会被自动注入 image_generation 工具。仅在路由账号支持图片生成时开启。",
+        "bedrockCCCompat": "Bedrock CC 兼容",
+        "bedrockCCCompatHint": "⚠️ 开启后，该渠道下 Bedrock 账号的请求将进行 Claude Code 兼容处理（thinking 类型转换、tool_use ID 清理）",
+        "syncLatestModels": "同步最新模型",
+        "syncingModels": "同步中...",
+        "syncModelsSuccess": "已同步 {count} 个新模型",
+        "syncModelsAlreadyUpToDate": "模型列表已是最新",
+        "syncModelsError": "同步模型失败"
+      },
+      "noGroupsSelected": "{platform} 平台未选择分组，请至少选择一个分组或禁用该平台",
+      "emptyModelsInPricing": "{platform} 平台下有定价条目未添加模型，请添加模型或删除该条目",
+      "validation": {
+        "minTokensNegative": "区间 #{index}: 最小 token 数 ({min}) 不能为负数",
+        "maxTokensPositive": "区间 #{index}: 最大 token 数 ({max}) 必须大于 0",
+        "maxTokensGreaterThanMin": "区间 #{index}: 最大 token 数 ({max}) 必须大于最小 token 数 ({min})",
+        "priceNegative": "区间 #{index}: {name}不能为负数",
+        "unlimitedLast": "区间 #{index}: 无上限区间（最大 token 数为空）只能是最后一个",
+        "overlap": "区间 #{prevIndex} 和 #{currentIndex} 重叠：前一个区间上界 ({prevMax}) 大于当前区间下界 ({currentMin})",
+        "priceFields": {
+          "input": "输入价格",
+          "output": "输出价格",
+          "cacheWrite": "缓存写入价格",
+          "cacheRead": "缓存读取价格",
+          "perRequest": "单次价格"
+        }
       }
     },
     "riskControl": {
@@ -2577,7 +2816,9 @@ const messages = {
         "scope": "審計範圍",
         "runtime": "執行佇列",
         "response": "命中通知",
-        "retention": "日誌保留"
+        "retention": "日誌保留",
+        "riskThresholds": "风险阈值",
+        "keywords": "关键词拦截"
       },
       "overview": {
         "status": "執行狀態",
@@ -2616,8 +2857,71 @@ const messages = {
       },
       "action": {
         "block": "攔截",
-        "error": "異常"
-      }
+        "error": "異常",
+        "keywordBlock": "关键词拦截",
+        "cyberPolicy": "网络安全策略"
+      },
+      "cyberPolicyExcludeBan": "cyber_policy 不计入封号次数",
+      "cyberPolicyExcludeBanHint": "开启后，cyber_policy 拦截不再计入自动封号的违规次数：当次不判定封号，历史累计亦排除。风控日志与通知邮件照常。",
+      "violationNotCounted": "未计入封号",
+      "modelFilter": "模型范围",
+      "modelFilterHint": "按客户端请求的模型名决定是否执行内容审计，模型映射后仍以请求模型判断。",
+      "modelFilterAll": "所有模型",
+      "modelFilterAllDesc": "所有模型请求都会进入内容审计。",
+      "modelFilterInclude": "仅指定模型",
+      "modelFilterIncludeDesc": "只有列表中的模型会执行内容审计。",
+      "modelFilterExclude": "排除指定模型",
+      "modelFilterExcludeDesc": "列表中的模型跳过内容审计，其余模型执行审计。",
+      "modelFilterModels": "模型列表",
+      "modelFilterModelCount": "已配置 {count} 个模型",
+      "modelFilterModelsRequired": "当前模型范围至少需要配置 1 个模型",
+      "modelFilterAllSummary": "全部模型生效",
+      "modelFilterIncludeSummary": "仅 {count} 个模型生效",
+      "modelFilterExcludeSummary": "排除 {count} 个模型",
+      "preBlockSyncStatus": "前置拦截同步状态",
+      "preBlockSyncHint": "同步审核链路的实时计数，不包含异步写记录任务。",
+      "preBlockActive": "同步处理中",
+      "preBlockActiveHint": "当前正在审核",
+      "preBlockChecked": "已检查",
+      "preBlockCheckedHint": "进入前置拦截链路",
+      "preBlockAllowed": "已放行",
+      "preBlockAllowedHint": "未触发拦截",
+      "preBlockBlocked": "已拦截",
+      "preBlockBlockedHint": "命中后拒绝请求",
+      "preBlockErrors": "审核异常",
+      "preBlockErrorsHint": "失败或无可用 Key",
+      "preBlockAvgLatency": "平均耗时",
+      "preBlockAvgLatencyHint": "同步链路平均值",
+      "preBlockAPIKeyLoad": "审核 Key 负载",
+      "preBlockAPIKeyLoadHint": "同步前置拦截直接轮询可用审核 Key。",
+      "preBlockAPIKeyLoadSummary": "同步并发 {active} / 可用 Key {available}，累计 {total} 次，worker：{workerActive} / {workerTotal}",
+      "preBlockAPIKeyTotals": "累计 {total}，成功 {success}，异常 {errors}",
+      "preBlockAPIKeyLoadEmpty": "暂无审核 Key 负载数据",
+      "preBlockKeyActiveShort": "并发",
+      "preBlockKeyTotalShort": "累计",
+      "preBlockKeyAvgShort": "平均",
+      "preBlockKeyLastShort": "最近",
+      "riskThresholds": "风险阈值",
+      "riskThresholdsHint": "按 OpenAI Moderations 分类调整命中阈值，分数达到或超过阈值即视为命中。",
+      "riskThresholdDefault": "默认 {value}",
+      "riskThresholdReset": "恢复默认阈值",
+      "riskThresholdPercent": "阈值百分比",
+      "blockedKeywords": "拦截关键词",
+      "blockedKeywordsPlaceholder": "每行输入一个关键词，例如：\n敏感词1\n敏感词2",
+      "blockedKeywordsDescription": "匹配忽略大小写；命中后会按下方策略决定是否调用上游审计接口。",
+      "blockedKeywordsPreBlockHint": "关键词拦截仅在「前置拦截」模式下生效。",
+      "blockedKeywordsModeWarning": "当前为「{mode}」模式，关键词拦截不会生效；请切换到「前置拦截」模式后再保存关键词。",
+      "blockedKeywordCount": "已配置 {count} 个关键词",
+      "blockedKeywordsLimit": "最多保存 {max} 个关键词，单个长度不超过 200 个字符；重复项会自动去重。",
+      "keywordBlockingMode": "审计策略",
+      "keywordModeKeywordAndApi": "关键词 + API",
+      "keywordModeKeywordAndApiDesc": "命中关键词直接拦截；未命中时再调用上游审计接口。",
+      "keywordModeKeywordOnly": "仅关键词",
+      "keywordModeKeywordOnlyDesc": "只用关键词判断，未命中即放行，不调用上游审计接口，可显著降低 API 用量。",
+      "keywordModeKeywordOnlyNotice": "当前为「仅关键词」策略：未命中关键词的请求将直接放行，不调用上游审计接口。",
+      "keywordModeApiOnly": "仅 API",
+      "keywordModeApiOnlyDesc": "只调用上游审计接口判断，本页的关键词列表将不会生效。",
+      "keywordModeApiOnlyNotice": "当前为「仅 API」策略：关键词列表不会生效，请求会全部交给上游审计接口判断。"
     },
     "channelMonitor": {
       "title": "通路監控",
@@ -2674,7 +2978,14 @@ const messages = {
         "intervalSeconds": "偵測間隔 (秒)",
         "intervalSecondsHint": "範圍：15 - 3600 秒",
         "enabled": "啟用監控",
-        "kindRequired": "請選擇供應商"
+        "kindRequired": "請選擇供應商",
+        "apiMode": "OpenAI 协议",
+        "apiModeChatCompletions": "OpenAI Compatible",
+        "apiModeChatCompletionsHint": "使用 /v1/chat/completions，发送 messages；适合大多数兼容站。",
+        "apiModeResponses": "Responses API",
+        "apiModeResponsesHint": "使用 /v1/responses，默认带 instructions + input；适合本站自检/Codex。",
+        "jitterSeconds": "随机抖动 (± 秒)",
+        "jitterSecondsHint": "每次检测在间隔基础上正负随机偏移该秒数，0 表示固定间隔；需满足 间隔 - 抖动 ≥ 15 秒"
       },
       "runResultTitle": "檢測結果",
       "noMonitorsYet": "暫無監控",
@@ -2846,7 +3157,10 @@ const messages = {
           "revokeDesc": "立即終止該用戶的訂閱，不可恢復"
         },
         "tip": "提示：訂閱分組下拉清單中只會顯示計費類型為「訂閱」且狀態為「正常」的分組。如果沒有可選項，請先到分組管理中建立。"
-      }
+      },
+      "quotaEndsInMinutes": "额度将在 {minutes} 分钟后结束",
+      "quotaEndsInHoursMinutes": "额度将在 {hours} 小时 {minutes} 分钟后结束",
+      "quotaEndsInDaysHours": "额度将在 {days} 天 {hours} 小时后结束"
     },
     "accounts": {
       "title": "帳號管理",
@@ -2956,7 +3270,9 @@ const messages = {
         "proxy": "代理商",
         "lastUsed": "最近使用",
         "expiresAt": "過期時間",
-        "actions": "操作"
+        "actions": "操作",
+        "id": "账号ID",
+        "createdAt": "创建时间"
       },
       "allPrivacyModes": "全部Privacy狀態",
       "privacyUnset": "未設定",
@@ -3050,7 +3366,8 @@ const messages = {
         "openai": "OpenAI",
         "anthropic": "Anthropic",
         "gemini": "Gemini",
-        "antigravity": "Antigravity"
+        "antigravity": "Antigravity",
+        "grok": "Grok"
       },
       "types": {
         "oauth": "OAuth",
@@ -3063,7 +3380,8 @@ const messages = {
         "upstream": "對接上游",
         "upstreamDesc": "透過 Base URL + API Key 連接上游",
         "api_key": "API Key",
-        "cookie": "Cookie"
+        "cookie": "Cookie",
+        "grokOauth": "Grok OAuth"
       },
       "status": {
         "active": "正常",
@@ -3139,7 +3457,19 @@ const messages = {
         "gemini3Image": "G31FI",
         "claude": "Claude",
         "passiveSampled": "被動採樣",
-        "activeQuery": "查詢"
+        "activeQuery": "查詢",
+        "grokRequests": "请求",
+        "grokTokens": "Token",
+        "grokUnknown": "Grok 配额需等待首次上游响应返回 xAI rate-limit 头后显示。",
+        "grokRetryAfter": "{time} 后重试",
+        "grokProbe": "探测",
+        "grokProbeTooltip": "发送最小 xAI Responses 探测请求并读取配额响应头",
+        "grokResetUnsupported": "不支持重置",
+        "grokResetUnsupportedTooltip": "xAI 未向 Grok OAuth 账号开放重置额度接口",
+        "grokNoHeaders": "未观察到配额响应头",
+        "grokLastStatus": "状态 {status}",
+        "grokLastProbe": "探测 {time}",
+        "grokLastHeadersSeen": "响应头 {time}"
       },
       "tier": {
         "free": "Free",
@@ -3208,7 +3538,11 @@ const messages = {
         "refreshToken": "批次刷新令牌",
         "resetStatusSuccess": "已成功重設 {count} 個帳號狀態",
         "refreshTokenSuccess": "已成功刷新 {count} 個帳號令牌",
-        "partialSuccess": "操作部分完成：{success} 成功，{failed} 失敗"
+        "partialSuccess": "操作部分完成：{success} 成功，{failed} 失敗",
+        "probeUsage": "批量探测用量窗口",
+        "probeUsageSuccess": "已成功探测 {count} 个账号用量窗口",
+        "probeUsagePartial": "用量窗口探测部分完成：{success} 成功，{failed} 失败",
+        "probeUsageFailed": "批量探测用量窗口失败"
       },
       "bulkEdit": {
         "title": "大量編輯帳號",
@@ -3316,7 +3650,40 @@ const messages = {
         "testMode": "測試模式",
         "testModeDefault": "常規請求",
         "testModeCompact": "Compact 探測",
-        "modelRestrictionDisabledByPassthrough": "已開啟自動透傳：模型白名單/映射不會生效。"
+        "modelRestrictionDisabledByPassthrough": "已開啟自動透傳：模型白名單/映射不會生效。",
+        "responsesMode": "Responses API 支持",
+        "responsesModeDesc": "仅对 OpenAI API Key 的文本转发链路生效。自动跟随探测结果，强制模式会覆盖自动探测。",
+        "responsesModeAuto": "自动",
+        "responsesModeForceResponses": "强制 Responses",
+        "responsesModeForceChatCompletions": "强制 Chat Completions",
+        "responsesModeTextDisabledHint": "未启用 Responses / Chat Completions 端点时，此设置不适用。",
+        "endpointCapabilities": "端点能力",
+        "endpointCapabilitiesDesc": "用于调度筛选。文本端点会跟随上方 Responses API 支持显示为 Responses、Chat Completions 或自动模式；Embeddings 独立控制 /v1/embeddings。",
+        "capabilityResponses": "Responses",
+        "capabilityTextAuto": "Responses / Chat Completions（自动）",
+        "capabilityResponsesAuto": "Responses（自动探测）",
+        "capabilityChatCompletions": "Chat Completions",
+        "capabilityChatCompletionsAuto": "Chat Completions（自动探测）",
+        "capabilityEmbeddings": "Embeddings",
+        "responsesStatusAutoSupported": "自动探测：Responses",
+        "responsesStatusAutoUnsupported": "自动探测：Chat Completions",
+        "responsesStatusAutoUnknown": "自动探测：未探测",
+        "responsesStatusForcedResponses": "已强制 Responses",
+        "responsesStatusForcedChatCompletions": "已强制 Chat Completions",
+        "codexCLIOnlyAppServer": "允许 Codex app-server 客户端",
+        "codexCLIOnlyAppServerDesc": "仅在上方开关开启时生效。开启后本账号额外放行内嵌 Codex 引擎、经 app-server 协议接入的第三方客户端（如 Claude Code 的 codex 插件），仍需通过全局引擎指纹门；与全局 app-server 开关取 OR（任一开即放行）。",
+        "codexImageGenerationBridge": "Codex 图片生成桥接",
+        "codexImageGenerationBridgeDesc": "账号级策略优先于渠道和全局配置。仅控制 Codex 走 /responses 文本端点时是否注入 image_generation 工具；不影响独立图片生成接口。",
+        "codexImageGenerationBridgeInherit": "跟随渠道",
+        "codexImageGenerationBridgeInheritDesc": "不写入账号覆盖，继续使用渠道或全局策略。",
+        "codexImageGenerationBridgeEnabled": "强制开启",
+        "codexImageGenerationBridgeEnabledDesc": "允许 Codex /responses 请求获得图片工具注入。",
+        "codexImageGenerationBridgeDisabled": "强制关闭",
+        "codexImageGenerationBridgeDisabledDesc": "阻断 Codex /responses 的图片工具注入。",
+        "codexImageGenerationBridgeBadgeInherit": "渠道策略",
+        "codexImageGenerationBridgeBadgeEnabled": "账号开启",
+        "codexImageGenerationBridgeBadgeDisabled": "账号关闭",
+        "compactAuto": "Compact Auto"
       },
       "anthropic": {
         "apiKeyPassthrough": "自動透傳（僅替換認證）",
@@ -3603,7 +3970,27 @@ const messages = {
           "validating": "驗證中...",
           "validateAndCreate": "驗證並建立帳號",
           "pleaseEnterRefreshToken": "請輸入 Refresh Token",
-          "pleaseEnterSessionToken": "請輸入 Session Token"
+          "pleaseEnterSessionToken": "請輸入 Session Token",
+          "codexSessionAuth": "Codex JSON / AT 批量输入",
+          "codexSessionDesc": "粘贴 Codex JSON/accessToken，或选择一个/多个 JSON 文件；按第一步配置创建账号，默认会更新已存在账号。",
+          "codexSessionInputLabel": "Codex JSON / accessToken / JSON 文件",
+          "codexSessionSelectFiles": "选择 JSON 文件",
+          "codexSessionFilesCount": "{count} 个文件",
+          "codexSessionPlaceholder": "支持多行，每行一个 token 或 JSON；也可点击上方按钮选择一个或多个 .json 文件",
+          "codexSessionHint": "支持单个/多个 JSON 文件、JSON 数组和多行 AT。导入时会按账号身份、邮箱、refresh_token/access_token 指纹检测已存在账号并默认更新。sessionToken 不会作为 refresh_token 保存。",
+          "codexSessionImportAndCreate": "导入并添加/更新账号",
+          "codexSessionEmpty": "请输入 Codex JSON 或 accessToken",
+          "codexSessionImportFailed": "Codex 账号导入失败",
+          "codexSessionImportSuccess": "导入完成：新增 {created}，更新 {updated}，跳过 {skipped}",
+          "codexSessionImportPartial": "部分成功：新增 {created}，更新 {updated}，跳过 {skipped}，失败 {failed}",
+          "codexPatAuth": "Codex Personal Access Token",
+          "codexPatDesc": "输入 Codex at- Personal Access Token，系统会先调用 OpenAI whoami 校验后再创建账号。",
+          "codexPatInputLabel": "Codex PAT",
+          "codexPatPlaceholder": "at-...",
+          "codexPatHint": "这是独立认证模式，不保存 refresh_token，也不会写入 OAuth access_token 过期时间。",
+          "codexPatImportAndCreate": "校验并创建 Codex PAT 账号",
+          "codexPatEmpty": "请输入 Codex Personal Access Token",
+          "codexPatImportFailed": "Codex PAT 账号创建失败"
         },
         "gemini": {
           "title": "Gemini 帳號授權",
@@ -3667,6 +4054,31 @@ const messages = {
           "validateAndCreate": "驗證並建立帳號",
           "pleaseEnterRefreshToken": "請輸入 Refresh Token",
           "failedToValidateRT": "驗證 Refresh Token 失敗"
+        },
+        "grok": {
+          "title": "Grok 账号授权",
+          "followSteps": "请按照以下步骤授权您的 xAI/Grok 账号：",
+          "step1GenerateUrl": "生成 xAI 授权链接",
+          "generateAuthUrl": "生成授权链接",
+          "step2OpenUrl": "在浏览器中打开链接并完成授权",
+          "openUrlDesc": "在新标签页中打开授权链接，登录 xAI 并授权 API 访问。",
+          "importantNotice": "当浏览器跳转到本地 callback URL 后，请复制完整 URL 或 code 参数回填到这里。",
+          "step3EnterCode": "输入授权链接或 Code",
+          "authCodeDesc": "授权完成后，粘贴 callback URL、查询字符串或授权码：",
+          "authCode": "授权链接或 Code",
+          "authCodePlaceholder": "粘贴完整 callback URL、?code=... 查询字符串或 code 值",
+          "authCodeHint": "支持完整 callback URL、查询字符串或裸 code。",
+          "refreshTokenAuth": "手动输入 RT",
+          "refreshTokenDesc": "输入已有的 xAI refresh token，支持批量输入（每行一个）。",
+          "refreshTokenPlaceholder": "粘贴您的 xAI refresh token...\n支持多个，每行一个",
+          "validating": "验证中...",
+          "validateAndCreate": "验证并创建账号",
+          "pleaseEnterRefreshToken": "请输入 Refresh Token",
+          "failedToGenerateUrl": "生成 Grok 授权链接失败",
+          "missingExchangeParams": "缺少授权码、state 或 OAuth 会话",
+          "failedToExchangeCode": "Grok 授权码兑换失败",
+          "failedToValidateRT": "验证 Grok refresh token 失败",
+          "oauthOnlyHint": "首版 Grok 支持仅包含 OAuth 订阅的 Responses API 文本/推理转发。"
         }
       },
       "gemini": {
@@ -3720,7 +4132,17 @@ const messages = {
             "noAdmin": "無需管理員設定",
             "orgManaged": "組織管理",
             "adminRequired": "需要管理員"
-          }
+          },
+          "googleOneDesc": "个人账号，享受 Google One 订阅配额",
+          "recommendedPersonal": "推荐个人用户",
+          "noGcpRequired": "无需 GCP",
+          "codeAssistTitle": "GCP Code Assist",
+          "codeAssistDesc": "企业级，需要 GCP 项目",
+          "codeAssistRequirement": "需要激活 GCP 项目并绑定信用卡",
+          "enterpriseUsers": "企业用户",
+          "highConcurrency": "高并发",
+          "advancedHide": "隐藏高级选项（自建 OAuth Client）",
+          "advancedShow": "显示高级选项（自建 OAuth Client）"
         },
         "setupGuide": {
           "title": "Gemini 使用準備",
@@ -3867,7 +4289,56 @@ const messages = {
         "todayCost": "今日費用",
         "usageTrend": "30天費用與請求趨勢",
         "noData": "該帳號暫無使用數據"
-      }
+      },
+      "moreActions": "更多操作",
+      "dataActions": "数据操作",
+      "toolActions": "工具",
+      "viewColumns": "列显示",
+      "selectedCount": "已选 {count}",
+      "emailFilter": "按邮箱筛选...",
+      "usageWindowsHint": "“5h / 7d”是上游账号（如 OpenAI ChatGPT、Claude）官方的滚动用量窗口限制，由上游对账号设定，并非 sub2api 配置，也与你映射的模型无关。窗口滚动到期后用量会自动重置，无法在 sub2api 端解除该限制。",
+      "antigravityProjectIdLabel": "GCP Project ID（可选）",
+      "antigravityProjectIdPlaceholder": "your-gcp-project-id",
+      "antigravityProjectIdHint": "standard-tier 且未自动返回 project_id 的 Antigravity 账号需要填写用户自带 GCP project。",
+      "openaiQuotaReset": {
+        "count": "次数",
+        "reset": "重置",
+        "countTooltipLoad": "点击查询剩余重置次数",
+        "countTooltipRefresh": "点击刷新剩余重置次数",
+        "resetTooltipReady": "消耗 1 次重置次数以立即恢复当前窗口",
+        "resetTooltipNeedQuery": "先点击「次数」加载剩余重置次数",
+        "resetTooltipNoCredits": "没有可用的重置次数",
+        "noCreditsAvailable": "没有可用的重置次数",
+        "resetSuccess": "已重置 {windows} 个窗口",
+        "confirmTitle": "确认重置周限",
+        "confirmMessage": "将消耗 1 次重置次数立即恢复当前窗口，剩余 {count} 次。此操作不可撤销，确定继续吗？"
+      },
+      "fallbackActive": "已回退",
+      "fallbackActiveTip": "原代理 {origin} 已到期，当前使用备用代理",
+      "revertProxy": "切回原代理",
+      "revertProxySuccess": "已成功切回原代理",
+      "revertProxyFailed": "切回原代理失败",
+      "vertexProjectIdLabel": "Project ID",
+      "vertexLocationLabel": "Location",
+      "vertexClientEmailLabel": "Client Email",
+      "grok": {
+        "baseUrlHint": "Grok OAuth 账号会转发到官方 xAI API Base URL。",
+        "apiKeyHint": "Grok 订阅支持使用 OAuth refresh token；API Key 账号不在本次范围内。"
+      },
+      "syncUpstreamModels": "同步上游支持的模型",
+      "syncUpstreamModelsLoading": "同步上游中...",
+      "syncUpstreamModelsSuccess": "已从上游同步 {count} 个新模型（上游共 {total} 个）",
+      "syncUpstreamModelsNoChanges": "上游 {count} 个模型均已在白名单中",
+      "syncUpstreamModelsEmpty": "上游没有返回可同步的模型",
+      "syncUpstreamModelsFailed": "同步上游模型失败",
+      "syncUpstreamModelsError": "同步上游模型失败：{message}",
+      "autoPause5hThreshold": "5h 用量阈值(%)",
+      "autoPause7dThreshold": "7d 用量阈值(%)",
+      "autoPauseThresholdHint": "留空或填 0 表示使用全局默认阈值（在运维设置中配置）；填具体值则覆盖全局默认。达到阈值后仅在调度时跳过账号，不修改 schedulable。",
+      "autoPause5hDisabled": "禁用 5h 自动暂停",
+      "autoPause7dDisabled": "禁用 7d 自动暂停",
+      "autoPauseDisabledHint": "开启后该账号永不进入自动暂停（即使全局默认阈值已配置）。",
+      "grokAccount": "Grok 账号"
     },
     "scheduledTests": {
       "title": "定時測試",
@@ -3907,7 +4378,12 @@ const messages = {
       "maxResultsTooltipExample": "例如填寫 100，表示最多儲存最近 100 次測試結果；第 101 次結果寫入後，最早的一條會被清除。",
       "maxResultsTooltipRange": "建議填寫範圍：一般可填 20 到 200。只關注近期可用性時可填 20-50；需要回看較長時間的波動趨勢時可填 100-200。",
       "autoRecover": "自動恢復",
-      "autoRecoverHelp": "測試成功後自動恢復異常狀態的帳號"
+      "autoRecoverHelp": "測試成功後自動恢復異常狀態的帳號",
+      "failedToLoadPlans": "加载计划失败",
+      "failedToCreatePlan": "创建计划失败",
+      "failedToUpdatePlan": "更新计划失败",
+      "failedToDeletePlan": "删除计划失败",
+      "failedToLoadResults": "加载结果失败"
     },
     "proxies": {
       "title": "IP管理",
@@ -3961,7 +4437,9 @@ const messages = {
         "passwordLabel": "密碼（可選）",
         "passwordPlaceholder": "請輸入密碼",
         "priorityLabel": "優先權",
-        "statusLabel": "狀態"
+        "statusLabel": "狀態",
+        "expiry": "有效期",
+        "createdAt": "创建时间"
       },
       "filters": {
         "protocol": "協定",
@@ -4078,7 +4556,24 @@ const messages = {
       "nameRequired": "請輸入代理名稱",
       "hostRequired": "請輸入主機位址",
       "portInvalid": "連接埠必須在 1-65535 之間",
-      "deleteConfirm": "確定要刪除代理 '{name}' 嗎？使用此代理程式的帳號將移除代理設定。"
+      "deleteConfirm": "確定要刪除代理 '{name}' 嗎？使用此代理程式的帳號將移除代理設定。",
+      "ad": {
+        "inline": "正在寻找合适的代理 IP？"
+      },
+      "neverExpires": "永不过期",
+      "expired": "已过期",
+      "overdueDays": "已超期 {days} 天",
+      "expiringInDays": "{days} 天后到期",
+      "remainingDays": "剩余 {days} 天",
+      "expiresAt": "有效期",
+      "nDays": "{days} 天",
+      "expiryDaysPlaceholder": "自定义天数，留空 = 永不过期",
+      "expiryWarnDays": "到期提醒提前天数",
+      "fallbackMode": "失败回退",
+      "fallbackNone": "不回退",
+      "fallbackProxy": "指定备用代理",
+      "fallbackDirect": "回退直连",
+      "backupProxy": "备用代理"
     },
     "redeem": {
       "title": "兌換碼管理",
@@ -4092,7 +4587,8 @@ const messages = {
         "usedBy": "使用者",
         "usedAt": "使用時間",
         "createdAt": "創建時間",
-        "actions": "操作"
+        "actions": "操作",
+        "expiresAt": "过期时间"
       },
       "types": {
         "balance": "餘額",
@@ -4199,7 +4695,13 @@ const messages = {
       "failedToLoad": "加載兌換碼清單失敗",
       "failedToGenerate": "產生兌換碼失敗",
       "failedToUpdate": "更新兌換碼失敗",
-      "failedToDelete": "刪除兌換碼失敗"
+      "failedToDelete": "刪除兌換碼失敗",
+      "codeExpiry": "兑换码过期",
+      "neverExpires": "永不过期",
+      "expiryPresetDays": "{days} 天",
+      "customExpiry": "自定义",
+      "customExpiryDays": "自定义天数",
+      "expiryDaysRequired": "请输入有效的过期天数"
     },
     "announcements": {
       "title": "公告管理",
@@ -4397,7 +4899,8 @@ const messages = {
           "failed": "失敗",
           "canceled": "已取消"
         }
-      }
+      },
+      "userDeletedBadge": "已删除"
     },
     "ops": {
       "title": "維運監控",
@@ -4615,7 +5118,9 @@ const messages = {
         "requestType": "類型",
         "requestTypeSync": "同步",
         "requestTypeStream": "串流式",
-        "requestTypeWs": "WS"
+        "requestTypeWs": "WS",
+        "apiKey": "API Key",
+        "keyDeletedBadge": "Key 已删除"
       },
       "errorDetails": {
         "upstreamErrors": "上游錯誤",
@@ -4760,7 +5265,11 @@ const messages = {
         "suggestRequest": "⚠️ 用戶端請求錯誤，建議：聯絡客戶修正請求參數 / 手動標記已解決",
         "suggestAuth": "⚠️ 認證失敗，建議：檢查 API Key 是否有效 / 聯絡客戶更新憑證",
         "suggestPlatform": "🚨 平台錯誤，建議立即排除修復",
-        "suggestGeneric": "查看詳情以了解更多信息"
+        "suggestGeneric": "查看詳情以了解更多信息",
+        "apiKeyPrefix": "Key 前缀",
+        "attemptedKeyPrefix": "尝试的 Key 前缀",
+        "deletedKeyOwner": "已删除 Key 所有者",
+        "keyDeletedBadge": "Key 已删除"
       },
       "requestDetails": {
         "title": "請求明細",
@@ -4874,7 +5383,8 @@ const messages = {
           "accountRateLimitedCount": "限流帳號數",
           "accountErrorCount": "錯誤帳號數（不含臨時不可調度）",
           "accountErrorRatio": "錯誤帳號比例 (%)",
-          "overloadAccountCount": "過載帳號數"
+          "overloadAccountCount": "過載帳號數",
+          "accountTempUnscheduledCount": "临时不可调度账号数"
         },
         "metricDescriptions": {
           "successRate": "統計視窗內成功請求佔比（0~100）。",
@@ -4891,7 +5401,8 @@ const messages = {
           "accountRateLimitedCount": "統計視窗內被限流的帳號數量。",
           "accountErrorCount": "統計視窗內產生錯誤的帳號數量（不含臨時不可調度）。",
           "accountErrorRatio": "統計視窗內錯誤帳號佔比（0~100）。",
-          "overloadAccountCount": "統計視窗內過載帳號數量。"
+          "overloadAccountCount": "統計視窗內過載帳號數量。",
+          "accountTempUnscheduledCount": "当前处于临时不可调度状态的账号数量（如代理/凭据故障被自动摘除）。"
         },
         "hints": {
           "recommended": "建議：運算子 {operator}，閾值 {threshold}{unit}",
@@ -5105,8 +5616,14 @@ const messages = {
           "slaMinPercentRange": "SLA最低百分比必須在0-100之間",
           "ttftP99MaxRange": "TTFT P99最大值必須大於等於0",
           "requestErrorRateMaxRange": "請求錯誤率最大值必須在0-100之間",
-          "upstreamErrorRateMaxRange": "上游錯誤率最大值必須在0-100之間"
-        }
+          "upstreamErrorRateMaxRange": "上游錯誤率最大值必須在0-100之間",
+          "openaiQuotaAutoPauseRange": "OpenAI 配额自动暂停阈值必须在 0-100 之间"
+        },
+        "openaiQuotaAutoPause": "OpenAI 账号配额自动暂停",
+        "openaiQuotaAutoPauseHint": "当 OpenAI 账号 5h / 7d 用量达到阈值时，调度会自动跳过该账号；窗口滚动后自动恢复。账号级阈值优先于此全局默认值。",
+        "openaiQuotaAutoPauseDefault5h": "默认 5h 用量阈值 (%)",
+        "openaiQuotaAutoPauseDefault7d": "默认 7d 用量阈值 (%)",
+        "openaiQuotaAutoPauseThresholdHint": "取值 0-100，留空或 0 表示不启用全局默认阈值。"
       },
       "concurrency": {
         "title": "並發 / 排隊",
@@ -5173,6 +5690,58 @@ const messages = {
         "resetZoomHint": "重置縮放（若啟用）",
         "downloadChart": "下載",
         "downloadChartHint": "下載圖表圖片"
+      },
+      "autoRefreshRemaining": "剩余 {seconds}s",
+      "systemLogs": {
+        "title": "系统日志",
+        "description": "默认按最新时间倒序，支持筛选搜索与按条件清理。",
+        "loadFailed": "系统日志加载失败",
+        "empty": "暂无系统日志",
+        "cleanupConfirm": "确认按当前筛选条件清理系统日志？该操作不可撤销。",
+        "cleanupSuccess": "清理完成，删除 {count} 条日志",
+        "cleanupFailed": "清理系统日志失败",
+        "cleanupFiltered": "按当前筛选清理",
+        "refreshHealth": "刷新健康指标",
+        "health": {
+          "queue": "队列 {depth}/{capacity}",
+          "written": "写入 {count}",
+          "dropped": "丢弃 {count}",
+          "failed": "失败 {count}"
+        },
+        "runtime": {
+          "title": "运行时日志配置（实时生效）",
+          "stacktraceLevel": "堆栈阈值",
+          "samplingInitial": "采样初始",
+          "samplingThereafter": "采样后续",
+          "retentionDays": "保留天数",
+          "caller": "caller",
+          "sampling": "sampling",
+          "saveAndApply": "保存并生效",
+          "saveSuccess": "日志运行时配置已生效",
+          "saveFailed": "保存日志配置失败",
+          "reset": "回滚默认值",
+          "resetConfirm": "确认回滚为启动配置（env/yaml）并立即生效？",
+          "resetSuccess": "已回滚到启动日志配置",
+          "resetFailed": "回滚日志配置失败",
+          "lastError": "最近写入错误：{error}"
+        },
+        "filters": {
+          "timeRange": "时间范围",
+          "startTime": "开始时间（可选）",
+          "endTime": "结束时间（可选）",
+          "level": "级别",
+          "component": "组件",
+          "componentPlaceholder": "如 http.access",
+          "platform": "平台",
+          "model": "模型",
+          "keyword": "关键词",
+          "keywordPlaceholder": "消息/request_id"
+        },
+        "table": {
+          "time": "时间",
+          "level": "级别",
+          "details": "日志详细信息"
+        }
       }
     },
     "settings": {
@@ -5186,7 +5755,8 @@ const messages = {
         "gateway": "網關服務",
         "email": "郵件設定",
         "backup": "資料備份",
-        "payment": "支付設定"
+        "payment": "支付設定",
+        "agreement": "登录条款"
       },
       "features": {
         "channelMonitor": {
@@ -5259,6 +5829,16 @@ const messages = {
             "placeholder": "例如 30",
             "clearHint": "留空提交將清除所選用戶的專屬比例。"
           }
+        },
+        "riskControl": {
+          "title": "风控中心",
+          "description": "启用内容审计菜单和全端点请求审核入口。默认关闭。",
+          "configureLink": "前往 风控中心 配置内容审计",
+          "enabled": "启用风控中心",
+          "enabledHint": "关闭后管理员侧边栏入口隐藏，网关内容审计不会执行。",
+          "cyberSessionBlock": "cyber 会话自动屏蔽",
+          "cyberSessionBlockHint": "开启后,被上游网络安全策略(cyber_policy)拦截的会话将在 TTL 内被本地屏蔽,不再发往上游。仅屏蔽该会话,不影响同 Key 其他会话。",
+          "cyberSessionBlockTTL": "屏蔽时长(秒)"
         }
       },
       "loginAgreement": {
@@ -5415,7 +5995,10 @@ const messages = {
         "defaultSubscriptionsEmpty": "未設定預設訂閱。新用戶不會自動獲得訂閱套餐。",
         "defaultSubscriptionsDuplicate": "預設訂閱存在重複分組：{groupId}。每個分組只能出現一次。",
         "subscriptionGroup": "訂閱分組",
-        "subscriptionValidityDays": "有效期限（天）"
+        "subscriptionValidityDays": "有效期限（天）",
+        "defaultPlatformQuotas": "默认平台限额（注册时分配）",
+        "defaultPlatformQuotasHint": "新用户注册时自动写入平台限额记录；已有用户不受影响。留空 = 该平台该窗口不限制。",
+        "platformQuotaNotice": "月限额为 30 天滚动窗口，非自然月"
       },
       "claudeCode": {
         "title": "Claude Code 設定",
@@ -5443,7 +6026,67 @@ const messages = {
         "cchSigning": "CCH 簽名",
         "cchSigningHint": "對轉送請求的 billing header 進行 CCH 雜湊簽章。關閉時保留原始佔位符。",
         "anthropicCacheTTL1hInjection": "Anthropic 快取 TTL 注入",
-        "anthropicCacheTTL1hInjectionHint": "開啟後，對 Anthropic OAuth/Setup Token 請求體中已有的 ephemeral 快取區塊強制寫入 1h；回應 usage 預設以 5m 回寫計費，帳號級 TTL 計費設定優先。"
+        "anthropicCacheTTL1hInjectionHint": "開啟後，對 Anthropic OAuth/Setup Token 請求體中已有的 ephemeral 快取區塊強制寫入 1h；回應 usage 預設以 5m 回寫計費，帳號級 TTL 計費設定優先。",
+        "claudeOAuthSystemPromptInjection": "Claude OAuth System 注入",
+        "claudeOAuthSystemPromptInjectionHint": "为非 Claude Code 客户端的 Claude OAuth 请求注入 Claude Code 形态的 system blocks。默认开启。",
+        "claudeOAuthSystemPrompt": "Claude OAuth 扩展提示词",
+        "claudeOAuthSystemPromptPlaceholder": "留空时使用内置 Claude Code 扩展提示词。",
+        "claudeOAuthSystemPromptHint": "兼容旧配置：仅控制第三个注入的 system block。",
+        "claudeOAuthSystemPromptBlocks": "Claude OAuth System Blocks",
+        "claudeOAuthSystemPromptBlocksPlaceholder": "留空时使用内置 3 个 blocks。支持数组或 {\"blocks\": [...]}。",
+        "claudeOAuthSystemPromptBlocksHint": "每个 block 会保存为带 enabled、type、text、可选 cache_control 的 JSON。{billing_header} 会按请求动态生成；Claude Code 身份提示词和扩展提示词可直接编辑，也可用预设恢复默认值。",
+        "systemBlockTitle": "System Block {index}",
+        "systemBlockPreset": "预设",
+        "systemBlockPresetBilling": "Billing Header",
+        "systemBlockPresetIdentity": "Claude Code 身份提示词",
+        "systemBlockPresetExpansion": "Claude Code 扩展提示词",
+        "systemBlockPresetCustom": "自定义",
+        "systemBlockType": "类型",
+        "systemBlockTypeText": "文本",
+        "systemBlockText": "内容",
+        "systemBlockCacheControl": "Cache Control",
+        "systemBlockHide": "隐藏 block 详情",
+        "systemBlockShow": "展示 block 详情",
+        "addSystemBlock": "添加 block",
+        "resetSystemBlocks": "恢复默认",
+        "cacheTTL5m": "5 分钟",
+        "cacheTTL1h": "1 小时",
+        "rewriteMessageCacheControl": "改写消息缓存断点",
+        "rewriteMessageCacheControlHint": "默认关闭，保留客户端在 messages 内容块中的 cache_control。开启后会清除客户端断点并注入代理断点，适合不自行管理缓存策略的客户端。",
+        "antigravityUserAgentVersion": "Antigravity UA 版本",
+        "antigravityUserAgentVersionPlaceholder": "1.23.2",
+        "antigravityUserAgentVersionHint": "留空时使用 ANTIGRAVITY_USER_AGENT_VERSION 或内置默认值 1.23.2；填写后后台设置优先。",
+        "openaiCodexUserAgent": "OpenAI Codex UA",
+        "openaiCodexUserAgentPlaceholder": "codex-tui/0.125.0 (Ubuntu 22.4.0; x86_64) xterm-256color (codex-tui; 0.125.0)",
+        "openaiCodexUserAgentHint": "用于规避 OpenAI 上游 Cloudflare 对浏览器 UA 的访问质询。仅在检测到客户端 User-Agent 为浏览器（Mozilla/...）时生效，其他客户端原样透传。留空使用内置默认值。",
+        "codexHardeningTitle": "Codex 设置",
+        "codexClientRestrictionTitle": "Codex 客户端限制",
+        "codexHardeningDesc": "仅对已开启「仅允许 Codex 官方客户端」的 OpenAI OAuth 账号生效（全局）。在 User-Agent/Originator 之外，用版本区间、引擎指纹门与黑/白名单巩固判定。",
+        "minCodexVersion": "最低 Codex 版本",
+        "minCodexVersionPlaceholder": "例如 0.142.0",
+        "maxCodexVersion": "最高 Codex 版本",
+        "maxCodexVersionPlaceholder": "例如 0.200.0",
+        "codexVersionHint": "仅对官方客户端生效，校验其版本是否落在 [最低, 最高] 区间。留空表示该侧不限制。",
+        "codexFingerprintSignals": "Codex 引擎指纹信号",
+        "codexFingerprintSignalsDesc": "定义引擎指纹信号：勾「必须」的信号需全部命中（AND），每条 / 分隔的变体取或（OR）；一条都不勾即不校验。默认只勾 x-codex- 前缀。类型：头精确 / 头前缀 / body 路径。",
+        "codexFpTypeHeaderExact": "头精确",
+        "codexFpTypeHeaderPrefix": "头前缀",
+        "codexFpTypeBodyPath": "body 路径",
+        "codexFpMatchPlaceholder": "匹配，变体用 / 分隔（如 session-id / session_id 或 x-codex-）",
+        "codexFpRequired": "必须",
+        "codexFingerprintNoRequiredWarn": "未勾选任何「必须」信号——引擎指纹门当前不生效，等于放行所有通过身份/版本的候选。如需启用校验，请至少勾选一条信号。",
+        "codexAllowAppServer": "Codex app-server",
+        "codexAllowAppServerDesc": "放行内嵌 Codex 引擎、经 app-server 协议接入的第三方客户端（如 Claude Code 的 codex 插件）。默认关闭；开启后此类客户端通过引擎指纹门（下方信号列表）即放行，关闭则仅放行官方客户端与白名单。",
+        "codexBlacklist": "User-Agent/Originator 黑名单",
+        "codexBlacklistDesc": "命中任一字段即拒，优先于一切放行。originator 精确匹配，User-Agent 为包含匹配（多个用逗号分隔）。",
+        "codexWhitelist": "User-Agent/Originator 白名单",
+        "codexWhitelistDesc": "放行官方集之外的客户端：需 originator 精确，且每个 User-Agent 标记都命中。默认仍需过引擎指纹门，勾「跳过引擎指纹」可免。",
+        "codexWhitelistSkipFingerprint": "跳过引擎指纹",
+        "codexWhitelistSkipFingerprintTooltip": "风险：勾选后该条仅凭 originator + User-Agent（均可伪造）放行，不再要求引擎指纹兜底。仅用于确属可信、但本身不发 codex 引擎指纹的第三方客户端。",
+        "codexOriginatorPlaceholder": "originator（精确，如 opencode）",
+        "codexUaContainsPlaceholder": "User-Agent 包含标记，逗号分隔（如 opencode/）",
+        "codexAddRow": "添加一条",
+        "codexRemoveRow": "删除"
       },
       "webSearchEmulation": {
         "title": "Web Search 模擬",
@@ -5711,7 +6354,24 @@ const messages = {
         "supportedTypesHint": "逗號分隔，如 alipay,wxpay",
         "refundEnabled": "允許退款",
         "allowUserRefund": "允許用戶退款",
-        "enableConflict": "{method} 已有啟用中的服務商實例：{provider}。請先停用現有實例後再啟用或切換。"
+        "enableConflict": "{method} 已有啟用中的服務商實例：{provider}。請先停用現有實例後再啟用或切換。",
+        "alipayForceQRCode": "支付宝强制二维码支付",
+        "alipayForceQRCodeHint": "启用后，移动端支付宝用户将统一使用二维码扫码支付，不再跳转至手机网站支付",
+        "providerAirwallex": "Airwallex",
+        "providerUsdt": "USDT（加密货币）",
+        "field_tradeType": "链上交易类型",
+        "field_clientId": "Client ID",
+        "field_apiKey": "API Key",
+        "field_countryCode": "国家/地区代码",
+        "field_currency": "支付币种",
+        "field_accountId": "Airwallex 账户 ID",
+        "field_airwallexApiBaseHint": "必须和 API Key 所属环境一致：沙箱/测试密钥使用 https://api-demo.airwallex.com/api/v1，生产密钥使用 https://api.airwallex.com/api/v1。环境混用会返回 credentials_invalid / Access Denied。",
+        "field_paymentCurrencyHint": "默认 CNY。Stripe 和 Airwallex 可按账户支持从下拉项选择 HKD、USD 等币种；微信、支付宝、易支付仍按 CNY。",
+        "field_accountIdHint": "不涉及多账户、组织级密钥或连接账户收款时可以不填；单账户 Scoped API Key 会默认使用所选账户。",
+        "stripeWebhookApiVersionHint": "Webhook 端点的 API 版本请与当前集成的 Stripe SDK 对齐，建议选择 {version}；版本不一致可能导致回调事件解析失败。",
+        "airwallexWebhookHint": "请在 Airwallex 后台将以下地址配置为 Webhook 端点；事件至少选择 Payment Intent -> Succeeded（payment_intent.succeeded），建议同时选择 Payment Intent -> Cancelled（payment_intent.cancelled）；API version 选择账户默认或最新稳定版本。",
+        "airwallexGuideSummary": "创建 Airwallex Scoped API 密钥时，建议只在账户级权限中为 Payment Acceptance 勾选读取和写入。",
+        "airwallexGuideNote": "不需要勾选 Spend、Payouts、Transfers、Funds Splits、POS 终端等与在线收款无关的权限。Webhook 事件至少选择 payment_intent.succeeded，建议同时选择 payment_intent.cancelled；API version 选择账户默认或最新稳定版本。"
       },
       "balanceNotify": {
         "title": "餘額不足提醒",
@@ -6142,13 +6802,27 @@ const messages = {
           "wechat": {
             "title": "微信登入",
             "description": "適用於微信第三方註冊的新用戶預設配額。"
+          },
+          "github": {
+            "title": "GitHub 登录",
+            "description": "通过 GitHub 已验证邮箱首次注册或首次绑定时应用。"
+          },
+          "google": {
+            "title": "Google 登录",
+            "description": "通过 Google 已验证邮箱首次注册或首次绑定时应用。"
+          },
+          "dingtalk": {
+            "title": "钉钉登录",
+            "description": "适用于钉钉第三方注册的新用户默认配额。"
           }
         },
         "grantOnFirstBindLabel": "首次綁定時授權",
         "grantOnFirstBindHint": "已有帳號首次綁定此來源時發放預設權益。",
         "defaultSubscriptionsLabel": "預設訂閱",
         "defaultSubscriptionsHint": "僅對目前認證來源生效，未設定時不追加來源專屬訂閱。",
-        "noSourceSubscriptions": "目前來源未設定專屬預設訂閱。"
+        "noSourceSubscriptions": "目前來源未設定專屬預設訂閱。",
+        "platformQuotasOverride": "平台限额覆盖",
+        "platformQuotasOverrideHint": "留空的字段继承「系统默认平台限额」；填 0 表示禁止该窗口使用。"
       },
       "paymentVisibleMethods": {
         "methodLabel": "{title} 可見方式",
@@ -6169,7 +6843,151 @@ const messages = {
       "failedToLoad": "載入設定失敗",
       "failedToSave": "儲存設定失敗",
       "failedToTestSmtp": "SMTP 連線測試失敗",
-      "failedToSendTestEmail": "發送測試郵件失敗"
+      "failedToSendTestEmail": "發送測試郵件失敗",
+      "apiKeyAcl": {
+        "title": "API Key IP 访问控制",
+        "description": "控制 API Key 白名单和黑名单使用哪个客户端 IP 判断",
+        "trustForwardedIp": "信任反代传递的客户端 IP",
+        "trustForwardedIpHint": "默认关闭。仅在源站只允许 Cloudflare 或 Nginx 反代访问时开启；开启后 API Key IP 白/黑名单会使用 CF-Connecting-IP、X-Real-IP 或 X-Forwarded-For，与使用记录中的请求 IP 保持一致。"
+      },
+      "dingtalk": {
+        "title": "钉钉登录",
+        "description": "配置钉钉 OAuth，用于 Sub2API 用户登录",
+        "enable": "启用钉钉登录-企业内部应用",
+        "enableHint": "在登录/注册页面显示钉钉登录入口",
+        "clientId": "Client ID（AppKey）",
+        "clientIdPlaceholder": "例如：dingxxxxxxxxxxxxxxxx",
+        "clientIdHint": "从钉钉开放平台应用详情页获取",
+        "clientSecret": "Client Secret（AppSecret）",
+        "clientSecretPlaceholder": "********",
+        "clientSecretHint": "用于后端交换 token（请保密）",
+        "clientSecretConfiguredPlaceholder": "********",
+        "clientSecretConfiguredHint": "密钥已配置，留空以保留当前值。",
+        "redirectUrl": "回调地址（Redirect URL）",
+        "redirectUrlPlaceholder": "https://your-domain.com/api/v1/auth/oauth/dingtalk/callback",
+        "redirectUrlHint": "需与钉钉开放平台中配置的回调地址一致（必须是 http(s) 完整 URL）",
+        "corpPolicy": {
+          "label": "企业限制策略",
+          "hint": "控制哪些钉钉账号（企业）可以登录",
+          "none": "不限制（所有钉钉账号均可登录）",
+          "internalOnly": "仅本企业（Internal Only）"
+        },
+        "bypassRegistration": "开放钉钉注册",
+        "bypassRegistrationHint": "即使「开放注册」关闭时也可以通过钉钉登录来注册",
+        "syncDisplayName": "同步钉钉姓名",
+        "syncDisplayNameHint": "登录时将钉钉姓名写入 username 字段（同时记录到 dingtalk_name 属性）",
+        "syncCorpEmail": "同步企业邮箱",
+        "syncCorpEmailHint": "登录时将钉钉企业邮箱写入 dingtalk_email 属性（不影响登录邮箱）",
+        "syncCorpEmailPermissionHint": "需在钉钉开放平台 → 应用 → 权限管理中为本应用申请「邮箱等个人信息（fieldEmail）」权限，否则 OAPI 不会返回企业邮箱字段",
+        "syncDept": "同步部门",
+        "syncDeptHint": "登录时将钉钉首个部门完整路径写入 dingtalk_department 属性（每次登录实时拉取）",
+        "syncDeptPermissionHint": "需在钉钉开放平台 → 应用 → 权限管理中为本应用申请「通讯录部门信息读权限（qyapi_get_department_list）」，否则无法递归出部门路径",
+        "syncDisplayNameTarget": "属性键",
+        "syncDisplayNameTargetHint": "默认 dingtalk_name / 钉钉姓名；保存设置时按上述属性键和显示名称自动创建用户属性（已存在则仅同步显示名称）",
+        "syncCorpEmailTarget": "属性键",
+        "syncCorpEmailTargetHint": "默认 dingtalk_email / 钉钉企业邮箱；保存设置时按上述属性键和显示名称自动创建用户属性（已存在则仅同步显示名称）",
+        "syncDeptTarget": "属性键",
+        "syncDeptTargetHint": "默认 dingtalk_department / 钉钉部门；保存设置时按上述属性键和显示名称自动创建用户属性（已存在则仅同步显示名称）",
+        "syncAttrDisplayName": "显示名称",
+        "defaultDisplayNameAttrName": "钉钉姓名",
+        "defaultCorpEmailAttrName": "钉钉企业邮箱",
+        "defaultDeptAttrName": "钉钉部门"
+      },
+      "platformQuota": {
+        "platform": "平台",
+        "daily": "日限额 (USD)",
+        "weekly": "周限额 (USD)",
+        "monthly": "月限额 (USD, 30天滚动)",
+        "placeholder": "不限"
+      },
+      "subscriptionExpiryNotify": {
+        "title": "订阅到期提醒",
+        "description": "控制是否向用户发送订阅即将到期的邮件提醒。",
+        "enabled": "启用订阅到期提醒",
+        "enabledHint": "开启后，系统会在订阅到期前 7 天、3 天、1 天各发送一次提醒。"
+      },
+      "emailProvider": {
+        "title": "邮件发送方式",
+        "description": "选择系统邮件的发送通道。",
+        "smtp": "SMTP",
+        "smtpDescription": "使用现有 SMTP 服务器发送邮件。",
+        "resend": "Resend",
+        "resendDescription": "通过 Resend HTTP API 发送邮件。",
+        "cloudflare": "Cloudflare",
+        "cloudflareDescription": "通过 Cloudflare Email Sending 发送邮件。"
+      },
+      "resend": {
+        "title": "Resend Email API",
+        "description": "配置 Resend，在不使用 SMTP 的情况下发送邮件。",
+        "apiKey": "API Key",
+        "apiKeyPlaceholder": "请输入 Resend API Key",
+        "apiKeyHint": "请在 Resend 后台创建 API Key，并妥善保管。",
+        "apiKeyConfiguredPlaceholder": "********",
+        "apiKeyConfiguredHint": "API Key 已配置，留空以保留当前值。",
+        "apiBaseUrl": "API Base URL",
+        "apiBaseUrlPlaceholder": "https://api.resend.com",
+        "apiBaseUrlHint": "默认使用 Resend 官方地址，除非你使用了代理。",
+        "fromEmail": "发件人邮箱",
+        "fromEmailPlaceholder": "noreply{'@'}example.com",
+        "fromName": "发件人名称",
+        "fromNamePlaceholder": "Sub2API"
+      },
+      "cloudflareEmail": {
+        "title": "Cloudflare Email Sending",
+        "description": "配置 Cloudflare Email Sending 发送系统邮件。",
+        "apiToken": "API Token",
+        "apiTokenPlaceholder": "请输入 Cloudflare API Token",
+        "apiTokenHint": "需要具备 Cloudflare Email Sending 发送权限。",
+        "apiTokenConfiguredPlaceholder": "********",
+        "apiTokenConfiguredHint": "API Token 已配置，留空以保留当前值。",
+        "accountId": "Account ID",
+        "accountIdPlaceholder": "请输入 Cloudflare Account ID",
+        "fromEmail": "发件人邮箱",
+        "fromEmailPlaceholder": "noreply{'@'}example.com",
+        "fromName": "发件人名称",
+        "fromNamePlaceholder": "Sub2API"
+      },
+      "cloudmail": {
+        "title": "Cloud-Mail",
+        "description": "配置自建的 Cloud-Mail 邮件服务发送系统邮件。",
+        "apiUrl": "Cloud-Mail API 地址",
+        "apiUrlPlaceholder": "https://mail.example.com",
+        "apiUrlHint": "输入你部署的 Cloud-Mail 实例完整地址。",
+        "adminEmail": "管理员邮箱",
+        "adminEmailPlaceholder": "admin@example.com",
+        "adminPassword": "管理员密码",
+        "adminPasswordPlaceholder": "请输入 Cloud-Mail 管理员密码",
+        "adminPasswordHint": "使用 Cloud-Mail 管理员账号密码进行 API 鉴权。",
+        "adminPasswordConfiguredPlaceholder": "********",
+        "adminPasswordConfiguredHint": "管理员密码已配置，留空以保留当前值。",
+        "fromEmail": "发件人邮箱",
+        "fromEmailPlaceholder": "选择一个账号或手动输入邮箱",
+        "fromEmailHint": "可点\"加载可用邮箱\"拉取列表选择，也可手动输入 Cloud-Mail 中已有的邮箱地址。",
+        "fromName": "发件人名称",
+        "fromNamePlaceholder": "Sub2API",
+        "loadAccounts": "加载可用邮箱",
+        "fillCredentialsFirst": "请先填写 API 地址和管理员凭据",
+        "noAccounts": "未找到可用邮箱账号",
+        "loadAccountsError": "加载邮箱列表失败"
+      },
+      "rateLimit429Cooldown": {
+        "title": "429 默认回避",
+        "description": "配置上游返回 429 且没有明确重置时间时的默认账号回避策略",
+        "enabled": "启用 429 默认回避",
+        "enabledHint": "收到无重置时间的 429 时暂停该账号调度，冷却后自动恢复",
+        "cooldownSeconds": "回避时长（秒）",
+        "cooldownSecondsHint": "默认回避持续时间（1-7200 秒）；上游返回明确 reset 时仍优先使用上游时间",
+        "saved": "429 默认回避设置保存成功",
+        "saveFailed": "保存 429 默认回避设置失败"
+      },
+      "usageRecords": {
+        "title": "使用记录",
+        "description": "与终端用户可见的用量及失败请求记录相关的设置。"
+      },
+      "user_error_view": {
+        "label": "允许用户查看自己的错误请求",
+        "description": "开启后，用户可在用量页查看自己失败请求的精简信息（不含内部/上游错误细节）。需运维监控开启才有数据。"
+      }
     },
     "errorPassthrough": {
       "title": "錯誤透傳規則",
@@ -6342,7 +7160,11 @@ const messages = {
     "notFoundTitle": "頁面不存在",
     "notFoundDesc": "該自訂頁面不存在或已刪除。",
     "notConfiguredTitle": "頁面連結未設定",
-    "notConfiguredDesc": "該自訂頁面的 URL 未正確設定。"
+    "notConfiguredDesc": "該自訂頁面的 URL 未正確設定。",
+    "tableOfContents": "目录",
+    "loadFailed": "页面加载失败",
+    "copyCode": "复制",
+    "copiedCode": "已复制 ✓"
   },
   "announcements": {
     "title": "公告",
@@ -6389,7 +7211,8 @@ const messages = {
     "expiresOn": "{date} 到期",
     "resetIn": "{time} 後重置",
     "windowNotActive": "等待首次使用",
-    "usageOf": "已使用 {used} / {limit}"
+    "usageOf": "已使用 {used} / {limit}",
+    "quotaEndsIn": "额度将在 {time} 后结束"
   },
   "onboarding": {
     "restartTour": "重新查看新手引導",
@@ -6552,7 +7375,9 @@ const messages = {
       "card": "金融卡",
       "link": "Link",
       "alipay_direct": "支付寶（直連）",
-      "wxpay_direct": "微信支付（直連）"
+      "wxpay_direct": "微信支付（直連）",
+      "airwallex": "Airwallex",
+      "usdt": "USDT"
     },
     "status": {
       "pending": "待支付",
@@ -6840,7 +7665,43 @@ const messages = {
         "expired": "已過期",
         "revoked": "已撤銷"
       }
-    }
+    },
+    "usdtRateLine": "实时汇率 1 USDT ≈ {cny} CNY · 实付约 {usdt} USDT",
+    "usdtRateLineNoAmount": "实时汇率 1 USDT ≈ {cny} CNY",
+    "usdtRateNote": "USDT 汇率每分钟更新，实际支付以收银台显示金额为准",
+    "airwallexLoadFailed": "Airwallex 支付组件加载失败，请刷新页面重试",
+    "airwallexMissingParams": "缺少 Airwallex 支付参数",
+    "airwallexPay": "Airwallex 支付"
+  },
+  "adminCompliance": {
+    "title": "部署与运营合规确认",
+    "blockingNotice": "继续使用控制台前，须完成部署与运营合规确认。",
+    "riskNotice": "本确认用于以清晰、显著、可留痕的方式提示自部署实例的合规义务与运营风险。",
+    "version": "协议版本",
+    "openDocument": "在 GitHub 查看协议文件",
+    "documentSource": "协议正文来自本项目仓库中的 Markdown 文件。修改协议内容时必须同步递增协议版本；已确认的旧版本将失效，控制台使用者须重新确认。",
+    "inputLabel": "请逐字输入以下确认短语",
+    "inputPlaceholder": "输入确认短语以继续",
+    "inputMismatch": "确认短语不匹配，请逐字输入提示内容。",
+    "legalNote": "本确认用于明确自部署实例与开源项目、著作权人、贡献者及维护者之间的非关联关系和责任边界；部署、运营或控制相关实例的主体应独立承担其适用义务。",
+    "logout": "退出登录",
+    "accept": "确认并继续",
+    "accepted": "合规确认已记录",
+    "acceptFailed": "提交确认失败"
+  },
+  "legal": {
+    "loadFailed": "文档加载失败",
+    "retryLater": "请稍后刷新页面重试。",
+    "notFound": "文档不存在",
+    "notFoundDescription": "当前条款文档不存在或已被管理员移除。",
+    "updatedAt": "更新日期：{date}",
+    "empty": "暂无正文内容",
+    "loginAgreement": "登录条款",
+    "adminCompliance": "部署与运营合规承诺"
+  },
+  "layout": {
+    "siteSubtitle": "订阅转 API 平台",
+    "copyright": "版权所有。"
   }
 }
 
