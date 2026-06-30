@@ -158,7 +158,7 @@ func TestGetModelPricing_FallbackWarnPerModelNotGlobal(t *testing.T) {
 	require.Equal(t, 0, strings.Count(out, "model: GLM-5.2"), out) // 大写经 ToLower 归一,不应单独成行
 }
 
-// 回归:glm-5.2 仍解析到 glm-5 兜底价(计费金额不变,防止日志改动掩盖未来计费回归)。
+// 回归:glm-5.2 使用独立定价（与 glm-5.1 同档位），防止被 glm-5 抢走导致计费回归。
 func TestGetModelPricing_GLM52FallsBackToGLM5Price(t *testing.T) {
 	svc := newTestBillingService()
 
@@ -166,9 +166,9 @@ func TestGetModelPricing_GLM52FallsBackToGLM5Price(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, got)
 
-	// glm-5 base：Input 1e-6 / Output 3.2e-6(见 TestGetFallbackPricing_FamilyMatching)。
-	require.InDelta(t, 1e-6, got.InputPricePerToken, 1e-12)
-	require.InDelta(t, 3.2e-6, got.OutputPricePerToken, 1e-12)
+	// glm-5.2 独立价格：Input 1.4e-6 / Output 4.4e-6（与 glm-5.1 同档，见 TestGetFallbackPricing_FamilyMatching）。
+	require.InDelta(t, 1.4e-6, got.InputPricePerToken, 1e-12)
+	require.InDelta(t, 4.4e-6, got.OutputPricePerToken, 1e-12)
 }
 
 func TestGetModelPricing_UnknownClaudeModelFallsBackToSonnet(t *testing.T) {
