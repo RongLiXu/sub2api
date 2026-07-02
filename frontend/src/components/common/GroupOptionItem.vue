@@ -55,6 +55,8 @@ import { useI18n } from 'vue-i18n'
 import GroupBadge from './GroupBadge.vue'
 import type { SubscriptionType, GroupPlatform } from '@/types'
 
+const { t } = useI18n()
+
 interface Props {
   name: string
   platform: GroupPlatform
