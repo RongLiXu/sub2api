@@ -713,7 +713,6 @@ export default {
     oidcCallbackPageTitle: 'OIDC Sign-In Callback',
     oauthCallbackPageTitle: 'OAuth Callback',
     wechatProviderName: 'WeChat',
-    dingtalkProviderName: 'DingTalk',
     wechatCallbackPageTitle: 'WeChat Sign-In Callback',
     wechatPaymentCallbackPageTitle: 'WeChat Payment Callback',
     wechatPayment: {
@@ -2652,9 +2651,6 @@ export default {
         imageTokenPrice: 'Image Output',
         imageOutputPrice: 'Image Output Price',
         pricePlaceholder: 'Default',
-        minTokens: 'Min',
-        maxTokens: 'Max',
-        inclusive: '(incl.)',
         intervals: 'Context Intervals (optional)',
         minTokens: 'Min',
         maxTokens: 'Max',
@@ -4265,9 +4261,6 @@ export default {
           builtInTitle: 'Built-in OAuth (Gemini CLI / Code Assist)',
           builtInDesc: 'Uses Google built-in client ID. No admin configuration required.',
           builtInRequirement: 'Requires a GCP project and Project ID.',
-          googleOneDesc: 'Personal account with Google One subscription quota',
-          codeAssistDesc: 'Enterprise-grade, requires a GCP project',
-          codeAssistRequirement: 'Requires an active GCP project with billing enabled',
           showAdvanced: 'Show advanced options (custom OAuth Client)',
           hideAdvanced: 'Hide advanced options (custom OAuth Client)',
           gcpProjectLink: 'Create project',
@@ -5031,7 +5024,6 @@ export default {
     ops: {
       title: 'Ops Monitoring',
       description: 'Operational monitoring and troubleshooting',
-      autoRefreshRemaining: '{seconds}s remaining',
       // Dashboard
       systemHealth: 'System Health',
       overview: 'Overview',
@@ -5193,57 +5185,6 @@ export default {
           totalOutputTokens: 'Total Output Tokens',
           avgDurationMs: 'Avg Duration (ms)',
           requestsWithFirstToken: 'Requests With First Token'
-        }
-      },
-      systemLogs: {
-        title: 'System Logs',
-        description: 'Newest-first logs with filtering, search, and filtered cleanup.',
-        loadFailed: 'Failed to load system logs',
-        empty: 'No system logs yet',
-        cleanupConfirm: 'Clean up system logs matching the current filters? This action cannot be undone.',
-        cleanupSuccess: 'Cleanup completed, deleted {count} logs',
-        cleanupFailed: 'Failed to clean up system logs',
-        cleanupFiltered: 'Clean Matching Logs',
-        refreshHealth: 'Refresh Health',
-        health: {
-          queue: 'Queue {depth}/{capacity}',
-          written: 'Written {count}',
-          dropped: 'Dropped {count}',
-          failed: 'Failed {count}'
-        },
-        runtime: {
-          title: 'Runtime Log Config (applies immediately)',
-          stacktraceLevel: 'Stacktrace Level',
-          samplingInitial: 'Sampling Initial',
-          samplingThereafter: 'Sampling Thereafter',
-          retentionDays: 'Retention Days',
-          caller: 'Caller',
-          sampling: 'Sampling',
-          saveAndApply: 'Save and Apply',
-          saveSuccess: 'Runtime log configuration applied',
-          saveFailed: 'Failed to save log configuration',
-          reset: 'Reset to Startup Defaults',
-          resetConfirm: 'Revert to startup config (env/yaml) and apply immediately?',
-          resetSuccess: 'Reverted to startup log configuration',
-          resetFailed: 'Failed to revert log configuration',
-          lastError: 'Last write error: {error}'
-        },
-        filters: {
-          timeRange: 'Time Range',
-          startTime: 'Start Time (optional)',
-          endTime: 'End Time (optional)',
-          level: 'Level',
-          component: 'Component',
-          componentPlaceholder: 'e.g. http.access',
-          platform: 'Platform',
-          model: 'Model',
-          keyword: 'Keyword',
-          keywordPlaceholder: 'message/request_id'
-        },
-        table: {
-          time: 'Time',
-          level: 'Level',
-          details: 'Log Details'
         }
       },
       fullscreen: {
@@ -7349,7 +7290,6 @@ export default {
     loadFailed: 'Failed to load page',
     copyCode: 'Copy',
     copiedCode: 'Copied ✓',
-    tableOfContents: 'Contents',
     copyCodeFailed: 'Failed'
   },
 

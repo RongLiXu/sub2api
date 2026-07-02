@@ -9,13 +9,27 @@ import (
 func TestDefaultSparkShadowModelMapping(t *testing.T) {
 	mapping := defaultSparkShadowModelMapping()
 
-	require.Len(t, mapping, 1, "spark 无 effort 变体，默认只含 base 模型")
-	require.Equal(t, "gpt-5.3-codex-spark", mapping["gpt-5.3-codex-spark"], "恒等映射：base 映射到自身")
+	expected := []string{
+		"gpt-5.3-codex-spark",
+		"gpt-5.3-codex-spark-low",
+		"gpt-5.3-codex-spark-medium",
+		"gpt-5.3-codex-spark-high",
+		"gpt-5.3-codex-spark-xhigh",
+	}
+
+	require.Len(t, mapping, len(expected), "spark 默认映射应覆盖 codexModelMap 中归一到 spark 的全部别名")
+	for _, model := range expected {
+		require.Equal(t, model, mapping[model], "恒等映射：%s 映射到自身", model)
+	}
 }
 
 func TestSparkModelVariantsDerivedFromAliases(t *testing.T) {
 	got := sparkModelVariants()
 	require.ElementsMatch(t, []string{
 		"gpt-5.3-codex-spark",
-	}, got, "spark 只有 base：effort 变体不存在，已从 codexModelMap 移除")
+		"gpt-5.3-codex-spark-low",
+		"gpt-5.3-codex-spark-medium",
+		"gpt-5.3-codex-spark-high",
+		"gpt-5.3-codex-spark-xhigh",
+	}, got, "spark 变体集合应从 codexModelMap 派生，避免别名表与影子账号默认映射漂移")
 }

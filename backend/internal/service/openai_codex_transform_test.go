@@ -908,7 +908,6 @@ func TestNormalizeCodexModel_Gpt53(t *testing.T) {
 		"gpt-5.4":                   "gpt-5.4",
 		"gpt5.5":                    "gpt-5.5",
 		"openai/gpt5.5":             "gpt-5.5",
-		"gpt-5.5-pro":               "gpt-5.5-pro",
 		"gpt5.5-pro":                "gpt-5.5-pro",
 		"openai/gpt5.5-pro":         "gpt-5.5-pro",
 		"gpt-5.5-pro-high":          "gpt-5.5-pro",

@@ -106,7 +106,7 @@
                 class="group flex min-h-[72px] w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-left transition hover:-translate-y-0.5 hover:border-primary-200 hover:bg-white hover:shadow-sm dark:border-dark-700 dark:bg-dark-800/70 dark:hover:border-primary-500/30 dark:hover:bg-dark-800"
               >
                 <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-white text-gray-700 ring-1 ring-gray-200 transition group-hover:bg-primary-50 group-hover:text-primary-700 group-hover:ring-primary-100 dark:bg-dark-900 dark:text-dark-200 dark:ring-dark-700 dark:group-hover:bg-primary-500/10 dark:group-hover:text-primary-200 dark:group-hover:ring-primary-500/20">
-                  <Icon :name="documentIcon(doc, index)" size="sm" />
+                  <Icon :name="documentIcon(index, doc.title, doc.id)" size="sm" />
                 </span>
                 <span class="min-w-0 flex-1">
                   <span class="block truncate text-sm font-semibold text-gray-950 dark:text-white">{{ doc.title }}</span>
@@ -166,8 +166,6 @@ const emit = defineEmits<{
   open: []
 }>()
 
-const { t } = useI18n()
-
 const dialogVisible = computed(() => props.visible && documents.value.length > 0)
 const documents = computed(() => props.documents.filter((doc) => doc.title.trim()))
 const updatedAt = computed(() => props.updatedAt || '')
@@ -192,8 +190,9 @@ function handleCheckboxChange(event: Event): void {
   }
 }
 
-function documentIcon(index: number, title: string): 'document' | 'shield' | 'globe' | 'cog' {
+function documentIcon(index: number, title: string, id?: string): 'document' | 'shield' | 'globe' | 'cog' {
   const normalizedTitle = title.toLowerCase()
+  const normalizedID = (id || '').toLowerCase()
   if (
     normalizedTitle.includes('policy') ||
     normalizedTitle.includes('privacy') ||

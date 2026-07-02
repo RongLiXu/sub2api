@@ -705,7 +705,6 @@ export default {
     oidcCallbackPageTitle: 'OIDC 登录回调',
     oauthCallbackPageTitle: 'OAuth 回调',
     wechatProviderName: '微信',
-    dingtalkProviderName: '钉钉',
     wechatCallbackPageTitle: '微信登录回调',
     wechatPaymentCallbackPageTitle: '微信支付回调',
     wechatPayment: {
@@ -2742,9 +2741,6 @@ export default {
         imageTokenPrice: '图片输出',
         imageOutputPrice: '图片输出价格',
         pricePlaceholder: '默认',
-        minTokens: 'Min',
-        maxTokens: 'Max',
-        inclusive: '（含）',
         intervals: '上下文区间定价（可选）',
         minTokens: '最小',
         maxTokens: '最大',
@@ -4436,9 +4432,6 @@ export default {
           builtInTitle: '内置授权（Gemini CLI / Code Assist）',
           builtInDesc: '使用 Google 内置客户端 ID，无需管理员配置。',
           builtInRequirement: '需要 GCP 项目并填写 Project ID。',
-          googleOneDesc: '个人账号，享受 Google One 订阅配额',
-          codeAssistDesc: '企业级，需要 GCP 项目',
-          codeAssistRequirement: '需要激活 GCP 项目并绑定信用卡',
           showAdvanced: '显示高级选项（自建 OAuth Client）',
           hideAdvanced: '隐藏高级选项（自建 OAuth Client）',
           gcpProjectLink: '创建项目',
@@ -5197,7 +5190,6 @@ export default {
     ops: {
       title: '运维监控',
       description: '运维监控与排障',
-      autoRefreshRemaining: '剩余 {seconds}s',
       // Dashboard
       systemHealth: '系统健康',
       overview: '概览',
@@ -5361,57 +5353,6 @@ export default {
           totalOutputTokens: '输出 Token 总数',
           avgDurationMs: '平均时长(ms)',
           requestsWithFirstToken: '首 Token 样本数'
-        }
-      },
-      systemLogs: {
-        title: '系统日志',
-        description: '默认按最新时间倒序，支持筛选搜索与按条件清理。',
-        loadFailed: '系统日志加载失败',
-        empty: '暂无系统日志',
-        cleanupConfirm: '确认按当前筛选条件清理系统日志？该操作不可撤销。',
-        cleanupSuccess: '清理完成，删除 {count} 条日志',
-        cleanupFailed: '清理系统日志失败',
-        cleanupFiltered: '按当前筛选清理',
-        refreshHealth: '刷新健康指标',
-        health: {
-          queue: '队列 {depth}/{capacity}',
-          written: '写入 {count}',
-          dropped: '丢弃 {count}',
-          failed: '失败 {count}'
-        },
-        runtime: {
-          title: '运行时日志配置（实时生效）',
-          stacktraceLevel: '堆栈阈值',
-          samplingInitial: '采样初始',
-          samplingThereafter: '采样后续',
-          retentionDays: '保留天数',
-          caller: 'caller',
-          sampling: 'sampling',
-          saveAndApply: '保存并生效',
-          saveSuccess: '日志运行时配置已生效',
-          saveFailed: '保存日志配置失败',
-          reset: '回滚默认值',
-          resetConfirm: '确认回滚为启动配置（env/yaml）并立即生效？',
-          resetSuccess: '已回滚到启动日志配置',
-          resetFailed: '回滚日志配置失败',
-          lastError: '最近写入错误：{error}'
-        },
-        filters: {
-          timeRange: '时间范围',
-          startTime: '开始时间（可选）',
-          endTime: '结束时间（可选）',
-          level: '级别',
-          component: '组件',
-          componentPlaceholder: '如 http.access',
-          platform: '平台',
-          model: '模型',
-          keyword: '关键词',
-          keywordPlaceholder: '消息/request_id'
-        },
-        table: {
-          time: '时间',
-          level: '级别',
-          details: '日志详细信息'
         }
       },
       customTimeRange: {
@@ -7516,7 +7457,6 @@ export default {
     loadFailed: '页面加载失败',
     copyCode: '复制',
     copiedCode: '已复制 ✓',
-    tableOfContents: '目录',
     copyCodeFailed: '失败'
   },
 

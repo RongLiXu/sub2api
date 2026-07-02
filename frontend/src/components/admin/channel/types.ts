@@ -133,16 +133,6 @@ export type IntervalValidationMessages = {
   overlap: (params: { prevIndex: number; currentIndex: number; prevMax: string; currentMin: number }) => string
 }
 
-const defaultIntervalValidationMessages: IntervalValidationMessages = {
-  minTokensNegative: ({ index, min }) => `Interval #${index}: minimum tokens (${min}) cannot be negative`,
-  maxTokensPositive: ({ index, max }) => `Interval #${index}: maximum tokens (${max}) must be greater than 0`,
-  maxTokensGreaterThanMin: ({ index, max, min }) =>
-    `Interval #${index}: maximum tokens (${max}) must be greater than minimum tokens (${min})`,
-  priceNegative: ({ index, name }) => `Interval #${index}: ${name} cannot be negative`,
-  unlimitedLast: ({ index }) => `Interval #${index}: unlimited interval (empty maximum tokens) must be the last one`,
-  overlap: ({ prevIndex, currentIndex, prevMax, currentMin }) =>
-    `Intervals #${prevIndex} and #${currentIndex} overlap: previous upper bound (${prevMax}) is greater than current lower bound (${currentMin})`,
-}
 
 export function validateIntervals(
   intervals: IntervalFormEntry[],

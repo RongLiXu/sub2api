@@ -83,8 +83,6 @@ interface Props {
   showCheckmark?: boolean
 }
 
-const { t } = useI18n()
-
 const props = withDefaults(defineProps<Props>(), {
   subscriptionType: 'standard',
   selected: false,

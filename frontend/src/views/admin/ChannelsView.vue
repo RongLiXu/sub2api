@@ -655,28 +655,6 @@ import { useKeyedDebouncedSearch } from '@/composables/useKeyedDebouncedSearch'
 const { t } = useI18n()
 const appStore = useAppStore()
 
-const intervalValidationMessages = computed(() => ({
-  minTokensNegative: ({ index, min }: { index: number; min: number }) =>
-    t('admin.channels.validation.minTokensNegative', { index, min }),
-  maxTokensPositive: ({ index, max }: { index: number; max: number }) =>
-    t('admin.channels.validation.maxTokensPositive', { index, max }),
-  maxTokensGreaterThanMin: ({ index, max, min }: { index: number; max: number; min: number }) =>
-    t('admin.channels.validation.maxTokensGreaterThanMin', { index, max, min }),
-  priceNegative: ({ index, name }: { index: number; name: string }) =>
-    t('admin.channels.validation.priceNegative', {
-      index,
-      name: t(`admin.channels.validation.priceFields.${name}`),
-    }),
-  unlimitedLast: ({ index }: { index: number }) =>
-    t('admin.channels.validation.unlimitedLast', { index }),
-  overlap: ({
-    prevIndex,
-    currentIndex,
-    prevMax,
-    currentMin,
-  }: { prevIndex: number; currentIndex: number; prevMax: string; currentMin: number }) =>
-    t('admin.channels.validation.overlap', { prevIndex, currentIndex, prevMax, currentMin }),
-}))
 
 // Web Search global enabled state (loaded once on mount)
 const webSearchGlobalEnabled = ref(false)
@@ -1520,7 +1498,7 @@ async function handleSubmit() {
   for (const section of form.platforms.filter(s => s.enabled)) {
     for (const entry of section.model_pricing) {
       if (!entry.intervals || entry.intervals.length === 0) continue
-      const intervalErr = validateIntervals(entry.intervals, entry.billing_mode, intervalValidationMessages.value)
+      const intervalErr = validateIntervals(entry.intervals, entry.billing_mode, t)
       if (intervalErr) {
         const platformLabel = t('admin.groups.platforms.' + section.platform, section.platform)
         const modelLabel = entry.models.join(', ') || t('admin.channels.form.unnamed')

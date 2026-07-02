@@ -528,7 +528,7 @@ func TestCalculateCost_TokenPricingTiers(t *testing.T) {
 	require.InDelta(t, 1*8e-7, longInputCost.CacheReadCost, 1e-12)
 }
 
-func TestCalculateCost_OpenAIGPT55ProUsesGPT55PricingPolicy(t *testing.T) {
+func TestCalculateCost_OpenAIGPT55ProUsesGPT55ProPricingPolicy(t *testing.T) {
 	svc := newTestBillingService()
 
 	tokens := UsageTokens{
@@ -539,8 +539,8 @@ func TestCalculateCost_OpenAIGPT55ProUsesGPT55PricingPolicy(t *testing.T) {
 	cost, err := svc.CalculateCost("gpt-5.5-pro", tokens, 1.0)
 	require.NoError(t, err)
 
-	expectedInput := float64(tokens.InputTokens) * 2.5e-6 * 2.0
-	expectedOutput := float64(tokens.OutputTokens) * 15e-6 * 1.5
+	expectedInput := float64(tokens.InputTokens) * 30e-6 * 2.0
+	expectedOutput := float64(tokens.OutputTokens) * 180e-6 * 1.5
 	require.InDelta(t, expectedInput, cost.InputCost, 1e-10)
 	require.InDelta(t, expectedOutput, cost.OutputCost, 1e-10)
 	require.InDelta(t, expectedInput+expectedOutput, cost.TotalCost, 1e-10)
