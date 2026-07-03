@@ -73,6 +73,15 @@
               <Icon name="trash" size="md" class="mr-2" />
               {{ t('admin.proxies.batchDeleteAction') }}
             </button>
+            <button
+              @click="showDeleteFailedDialog = true"
+              :disabled="deletingFailedProxies || loading"
+              class="btn btn-danger"
+              :title="t('admin.proxies.deleteFailedAction')"
+            >
+              <Icon name="trash" size="md" class="mr-2" />
+              {{ t('admin.proxies.deleteFailedAction') }}
+            </button>
             <button @click="showImportData = true" class="btn btn-secondary">
               {{ t('admin.proxies.dataImport') }}
             </button>
@@ -257,13 +266,8 @@
           </template>
 
           <template #cell-status="{ value }">
-            <span
-              :class="[
-                'badge',
-                value === 'active' ? 'badge-success' : value === 'expired' ? 'badge-danger' : 'badge-danger'
-              ]"
-            >
-              {{ t('admin.accounts.status.' + value) }}
+            <span :class="['badge', proxyStatusBadgeClass(value)]">
+              {{ proxyStatusLabel(value) }}
             </span>
           </template>
 
@@ -825,6 +829,16 @@
       @cancel="showBatchDeleteDialog = false"
     />
     <ConfirmDialog
+      :show="showDeleteFailedDialog"
+      :title="t('admin.proxies.deleteFailedAction')"
+      :message="t('admin.proxies.deleteFailedConfirm')"
+      :confirm-text="t('common.delete')"
+      :cancel-text="t('common.cancel')"
+      :danger="true"
+      @confirm="confirmDeleteFailedProxies"
+      @cancel="showDeleteFailedDialog = false"
+    />
+    <ConfirmDialog
       :show="showExportDataDialog"
       :title="t('admin.proxies.dataExport')"
       :message="t('admin.proxies.dataExportConfirmMessage')"
@@ -1021,7 +1035,8 @@ const statusOptions = computed(() => [
   { value: '', label: t('admin.proxies.allStatus') },
   { value: 'active', label: t('admin.accounts.status.active') },
   { value: 'inactive', label: t('admin.accounts.status.inactive') },
-  { value: 'expired', label: t('admin.proxies.expired') }
+  { value: 'expired', label: t('admin.proxies.expired') },
+  { value: 'failed', label: t('admin.proxies.failed') }
 ])
 
 // Form options
@@ -1034,7 +1049,8 @@ const protocolSelectOptions = computed(() => [
 
 const editStatusOptions = computed(() => [
   { value: 'active', label: t('admin.accounts.status.active') },
-  { value: 'inactive', label: t('admin.accounts.status.inactive') }
+  { value: 'inactive', label: t('admin.accounts.status.inactive') },
+  { value: 'failed', label: t('admin.proxies.failed') }
 ])
 
 const proxies = ref<Proxy[]>([])
@@ -1065,6 +1081,7 @@ const editPasswordDirty = ref(false)
 const showImportData = ref(false)
 const showDeleteDialog = ref(false)
 const showBatchDeleteDialog = ref(false)
+const showDeleteFailedDialog = ref(false)
 const showExportDataDialog = ref(false)
 const showAccountsModal = ref(false)
 const submitting = ref(false)
@@ -1073,6 +1090,7 @@ const testingProxyIds = ref<Set<number>>(new Set())
 const qualityCheckingProxyIds = ref<Set<number>>(new Set())
 const batchTesting = ref(false)
 const batchQualityChecking = ref(false)
+const deletingFailedProxies = ref(false)
 const proxyTableRef = ref<HTMLElement | null>(null)
 const {
   selectedSet: selectedProxyIds,
@@ -1141,7 +1159,7 @@ const editForm = reactive({
   port: 8080,
   username: '',
   password: '',
-  status: 'active' as 'active' | 'inactive' | 'expired',
+  status: 'active' as 'active' | 'inactive' | 'expired' | 'failed',
   expires_at: '' as string,
   fallback_mode: 'none' as 'none' | 'proxy' | 'direct',
   backup_proxy_id: null as number | null,
@@ -1181,7 +1199,7 @@ const toggleSelectAllVisible = (event: Event) => {
 
 const buildProxyQueryFilters = () => ({
   protocol: filters.protocol || undefined,
-  status: (filters.status || undefined) as 'active' | 'inactive' | 'expired' | undefined,
+  status: (filters.status || undefined) as 'active' | 'inactive' | 'expired' | 'failed' | undefined,
   search: searchQuery.value || undefined,
   sort_by: sortState.sort_by,
   sort_order: sortState.sort_order
@@ -1753,6 +1771,17 @@ const expiryLabel = (row: Proxy): string => {
 const expiryBadgeClass = (row: Proxy): string =>
   proxyExpiryBadgeClass(row.expires_at, row.status)
 
+const proxyStatusBadgeClass = (status?: string) => {
+  if (status === 'active') return 'badge-success'
+  return 'badge-danger'
+}
+
+const proxyStatusLabel = (status?: string) => {
+  if (status === 'failed') return t('admin.proxies.failed')
+  if (status === 'expired') return t('admin.proxies.expired')
+  return t('admin.accounts.status.' + (status || 'inactive'))
+}
+
 const qualityOverallClass = (status?: string) => {
   if (status === 'healthy') return 'badge-success'
   if (status === 'warn') return 'badge-warning'
@@ -1782,7 +1811,7 @@ const qualityTargetLabel = (target: string) => {
   }
 }
 
-const fetchAllProxiesForBatch = async (): Promise<Proxy[]> => {
+const fetchAllProxiesForBatch = async (statusOverride?: 'active' | 'inactive' | 'expired' | 'failed'): Promise<Proxy[]> => {
   const pageSize = 200
   const result: Proxy[] = []
   let page = 1
@@ -1794,7 +1823,33 @@ const fetchAllProxiesForBatch = async (): Promise<Proxy[]> => {
       pageSize,
       {
         protocol: filters.protocol || undefined,
-        status: filters.status as any,
+        status: statusOverride ?? (filters.status as any),
+        search: searchQuery.value || undefined,
+        sort_by: sortState.sort_by,
+        sort_order: sortState.sort_order
+      }
+    )
+    result.push(...response.items)
+    totalPages = response.pages || 1
+    page++
+  }
+
+  return result
+}
+
+const fetchAllFailedProxiesForDelete = async (): Promise<Proxy[]> => {
+  const pageSize = 200
+  const result: Proxy[] = []
+  let page = 1
+  let totalPages = 1
+
+  while (page <= totalPages) {
+    const response = await adminAPI.proxies.list(
+      page,
+      pageSize,
+      {
+        protocol: filters.protocol || undefined,
+        status: 'failed',
         search: searchQuery.value || undefined,
         sort_by: sortState.sort_by,
         sort_order: sortState.sort_order
@@ -1982,6 +2037,40 @@ const confirmBatchDelete = async () => {
   } catch (error: any) {
     appStore.showError(error.response?.data?.detail || t('admin.proxies.batchDeleteFailed'))
     console.error('Error batch deleting proxies:', error)
+  }
+}
+
+const confirmDeleteFailedProxies = async () => {
+  if (deletingFailedProxies.value) return
+
+  deletingFailedProxies.value = true
+  try {
+    const failedProxies = await fetchAllFailedProxiesForDelete()
+    const ids = failedProxies.map((proxy) => proxy.id)
+    if (ids.length === 0) {
+      appStore.showInfo(t('admin.proxies.deleteFailedEmpty'))
+      showDeleteFailedDialog.value = false
+      return
+    }
+
+    const result = await adminAPI.proxies.batchDelete(ids)
+    const deleted = result.deleted_ids?.length || 0
+    const skipped = result.skipped?.length || 0
+
+    if (deleted > 0) {
+      appStore.showSuccess(t('admin.proxies.deleteFailedDone', { deleted, skipped }))
+    } else if (skipped > 0) {
+      appStore.showInfo(t('admin.proxies.batchDeleteSkipped', { skipped }))
+    }
+
+    removeSelectedProxies(result.deleted_ids || [])
+    showDeleteFailedDialog.value = false
+    loadProxies()
+  } catch (error: any) {
+    appStore.showError(error.response?.data?.detail || t('admin.proxies.deleteFailedFailed'))
+    console.error('Error deleting failed proxies:', error)
+  } finally {
+    deletingFailedProxies.value = false
   }
 }
 

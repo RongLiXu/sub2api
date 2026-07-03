@@ -728,7 +728,7 @@ export interface Proxy {
   port: number
   username: string | null
   password?: string | null
-  status: 'active' | 'inactive' | 'expired'
+  status: 'active' | 'inactive' | 'expired' | 'failed'
   account_count?: number // Number of accounts using this proxy
   latency_ms?: number
   latency_status?: 'success' | 'failed'
@@ -1145,7 +1145,7 @@ export interface UpdateProxyRequest {
   port?: number
   username?: string | null
   password?: string | null
-  status?: 'active' | 'inactive'
+  status?: 'active' | 'inactive' | 'failed'
   expires_at?: number | null   // unix 秒；null/0 = 永不过期
   fallback_mode?: 'none' | 'proxy' | 'direct'
   backup_proxy_id?: number | null
