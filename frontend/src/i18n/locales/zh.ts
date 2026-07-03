@@ -4754,7 +4754,7 @@ export default {
       batchTestFailed: '批量测试失败',
       batchDeleteAction: '删除',
       deleteFailedAction: '删除失败代理',
-      deleteFailedConfirm: '确定删除当前筛选范围内所有失败状态的代理吗？已被账号使用的将自动跳过。',
+      deleteFailedConfirm: '确定删除当前协议/搜索条件下所有失败状态的代理吗？已被账号使用的将自动跳过。',
       deleteFailedEmpty: '当前筛选范围内没有失败状态的代理',
       deleteFailedDone: '已删除 {deleted} 个失败代理，跳过 {skipped} 个',
       deleteFailedFailed: '删除失败代理失败',

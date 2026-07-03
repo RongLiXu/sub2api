@@ -4610,7 +4610,7 @@ export default {
       batchTestFailed: 'Batch test failed',
       batchDeleteAction: 'Delete',
       deleteFailedAction: 'Delete Failed',
-      deleteFailedConfirm: 'Delete all failed proxies in the current filter scope? In-use ones will be skipped.',
+      deleteFailedConfirm: 'Delete all failed proxies matching the current protocol/search filters? In-use ones will be skipped.',
       deleteFailedEmpty: 'No failed proxies in the current filter scope',
       deleteFailedDone: 'Deleted {deleted} failed proxies, skipped {skipped}',
       deleteFailedFailed: 'Failed to delete failed proxies',
