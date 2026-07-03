@@ -115,3 +115,69 @@ func TestUpdateAccount_EmptyCredentialsSkipsUpdate(t *testing.T) {
 	require.Equal(t, "rt-existing", repo.account.Credentials["refresh_token"], "空 credentials 不应触碰已有 token")
 	require.Equal(t, "renamed", repo.account.Name)
 }
+
+func TestUpdateAccount_PreservesModelMappingWhenIncomingOmits(t *testing.T) {
+	accountID := int64(205)
+	existingMapping := map[string]any{
+		"gpt-5": "gpt-5-codex",
+	}
+	existingCompactMapping := map[string]any{
+		"gpt-5.4": "gpt-5.4-openai-compact",
+	}
+	repo := &updateAccountCredsRepoStub{
+		account: &Account{
+			ID:       accountID,
+			Platform: PlatformOpenAI,
+			Type:     AccountTypeOAuth,
+			Status:   StatusActive,
+			Credentials: map[string]any{
+				"access_token":          "at-old",
+				"refresh_token":         "rt-old",
+				"model_mapping":         existingMapping,
+				"compact_model_mapping": existingCompactMapping,
+			},
+		},
+	}
+	svc := &adminServiceImpl{accountRepo: repo}
+
+	updated, err := svc.UpdateAccount(context.Background(), accountID, &UpdateAccountInput{
+		Type: AccountTypeOAuth,
+		Credentials: map[string]any{
+			"access_token":  "at-new",
+			"refresh_token": "rt-new",
+		},
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+	require.Equal(t, "at-new", repo.account.Credentials["access_token"])
+	require.Equal(t, "rt-new", repo.account.Credentials["refresh_token"])
+	require.Equal(t, existingMapping, repo.account.Credentials["model_mapping"], "重新授权未传模型限制时应保留")
+	require.Equal(t, existingCompactMapping, repo.account.Credentials["compact_model_mapping"], "重新授权未传 compact 模型限制时应保留")
+}
+
+func TestUpdateAccount_ExplicitModelMappingOverwrites(t *testing.T) {
+	accountID := int64(206)
+	repo := &updateAccountCredsRepoStub{
+		account: &Account{
+			ID:       accountID,
+			Platform: PlatformOpenAI,
+			Type:     AccountTypeOAuth,
+			Status:   StatusActive,
+			Credentials: map[string]any{
+				"model_mapping": map[string]any{"gpt-5": "gpt-5-codex"},
+			},
+		},
+	}
+	svc := &adminServiceImpl{accountRepo: repo}
+
+	updated, err := svc.UpdateAccount(context.Background(), accountID, &UpdateAccountInput{
+		Credentials: map[string]any{
+			"model_mapping": map[string]any{},
+		},
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+	require.Equal(t, map[string]any{}, repo.account.Credentials["model_mapping"], "显式传入空映射仍应允许清空模型限制")
+}
