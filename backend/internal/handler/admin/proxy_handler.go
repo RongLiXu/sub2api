@@ -47,7 +47,7 @@ type UpdateProxyRequest struct {
 	Port           int    `json:"port" binding:"omitempty,min=1,max=65535"`
 	Username       string `json:"username"`
 	Password       string `json:"password"`
-	Status         string `json:"status" binding:"omitempty,oneof=active inactive"`
+	Status         string `json:"status" binding:"omitempty,oneof=active inactive failed"`
 	ExpiresAt      *int64 `json:"expires_at"`
 	FallbackMode   string `json:"fallback_mode" binding:"omitempty,oneof=none proxy direct"`
 	BackupProxyID  *int64 `json:"backup_proxy_id"`

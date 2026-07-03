@@ -8,6 +8,7 @@ const (
 	StatusUnused   = "unused"
 	StatusUsed     = "used"
 	StatusExpired  = "expired"
+	StatusFailed   = "failed"
 )
 
 // Role constants

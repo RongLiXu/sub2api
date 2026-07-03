@@ -14,6 +14,7 @@ const (
 	StatusUnused   = domain.StatusUnused
 	StatusUsed     = domain.StatusUsed
 	StatusExpired  = domain.StatusExpired
+	StatusFailed   = domain.StatusFailed
 )
 
 // Role constants

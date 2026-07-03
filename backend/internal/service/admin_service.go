@@ -3662,6 +3662,10 @@ func (s *adminServiceImpl) TestProxy(ctx context.Context, id int64) (*ProxyTestR
 			Message:   err.Error(),
 			UpdatedAt: time.Now(),
 		})
+		proxy.Status = StatusFailed
+		if updateErr := s.proxyRepo.Update(ctx, proxy); updateErr != nil {
+			return nil, fmt.Errorf("mark proxy failed: %w", updateErr)
+		}
 		return &ProxyTestResult{
 			Success: false,
 			Message: err.Error(),
