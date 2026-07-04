@@ -147,6 +147,15 @@ def main() -> int:
 
     with open(args.audit, "r", encoding="utf-8") as handle:
         audit = json.load(handle)
+    if not isinstance(audit, dict):
+        sys.stderr.write("Invalid pnpm audit JSON: expected object\n")
+        return 1
+    if audit.get("error"):
+        error = audit.get("error") or {}
+        code = error.get("code", "unknown") if isinstance(error, dict) else "unknown"
+        message = error.get("message", str(error)) if isinstance(error, dict) else str(error)
+        sys.stderr.write(f"pnpm audit failed: {code}: {message}\n")
+        return 1
 
     # 读取异常清单并建立索引，便于快速匹配包名 + advisory。
     exceptions = parse_exceptions(args.exceptions)
