@@ -83,10 +83,6 @@ func (s *accountRepoStub) ListAllWithFilters(context.Context, string, string, st
 	return nil, nil
 }
 
-func (s *accountRepoStub) ListAllWithFilters(context.Context, string, string, string, string, int64, string) ([]Account, error) {
-	return nil, nil
-}
-
 func (s *accountRepoStub) ListWithFilters(ctx context.Context, params pagination.PaginationParams, platform, accountType, status, search, email string, groupID int64, privacyMode string) ([]Account, *pagination.PaginationResult, error) {
 	panic("unexpected ListWithFilters call")
 }

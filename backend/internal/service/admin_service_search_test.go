@@ -30,10 +30,6 @@ func (s *accountRepoStubForAdminList) ListAllWithFilters(context.Context, string
 	return nil, nil
 }
 
-func (s *accountRepoStubForAdminList) ListAllWithFilters(context.Context, string, string, string, string, int64, string) ([]Account, error) {
-	return nil, nil
-}
-
 func (s *accountRepoStubForAdminList) ListWithFilters(_ context.Context, params pagination.PaginationParams, platform, accountType, status, search, email string, groupID int64, privacyMode string) ([]Account, *pagination.PaginationResult, error) {
 	s.listWithFiltersCalls++
 	s.listWithFiltersParams = params

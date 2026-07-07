@@ -9,9 +9,9 @@ import (
 )
 
 var codexModelMap = map[string]string{
-	"gpt-5.6-sol":          "gpt-5.6-sol",
-	"gpt-5.6-terra":        "gpt-5.6-terra",
-	"gpt-5.6-luna":         "gpt-5.6-luna",
+	"gpt-5.6-sol":                "gpt-5.6-sol",
+	"gpt-5.6-terra":              "gpt-5.6-terra",
+	"gpt-5.6-luna":               "gpt-5.6-luna",
 	"gpt-5.5":                    "gpt-5.5",
 	"codex-auto-review":          "codex-auto-review",
 	"gpt-5.5-none":               "gpt-5.5",
