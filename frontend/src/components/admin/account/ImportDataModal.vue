@@ -207,29 +207,8 @@ const openFilePicker = () => {
 
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
-  file.value = target.files?.[0] || null
   setSelectedFiles(target.files)
   target.value = ''
-}
-
-async function loadImportTargetGroups() {
-  try {
-    const pageSize = 1000
-    let page = 1
-    let totalPages = 1
-    const groups: AdminGroup[] = []
-
-    do {
-      const response = await adminAPI.groups.list(page, pageSize, undefined)
-      groups.push(...response.items)
-      totalPages = response.pages || page
-      page += 1
-    } while (page <= totalPages)
-
-    importTargetGroups.value = groups
-  } catch {
-    importTargetGroups.value = []
-  }
 }
 
 async function loadImportTargetGroups() {
