@@ -1,15 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { flushPromises, mount } from '@vue/test-utils'
+import { flushPromises, flushPromises, mount } from '@vue/test-utils'
 import ImportDataModal from '@/components/admin/account/ImportDataModal.vue'
 import { adminAPI } from '@/api/admin'
 
 const showError = vi.fn()
 const showSuccess = vi.fn()
+const showWarning = vi.fn()
 
 vi.mock('@/stores/app', () => ({
   useAppStore: () => ({
     showError,
-    showSuccess
+    showSuccess,
+    showWarning
   })
 }))
 
@@ -56,6 +58,33 @@ describe('ImportDataModal', () => {
       }
     })
 
+const makeJsonFile = (name: string, content: string, type = 'application/json') => {
+  const file = new File([content], name, { type })
+  Object.defineProperty(file, 'text', {
+    value: () => Promise.resolve(content)
+  })
+  return file
+}
+
+const setInputFiles = (element: Element, files: File[]) => {
+  Object.defineProperty(element, 'files', {
+    value: files,
+    configurable: true
+  })
+}
+
+describe('ImportDataModal', () => {
+  beforeEach(async () => {
+    showError.mockReset()
+    showSuccess.mockReset()
+    showWarning.mockReset()
+    const { adminAPI } = await import('@/api/admin')
+    vi.mocked(adminAPI.accounts.importData).mockReset()
+  })
+
+  it('未选择文件时提示错误', async () => {
+    const wrapper = mountModal()
+
     await wrapper.find('form').trigger('submit')
     expect(showError).toHaveBeenCalledWith('admin.accounts.dataImportSelectFile')
   })
@@ -70,6 +99,69 @@ describe('ImportDataModal', () => {
       }
     })
 
+    await Promise.resolve()
+
+    expect(adminAPI.groups.list).toHaveBeenCalledWith(1, 1000, undefined)
+    expect(wrapper.text()).toContain('Claude 主分组')
+    expect(wrapper.text()).toContain('Claude 停用分组')
+    expect(wrapper.text()).toContain('admin.accounts.dataImportGroupInactive')
+
+    const inactiveCheckbox = wrapper
+      .findAll('label')
+      .find((label) => label.text().includes('Claude 停用分组'))
+      ?.find('input[type="checkbox"]')
+    expect(inactiveCheckbox?.exists()).toBe(true)
+    expect(inactiveCheckbox?.attributes('disabled')).toBeUndefined()
+  })
+
+  it('选择导入目标分组后提交请求携带 group_ids 且不修改数据导入文件', async () => {
+    vi.mocked(adminAPI.groups.list).mockResolvedValue({
+      items: [
+        createGroup({ id: 1, name: 'Claude 主分组', platform: 'anthropic' }),
+        createGroup({ id: 2, name: 'Claude 停用分组', platform: 'anthropic', status: 'inactive' })
+      ],
+      total: 2,
+      page: 1,
+      page_size: 1000,
+      pages: 1
+    })
+    vi.mocked(adminAPI.accounts.importData).mockResolvedValue({
+      proxy_created: 0,
+      proxy_reused: 0,
+      proxy_failed: 0,
+      account_created: 1,
+      account_failed: 0,
+      errors: []
+    })
+
+    const wrapper = mount(ImportDataModal, {
+      props: { show: true },
+      global: {
+        stubs: {
+          BaseDialog: { template: '<div><slot /><slot name="footer" /></div>' }
+        }
+      }
+    })
+    await flushPromises()
+
+    const checkboxes = wrapper.findAll('input[type="checkbox"]')
+    await checkboxes[0].setValue(true)
+    await checkboxes[1].setValue(true)
+
+    const dataPayload = {
+      exported_at: '2026-01-01T00:00:00Z',
+      proxies: [],
+      accounts: [
+        {
+          name: 'Claude Account',
+          platform: 'anthropic',
+          type: 'oauth',
+          credentials: {},
+          concurrency: 1,
+          priority: 1
+        }
+      ]
+    }
     const input = wrapper.find('input[type="file"]')
     const file = new File(['invalid json'], 'data.json', { type: 'application/json' })
     Object.defineProperty(file, 'text', {
@@ -81,9 +173,16 @@ describe('ImportDataModal', () => {
 
     await input.trigger('change')
     await wrapper.find('form').trigger('submit')
-    await Promise.resolve()
+    await flushPromises()
 
-    expect(showError).toHaveBeenCalledWith('admin.accounts.dataImportParseFailed')
+    expect(showError).toHaveBeenCalledWith('admin.accounts.dataImportCompletedWithErrors')
+    expect(wrapper.emitted('imported')).toBeUndefined()
+
+    // 第二个 btn-secondary 是 footer 的取消按钮(第一个是选择文件)
+    await wrapper.findAll('button.btn-secondary')[1]!.trigger('click')
+
+    expect(wrapper.emitted('imported')).toHaveLength(1)
+    expect(wrapper.emitted('close')).toHaveLength(1)
   })
 
   it('加载所有未删除分组并标识停用分组', async () => {
