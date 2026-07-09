@@ -189,9 +189,9 @@ func (h *SettingHandler) SendTestEmail(c *gin.Context) {
 
 // ListCloudMailAccountsRequest 查询 Cloud-Mail 账号列表请求
 type ListCloudMailAccountsRequest struct {
-	APIURL    string `json:"api_url"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
+	APIURL   string `json:"api_url"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 // ListCloudMailAccounts 获取 Cloud-Mail 实例的可用邮箱账号列表

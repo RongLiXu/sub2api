@@ -44,7 +44,6 @@
 
 <script setup lang="ts">
 import { computed, watch, onMounted, onUnmounted, ref, nextTick } from 'vue'
-import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
 
 // 生成唯一ID以避免多个对话框时ID冲突
@@ -80,7 +79,6 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
-const { t } = useI18n()
 
 // Custom z-index style (overrides the default z-50 from CSS)
 const zIndexStyle = computed(() => {

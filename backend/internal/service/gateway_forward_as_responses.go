@@ -248,6 +248,20 @@ func mergeClaudeUsageNode(dst *ClaudeUsage, node gjson.Result, replace bool) {
 	cacheRead := int(node.Get("cache_read_input_tokens").Int())
 	cacheCreate := int(node.Get("cache_creation_input_tokens").Int())
 
+	// Fallback: some upstreams use "cached_tokens" instead of "cache_read_input_tokens".
+	if cacheRead == 0 {
+		if cached := node.Get("cached_tokens").Int(); cached > 0 {
+			cacheRead = int(cached)
+		}
+	}
+
+	// cache_creation breakdown: accumulate 5m + 1h when total is not directly provided.
+	cc5m := int(node.Get("cache_creation.ephemeral_5m_input_tokens").Int())
+	cc1h := int(node.Get("cache_creation.ephemeral_1h_input_tokens").Int())
+	if cacheCreate == 0 && (cc5m > 0 || cc1h > 0) {
+		cacheCreate = cc5m + cc1h
+	}
+
 	if replace {
 		if inputTokens > 0 {
 			dst.InputTokens = inputTokens
@@ -261,11 +275,19 @@ func mergeClaudeUsageNode(dst *ClaudeUsage, node gjson.Result, replace bool) {
 		if cacheCreate > 0 {
 			dst.CacheCreationInputTokens = cacheCreate
 		}
+		if cc5m > 0 || node.Get("cache_creation.ephemeral_5m_input_tokens").Exists() {
+			dst.CacheCreation5mTokens = cc5m
+		}
+		if cc1h > 0 || node.Get("cache_creation.ephemeral_1h_input_tokens").Exists() {
+			dst.CacheCreation1hTokens = cc1h
+		}
 	} else {
 		dst.InputTokens += inputTokens
 		dst.OutputTokens += outputTokens
 		dst.CacheReadInputTokens += cacheRead
 		dst.CacheCreationInputTokens += cacheCreate
+		dst.CacheCreation5mTokens += cc5m
+		dst.CacheCreation1hTokens += cc1h
 	}
 }
 
