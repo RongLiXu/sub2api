@@ -35,6 +35,10 @@ func (c updateTestGitHubClient) FetchLatestRelease(context.Context, string) (*Gi
 	return c.release, c.err
 }
 
+func (c updateTestGitHubClient) FetchRecentReleases(context.Context, string, int) ([]*GitHubRelease, error) {
+	return nil, nil
+}
+
 func (c updateTestGitHubClient) DownloadFile(context.Context, string, string, int64) error {
 	return nil
 }
