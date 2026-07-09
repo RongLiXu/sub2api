@@ -84,6 +84,12 @@ func (s *GatewayService) forwardAnthropicAPIKeyPassthroughWithInput(
 	// passback-required third-party upstreams such as GLM/Kimi/DeepSeek,
 	// which reject server_tool_use with 400). input.RequestModel 已是映射后的模型 ID。
 	input.Body = FilterWebSearchHistoryBlocks(input.Body, input.RequestModel)
+
+	// Apply managed cache control rewrite (same as non-passthrough Anthropic path).
+	input.Body = s.rewriteManagedClaudeMessageCacheControlIfEnabled(ctx, account, input.Body)
+	// Enforce cache_control block limit.
+	input.Body = enforceCacheControlLimit(input.Body)
+
 	if input.Parsed != nil {
 		// 透传分支也会改写实际 wire body，成功 usage hash 依赖这里同步当前 body。
 		if err := input.Parsed.ReplaceBody(input.Body); err != nil {
@@ -649,6 +655,30 @@ func (s *GatewayService) parseSSEUsagePassthrough(data string, usage *ClaudeUsag
 
 			cc5m := deltaUsage.Get("cache_creation.ephemeral_5m_input_tokens")
 			cc1h := deltaUsage.Get("cache_creation.ephemeral_1h_input_tokens")
+			if cc5m.Exists() && cc5m.Int() > 0 {
+				usage.CacheCreation5mTokens = int(cc5m.Int())
+			}
+			if cc1h.Exists() && cc1h.Int() > 0 {
+				usage.CacheCreation1hTokens = int(cc1h.Int())
+			}
+		}
+	case "message_stop":
+		stopUsage := parsed.Get("usage")
+		if stopUsage.Exists() {
+			if v := stopUsage.Get("input_tokens").Int(); v > 0 {
+				usage.InputTokens = int(v)
+			}
+			if v := stopUsage.Get("output_tokens").Int(); v > 0 {
+				usage.OutputTokens = int(v)
+			}
+			if v := stopUsage.Get("cache_read_input_tokens").Int(); v > 0 {
+				usage.CacheReadInputTokens = int(v)
+			}
+			if v := stopUsage.Get("cache_creation_input_tokens").Int(); v > 0 {
+				usage.CacheCreationInputTokens = int(v)
+			}
+			cc5m := stopUsage.Get("cache_creation.ephemeral_5m_input_tokens")
+			cc1h := stopUsage.Get("cache_creation.ephemeral_1h_input_tokens")
 			if cc5m.Exists() && cc5m.Int() > 0 {
 				usage.CacheCreation5mTokens = int(cc5m.Int())
 			}

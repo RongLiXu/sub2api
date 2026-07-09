@@ -214,6 +214,9 @@ func (s *adminServiceImpl) TestProxy(ctx context.Context, id int64) (*ProxyTestR
 			Message:   err.Error(),
 			UpdatedAt: time.Now(),
 		})
+		// Mark the proxy as failed in the repository.
+		proxy.Status = StatusFailed
+		_ = s.proxyRepo.Update(ctx, proxy)
 		return &ProxyTestResult{
 			Success: false,
 			Message: err.Error(),

@@ -170,8 +170,8 @@ func normalizeOpenAICompactRequestBody(body []byte) ([]byte, bool, error) {
 	}
 
 	normalized := []byte(`{}`)
-	// Keep the current Codex /compact schema while still dropping request-scoped
-	// fields such as prompt_cache_key, store, and stream.
+	// Keep the current Codex /compact schema while dropping request-scoped
+	// fields such as store and stream.
 	for _, field := range []string{
 		"model",
 		"input",
@@ -181,6 +181,7 @@ func normalizeOpenAICompactRequestBody(body []byte) ([]byte, bool, error) {
 		"reasoning",
 		"text",
 		"previous_response_id",
+		"prompt_cache_key",
 	} {
 		value := gjson.GetBytes(body, field)
 		if !value.Exists() {
@@ -549,6 +550,9 @@ func extractOpenAIReasoningEffortFromBody(body []byte, requestedModel string) *s
 	reasoningEffort := strings.TrimSpace(gjson.GetBytes(body, "reasoning.effort").String())
 	if reasoningEffort == "" {
 		reasoningEffort = strings.TrimSpace(gjson.GetBytes(body, "reasoning_effort").String())
+	}
+	if reasoningEffort == "" {
+		reasoningEffort = strings.TrimSpace(gjson.GetBytes(body, "model_reasoning_effort").String())
 	}
 	if reasoningEffort != "" {
 		normalized := normalizeOpenAIReasoningEffort(reasoningEffort)

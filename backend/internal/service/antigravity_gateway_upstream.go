@@ -99,15 +99,14 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 		c.Status(resp.StatusCode)
 		_, _ = c.Writer.Write(respBody)
 
-		return &ForwardResult{
-			Model: originalModel,
-		}, nil
+		return nil, fmt.Errorf("upstream returned status %d", resp.StatusCode)
 	}
 
 	// 处理成功响应（流式/非流式）
 	var usage *ClaudeUsage
 	var firstTokenMs *int
 	var clientDisconnect bool
+	var respBody []byte
 
 	if claudeReq.Stream {
 		// 流式响应：透传
@@ -123,7 +122,8 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 		clientDisconnect = streamRes.clientDisconnect
 	} else {
 		// 非流式响应：直接透传
-		respBody, err := io.ReadAll(resp.Body)
+		var err error
+		respBody, err = io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, fmt.Errorf("read upstream response: %w", err)
 		}
@@ -140,7 +140,24 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 	duration := time.Since(startTime)
 	logger.LegacyPrintf("service.antigravity_gateway", "%s status=success duration_ms=%d", prefix, duration.Milliseconds())
 
+	// When the upstream returns zero usage, estimate tokens from the request/response
+	// bodies so billing records are not empty.
+	if usage.InputTokens == 0 && usage.OutputTokens == 0 {
+		// Rough estimation: ~4 characters per token for English text.
+		usage.InputTokens = len(body) / 4
+		if usage.InputTokens < 1 {
+			usage.InputTokens = 1
+		}
+		if !claudeReq.Stream {
+			usage.OutputTokens = len(respBody) / 4
+			if usage.OutputTokens < 1 {
+				usage.OutputTokens = 1
+			}
+		}
+	}
+
 	return &ForwardResult{
+		RequestID:        resp.Header.Get("x-request-id"),
 		Model:            originalModel,
 		Stream:           claudeReq.Stream,
 		Duration:         duration,
@@ -327,6 +344,12 @@ func (s *AntigravityGatewayService) extractSSEUsage(line string, usage *ClaudeUs
 	if v, ok := u["cache_read_input_tokens"].(float64); ok && int(v) > 0 {
 		usage.CacheReadInputTokens = int(v)
 	}
+	// cached_tokens is a legacy fallback for cache_read_input_tokens.
+	if usage.CacheReadInputTokens == 0 {
+		if v, ok := u["cached_tokens"].(float64); ok && int(v) > 0 {
+			usage.CacheReadInputTokens = int(v)
+		}
+	}
 	if v, ok := u["cache_creation_input_tokens"].(float64); ok && int(v) > 0 {
 		usage.CacheCreationInputTokens = int(v)
 	}
@@ -337,6 +360,10 @@ func (s *AntigravityGatewayService) extractSSEUsage(line string, usage *ClaudeUs
 		}
 		if v, ok := cc["ephemeral_1h_input_tokens"].(float64); ok {
 			usage.CacheCreation1hTokens = int(v)
+		}
+		// Auto-aggregate cache_creation_input_tokens from breakdown when the total is 0.
+		if usage.CacheCreationInputTokens == 0 && (usage.CacheCreation5mTokens > 0 || usage.CacheCreation1hTokens > 0) {
+			usage.CacheCreationInputTokens = usage.CacheCreation5mTokens + usage.CacheCreation1hTokens
 		}
 	}
 }
@@ -358,6 +385,12 @@ func (s *AntigravityGatewayService) extractClaudeUsage(body []byte) *ClaudeUsage
 		if v, ok := u["cache_read_input_tokens"].(float64); ok {
 			usage.CacheReadInputTokens = int(v)
 		}
+		// cached_tokens is a legacy fallback for cache_read_input_tokens.
+		if usage.CacheReadInputTokens == 0 {
+			if v, ok := u["cached_tokens"].(float64); ok && int(v) > 0 {
+				usage.CacheReadInputTokens = int(v)
+			}
+		}
 		if v, ok := u["cache_creation_input_tokens"].(float64); ok {
 			usage.CacheCreationInputTokens = int(v)
 		}
@@ -368,6 +401,10 @@ func (s *AntigravityGatewayService) extractClaudeUsage(body []byte) *ClaudeUsage
 			}
 			if v, ok := cc["ephemeral_1h_input_tokens"].(float64); ok {
 				usage.CacheCreation1hTokens = int(v)
+			}
+			// Auto-aggregate cache_creation_input_tokens from breakdown when the total is 0.
+			if usage.CacheCreationInputTokens == 0 && (usage.CacheCreation5mTokens > 0 || usage.CacheCreation1hTokens > 0) {
+				usage.CacheCreationInputTokens = usage.CacheCreation5mTokens + usage.CacheCreation1hTokens
 			}
 		}
 	}
