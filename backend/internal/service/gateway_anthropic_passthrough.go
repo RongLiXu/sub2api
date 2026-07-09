@@ -714,6 +714,46 @@ func parseClaudeUsageFromResponseBody(body []byte) *ClaudeUsage {
 	return usage
 }
 
+// parseClaudeUsageFromSSEBody extracts Claude usage from an SSE (Server-Sent Events) body.
+// It scans all SSE data events and merges usage, with message_stop providing the authoritative
+// output_tokens value.
+func parseClaudeUsageFromSSEBody(body []byte) *ClaudeUsage {
+	usage := &ClaudeUsage{}
+	if len(body) == 0 {
+		return usage
+	}
+
+	// Scan through SSE lines for data: payloads.
+	for _, line := range strings.Split(string(body), "\n") {
+		if !strings.HasPrefix(line, "data:") {
+			continue
+		}
+		payload := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
+		if payload == "" {
+			continue
+		}
+		node := gjson.Parse(payload)
+		switch node.Get("type").String() {
+		case "message_start":
+			if msgUsage := node.Get("usage"); msgUsage.Exists() {
+				if v := msgUsage.Get("input_tokens"); v.Exists() {
+					usage.InputTokens = int(v.Int())
+				}
+				if v := msgUsage.Get("cache_read_input_tokens"); v.Exists() {
+					usage.CacheReadInputTokens = int(v.Int())
+				}
+			}
+		case "message_stop":
+			if stopUsage := node.Get("usage"); stopUsage.Exists() {
+				if v := stopUsage.Get("output_tokens"); v.Exists() {
+					usage.OutputTokens = int(v.Int())
+				}
+			}
+		}
+	}
+	return usage
+}
+
 func (s *GatewayService) invalidNonStreamingJSONFailoverError(
 	ctx context.Context,
 	resp *http.Response,

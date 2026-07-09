@@ -239,6 +239,36 @@ func mergeAnthropicUsage(dst *ClaudeUsage, src apicompat.AnthropicUsage) {
 	}
 }
 
+func mergeClaudeUsageNode(dst *ClaudeUsage, node gjson.Result, replace bool) {
+	if dst == nil {
+		return
+	}
+	inputTokens := int(node.Get("input_tokens").Int())
+	outputTokens := int(node.Get("output_tokens").Int())
+	cacheRead := int(node.Get("cache_read_input_tokens").Int())
+	cacheCreate := int(node.Get("cache_creation_input_tokens").Int())
+
+	if replace {
+		if inputTokens > 0 {
+			dst.InputTokens = inputTokens
+		}
+		if outputTokens > 0 {
+			dst.OutputTokens = outputTokens
+		}
+		if cacheRead > 0 {
+			dst.CacheReadInputTokens = cacheRead
+		}
+		if cacheCreate > 0 {
+			dst.CacheCreationInputTokens = cacheCreate
+		}
+	} else {
+		dst.InputTokens += inputTokens
+		dst.OutputTokens += outputTokens
+		dst.CacheReadInputTokens += cacheRead
+		dst.CacheCreationInputTokens += cacheCreate
+	}
+}
+
 func mergeAnthropicRawUsageEvent(dst *ClaudeUsage, payload string) {
 	if dst == nil || strings.TrimSpace(payload) == "" {
 		return

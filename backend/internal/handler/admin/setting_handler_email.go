@@ -187,6 +187,71 @@ func (h *SettingHandler) SendTestEmail(c *gin.Context) {
 	response.Success(c, gin.H{"message": "Test email sent successfully"})
 }
 
+// ListCloudMailAccountsRequest 查询 Cloud-Mail 账号列表请求
+type ListCloudMailAccountsRequest struct {
+	APIURL    string `json:"api_url"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
+
+// ListCloudMailAccounts 获取 Cloud-Mail 实例的可用邮箱账号列表
+// POST /api/v1/admin/settings/cloudmail-accounts
+func (h *SettingHandler) ListCloudMailAccounts(c *gin.Context) {
+	var req ListCloudMailAccountsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	req.APIURL = strings.TrimSpace(req.APIURL)
+	req.Email = strings.TrimSpace(req.Email)
+
+	// Fall back to saved CloudMail settings when request body leaves fields empty.
+	var savedConfig *service.CloudMailConfig
+	if cfg, err := h.emailService.GetCloudMailConfig(c.Request.Context()); err == nil && cfg != nil {
+		savedConfig = cfg
+	}
+	if req.APIURL == "" && savedConfig != nil {
+		req.APIURL = savedConfig.APIURL
+	}
+	if req.Email == "" && savedConfig != nil {
+		req.Email = savedConfig.AdminEmail
+	}
+	password := strings.TrimSpace(req.Password)
+	if password == "" && savedConfig != nil {
+		password = savedConfig.AdminPassword
+	}
+	if req.APIURL == "" {
+		response.BadRequest(c, "CloudMail API URL is required")
+		return
+	}
+	if req.Email == "" {
+		response.BadRequest(c, "CloudMail admin email is required")
+		return
+	}
+
+	accounts, err := h.emailService.ListCloudMailAccounts(c.Request.Context(), req.APIURL, req.Email, password)
+	if err != nil {
+		response.BadRequest(c, "Failed to list CloudMail accounts: "+err.Error())
+		return
+	}
+
+	type accountItem struct {
+		ID    int    `json:"id"`
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+	items := make([]accountItem, 0, len(accounts))
+	for _, a := range accounts {
+		items = append(items, accountItem{
+			ID:    a.AccountID,
+			Email: a.Email,
+			Name:  a.Name,
+		})
+	}
+	response.Success(c, gin.H{"accounts": items})
+}
+
 // ListEmailTemplates returns all editable notification email templates.
 // GET /api/v1/admin/settings/email-templates
 func (h *SettingHandler) ListEmailTemplates(c *gin.Context) {
