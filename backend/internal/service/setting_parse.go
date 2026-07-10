@@ -266,6 +266,20 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 		SMTPFromName:                     settings[SettingKeySMTPFromName],
 		SMTPUseTLS:                       settings[SettingKeySMTPUseTLS] == "true",
 		SMTPPasswordConfigured:           settings[SettingKeySMTPPassword] != "",
+		EmailProvider:                    s.getEmailProviderDefault(settings),
+		ResendAPIKeyConfigured:           settings[SettingKeyResendAPIKey] != "",
+		ResendFromEmail:                  settings[SettingKeyResendFromEmail],
+		ResendFromName:                   settings[SettingKeyResendFromName],
+		ResendAPIBaseURL:                 s.getResendAPIBaseURLDefault(settings),
+		CloudflareAPITokenConfigured:     settings[SettingKeyCloudflareAPIToken] != "",
+		CloudflareAccountID:              settings[SettingKeyCloudflareAccountID],
+		CloudflareFromEmail:              settings[SettingKeyCloudflareFromEmail],
+		CloudflareFromName:               settings[SettingKeyCloudflareFromName],
+		CloudMailAPIURL:                  settings[SettingKeyCloudMailAPIURL],
+		CloudMailAdminEmail:              settings[SettingKeyCloudMailAdminEmail],
+		CloudMailAdminPasswordConfigured: settings[SettingKeyCloudMailAdminPassword] != "",
+		CloudMailFromEmail:               settings[SettingKeyCloudMailFromEmail],
+		CloudMailFromName:                settings[SettingKeyCloudMailFromName],
 		TurnstileEnabled:                 settings[SettingKeyTurnstileEnabled] == "true",
 		TurnstileSiteKey:                 settings[SettingKeyTurnstileSiteKey],
 		TurnstileSecretKeyConfigured:     settings[SettingKeyTurnstileSecretKey] != "",
@@ -1154,4 +1168,22 @@ func normalizeTablePreferences(defaultPageSize int, options []int) (int, []int) 
 	}
 
 	return defaultPageSize, normalizedOptions
+}
+
+// getEmailProviderDefault returns the email provider setting, defaulting to "smtp"
+// when the stored value is empty.
+func (s *SettingService) getEmailProviderDefault(settings map[string]string) string {
+	if v, ok := settings[SettingKeyEmailProvider]; ok && strings.TrimSpace(v) != "" {
+		return v
+	}
+	return "smtp"
+}
+
+// getResendAPIBaseURLDefault returns the Resend API base URL, defaulting to
+// "https://api.resend.com" when the stored value is empty.
+func (s *SettingService) getResendAPIBaseURLDefault(settings map[string]string) string {
+	if v, ok := settings[SettingKeyResendAPIBaseURL]; ok && strings.TrimSpace(v) != "" {
+		return v
+	}
+	return "https://api.resend.com"
 }
