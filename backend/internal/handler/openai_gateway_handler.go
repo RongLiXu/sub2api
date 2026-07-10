@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"go.uber.org/zap"
 )
 
@@ -600,6 +601,12 @@ func (h *OpenAIGatewayHandler) normalizeOpenAIResponsesCompactRequest(c *gin.Con
 	}
 	if compactSeed := strings.TrimSpace(gjson.GetBytes(body, "prompt_cache_key").String()); compactSeed != "" {
 		c.Set(service.OpenAICompactSessionSeedKeyForTest(), compactSeed)
+	}
+	// Remove request-scoped fields that should not reach the upstream.
+	for _, field := range []string{"prompt_cache_key", "store", "stream"} {
+		if updated, err := sjson.DeleteBytes(body, field); err == nil {
+			body = updated
+		}
 	}
 	normalizedCompactBody, normalizedCompact, compactErr := service.NormalizeOpenAICompactRequestBodyForTest(body)
 	if compactErr != nil {
