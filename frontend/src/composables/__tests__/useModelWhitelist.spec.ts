@@ -90,6 +90,7 @@ describe('useModelWhitelist', () => {
     expect(models).toContain('qwen3.6-35b-a3b')
     expect(models).toContain('qwen3.6-27b')
     expect(models.indexOf('qwen3.6-max-preview')).toBeLessThan(models.indexOf('qwen-turbo'))
+    expect(models).toContain('gpt-5.6')
   })
 
   it('openai 模型列表不再暴露已下线的 ChatGPT 登录 Codex 模型', () => {

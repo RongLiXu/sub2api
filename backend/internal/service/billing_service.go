@@ -388,6 +388,9 @@ func (s *BillingService) initFallbackPricing() {
 		CacheReadPricePerTokenPriority: 0.2e-6,   // $0.20 per MTok
 		CacheReadPricePerTokenFlex:     0.05e-6,  // $0.05 per MTok
 		SupportsCacheBreakdown:         false,
+		LongContextInputThreshold:          openAIGPT54LongContextInputThreshold,
+		LongContextInputMultiplier:         openAIGPT54LongContextInputMultiplier,
+		LongContextOutputMultiplier:        openAIGPT54LongContextOutputMultiplier,
 	}
 
 	s.fallbackPrices["gpt-5.4-mini"] = &ModelPricing{
@@ -1274,7 +1277,7 @@ func (s *BillingService) applyModelSpecificPricingPolicy(model string, pricing *
 	if !isGPT56 && !usesLegacyLongContextPricing {
 		return pricing
 	}
-	needsLongContextPolicy := usesLegacyLongContextPricing &&
+	needsLongContextPolicy := (isGPT56 || usesLegacyLongContextPricing) &&
 		(pricing.LongContextInputThreshold <= 0 || pricing.LongContextInputMultiplier <= 0 || pricing.LongContextOutputMultiplier <= 0)
 	needsCacheCreationPolicy := isGPT56 && !pricing.CacheCreationPriceExplicit && (pricing.CacheCreationPricePerToken <= 0 ||
 		(pricing.InputPricePerTokenPriority > 0 && pricing.CacheCreationPricePerTokenPriority <= 0))
@@ -1283,7 +1286,7 @@ func (s *BillingService) applyModelSpecificPricingPolicy(model string, pricing *
 	}
 
 	cloned := *pricing
-	if isGPT56 {
+	if isGPT56 && !cloned.CacheCreationPriceExplicit {
 		if cloned.CacheCreationPricePerToken <= 0 {
 			cloned.CacheCreationPricePerToken = cloned.InputPricePerToken * 1.25
 		}
@@ -1291,7 +1294,7 @@ func (s *BillingService) applyModelSpecificPricingPolicy(model string, pricing *
 			cloned.CacheCreationPricePerTokenPriority = cloned.InputPricePerTokenPriority * 1.25
 		}
 	}
-	if usesLegacyLongContextPricing {
+	if isGPT56 || usesLegacyLongContextPricing {
 		if cloned.LongContextInputThreshold <= 0 {
 			cloned.LongContextInputThreshold = longCtxThreshold
 		}
