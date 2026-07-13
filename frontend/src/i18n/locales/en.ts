@@ -426,6 +426,7 @@ export default {
     usage: 'Usage',
     redeem: 'Redeem',
     affiliate: 'Affiliate Rebates',
+    batchImage: 'Batch Image',
     affiliateManagement: 'Affiliate Rebates',
     affiliateInviteRecords: 'Invite Records',
     affiliateRebateRecords: 'Rebate Records',
@@ -829,7 +830,9 @@ export default {
     viewUsage: 'View Usage',
     checkDetailedLogs: 'Check detailed usage logs',
     redeemCode: 'Redeem Code',
-    addBalanceWithCode: 'Add balance with a code'
+    addBalanceWithCode: 'Add balance with a code',
+    batchImageAgent: 'Batch Image Agent',
+    batchImageAgentDesc: 'Generate multiple images at once with AI'
   },
 
   // Groups (shared)
@@ -897,6 +900,7 @@ export default {
     total: 'Last 30d',
     quota: 'Quota',
     lastUsedAt: 'Last Used',
+    lastUsedIP: 'Last IP',
     useKey: 'Use Key',
     useKeyModal: {
       title: 'Use API Key',
@@ -1061,6 +1065,9 @@ export default {
     cost: 'Cost',
     firstToken: 'First Token',
     duration: 'Duration',
+    latency: 'Latency',
+    latencyFirstToken: 'First',
+    latencyDuration: 'Total',
     time: 'Time',
     ws: 'WS',
     stream: 'Stream',
@@ -1129,7 +1136,7 @@ export default {
       detailAccuracy: 'Accuracy',
       detailCoordinates: 'Coordinates',
     },
-    tabs: { usage: 'Usage', errors: 'Error Requests' },
+    tabs: { usage: 'Usage', errors: 'Error Requests', ranking: 'User Ranking' },
     errors: {
       time: 'Time', model: 'Model', endpoint: 'Endpoint', status: 'Status',
       category: 'Category', platform: 'Platform', message: 'Message',
@@ -1251,6 +1258,7 @@ export default {
       billingModeToken: 'Per Token',
       billingModePerRequest: 'Per Request',
       billingModeImage: 'Per Image',
+      billingModeVideo: 'Per Video',
       inputPrice: 'Input',
       outputPrice: 'Output',
       cacheWritePrice: 'Cache Write',
@@ -1636,7 +1644,11 @@ export default {
       spendShort: 'Spend',
       requestsShort: 'Req',
       tokensShort: 'Tok',
-      failedToLoad: 'Failed to load dashboard statistics'
+      failedToLoad: 'Failed to load dashboard statistics',
+      batchImage: 'Batch Image',
+      batchImageDesc: 'Generate images in batch',
+      groupPricing: 'Group Pricing',
+      groupPricingDesc: 'Configure group-level pricing'
     },
 
     backup: {
@@ -2256,7 +2268,11 @@ export default {
         cellColumnTooltip: 'Only platforms with a limit are shown',
         subscriptionWarning: 'This user has an active subscription. Platform quotas only apply to balance (standard) mode requests; subscription mode requests are not subject to these limits.',
         invalidNumber: 'The following fields contain invalid numbers. Please fix them before saving: {fields}',
-      }
+      },
+      form: {
+        roleLabel: 'Role',
+      },
+      passwordCopied: 'Password copied to clipboard',
     },
 
     // Groups
@@ -3710,6 +3726,9 @@ export default {
         wsModeConcurrencyHint:
           'When WS mode is enabled, account concurrency becomes the WS connection pool limit for this account.',
         wsModePassthroughHint: 'Passthrough mode does not use the WS connection pool.',
+        planType: 'Plan Type',
+        planTypeClear: 'Clear',
+        planTypeDesc: 'Select the OpenAI subscription plan type for this account',
         oauthResponsesWebsocketsV2: 'OAuth WebSocket Mode',
         oauthResponsesWebsocketsV2Desc:
           'Only applies to OpenAI OAuth. This account can use OpenAI WebSocket Mode only when enabled.',
@@ -3802,6 +3821,8 @@ export default {
       modelRestriction: 'Model Restriction (Optional)',
       modelWhitelist: 'Model Whitelist',
       modelMapping: 'Model Mapping',
+      fromModel: 'From model',
+      toModel: 'To model',
       selectAllowedModels: 'Select allowed models. Leave empty to support all models.',
       mapRequestModels:
         'Map request models to actual models. Left is the requested model, right is the actual model sent to API.',
@@ -7368,7 +7389,23 @@ export default {
     restartRequired: 'Please restart the service to apply the update',
     restartNow: 'Restart Now',
     restarting: 'Restarting...',
-    retry: 'Retry'
+    retry: 'Retry',
+    copyCommand: 'Copy Command',
+    deployDocker: 'Deploy with Docker',
+    deployScript: 'Deploy Script',
+    dockerEditCompose: 'Edit docker-compose.yml',
+    dockerRecreate: 'Recreate container',
+    loadVersionsFailed: 'Failed to load versions',
+    manualRollbackCommand: 'Manual rollback command',
+    noRollbackVersions: 'No rollback versions available',
+    rollback: 'Rollback',
+    rollbackComplete: 'Rollback complete',
+    rollbackFailed: 'Rollback failed',
+    rollbackSelectVersion: 'Select version to rollback',
+    rollbackSourceHint: 'Source',
+    rollbackWarning: 'Warning: This will revert to a previous version',
+    rollingBack: 'Rolling back...',
+
   },
 
   // Recharge / Subscription Page

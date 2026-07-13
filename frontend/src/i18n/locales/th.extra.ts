@@ -93,7 +93,80 @@ const messages = {
         }
       }
     }
-  }
+  },
+
+  "nav": {
+    "batchImage": "ภาพชุด",
+  },
+  "keys": {
+    "lastUsedIP": "IP ล่าสุด",
+    "useKeyModal": {
+      "cliTabs": {
+        "grokCli": "Grok CLI",
+      },
+      "grok": {
+        "configTomlHint": "เพิ่มไปยัง config.toml",
+        "noteWindows": "หมายเหตุสำหรับ Windows",
+      },
+    },
+  },
+  "dashboard": {
+    "batchImageAgent": "ตัวแทนภาพชุด",
+    "batchImageAgentDesc": "สร้างหลายภาพด้วย AI",
+  },
+  "admin": {
+    "accounts": {
+      "fromModel": "โมเดลต้นทาง",
+      "toModel": "โมเดลปลายทาง",
+      "openai": {
+        "planType": "ประเภทแผน",
+        "planTypeClear": "ล้าง",
+        "planTypeDesc": "เลือกประเภทแผน OpenAI",
+      },
+      "bulkActions": {
+        "probeUsage": "ตรวจสอบการใช้งาน",
+      },
+    },
+    "dashboard": {
+      "batchImage": "ภาพชุด",
+      "batchImageDesc": "สร้างภาพเป็นชุด",
+      "groupPricing": "ราคากลุ่ม",
+      "groupPricingDesc": "กำหนดราคาระดับกลุ่ม",
+    },
+    "usage": {
+      "billingModeVideo": "ต่อวิดีโอ",
+      "tokenRanking": {
+        "subtitle": "จัดอันดับการใช้โทเค็น",
+        "rowHint": "คลิกเพื่อดูรายละเอียด",
+        "columns": {
+          "user": "ผู้ใช้",
+        },
+      },
+    },
+    "users": {
+      "form": {
+        "roleLabel": "บทบาท",
+      },
+      "passwordCopied": "คัดลอกรหัสผ่านแล้ว",
+    },
+  },
+  "version": {
+    "copyCommand": "คัดลอกคำสั่ง",
+    "deployDocker": "ปรับใช้ด้วย Docker",
+    "deployScript": "สคริปต์ปรับใช้",
+    "dockerEditCompose": "แก้ไข docker-compose.yml",
+    "dockerRecreate": "สร้างคอนเทนเนอร์ใหม่",
+    "loadVersionsFailed": "โหลดเวอร์ชันล้มเหลว",
+    "manualRollbackCommand": "คำสั่งย้อนกลับด้วยตนเอง",
+    "noRollbackVersions": "ไม่มีเวอร์ชันให้ย้อนกลับ",
+    "rollback": "ย้อนกลับ",
+    "rollbackComplete": "ย้อนกลับเสร็จสิ้น",
+    "rollbackFailed": "ย้อนกลับล้มเหลว",
+    "rollbackSelectVersion": "เลือกเวอร์ชันที่จะย้อนกลับ",
+    "rollbackSourceHint": "แหล่งที่มา",
+    "rollbackWarning": "คำเตือน: จะกลับไปยังเวอร์ชันก่อนหน้า",
+    "rollingBack": "กำลังย้อนกลับ...",
+  },
 }
 
 const recentI18nPatch = {

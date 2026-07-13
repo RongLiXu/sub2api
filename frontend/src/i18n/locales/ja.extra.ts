@@ -1364,5 +1364,78 @@ export default {
       "weekly": "W",
       "monthly": "M"
     }
-  }
+  },
+
+  "nav": {
+    "batchImage": "バッチ画像",
+  },
+  "keys": {
+    "lastUsedIP": "最後のIP",
+    "useKeyModal": {
+      "cliTabs": {
+        "grokCli": "Grok CLI",
+      },
+      "grok": {
+        "configTomlHint": "config.toml ファイルに追加",
+        "noteWindows": "Windowsユーザーへの注意",
+      },
+    },
+  },
+  "dashboard": {
+    "batchImageAgent": "バッチ画像エージェント",
+    "batchImageAgentDesc": "AIで複数の画像を生成",
+  },
+  "admin": {
+    "accounts": {
+      "fromModel": "元モデル",
+      "toModel": "対象モデル",
+      "openai": {
+        "planType": "プランタイプ",
+        "planTypeClear": "クリア",
+        "planTypeDesc": "OpenAIサブスクリプションプランタイプを選択",
+      },
+      "bulkActions": {
+        "probeUsage": "使用量を調査",
+      },
+    },
+    "dashboard": {
+      "batchImage": "バッチ画像",
+      "batchImageDesc": "画像を一括生成",
+      "groupPricing": "グループ価格",
+      "groupPricingDesc": "グループレベルの価格を構成",
+    },
+    "usage": {
+      "billingModeVideo": "動画ごと",
+      "tokenRanking": {
+        "subtitle": "トークン使用量ランキング",
+        "rowHint": "クリックして詳細を表示",
+        "columns": {
+          "user": "ユーザー",
+        },
+      },
+    },
+    "users": {
+      "form": {
+        "roleLabel": "役割",
+      },
+      "passwordCopied": "パスワードをコピーしました",
+    },
+  },
+  "version": {
+    "copyCommand": "コマンドをコピー",
+    "deployDocker": "Dockerでデプロイ",
+    "deployScript": "デプロイスクリプト",
+    "dockerEditCompose": "docker-compose.ymlを編集",
+    "dockerRecreate": "コンテナを再作成",
+    "loadVersionsFailed": "バージョンの読み込みに失敗",
+    "manualRollbackCommand": "手動ロールバックコマンド",
+    "noRollbackVersions": "ロールバック可能なバージョンなし",
+    "rollback": "ロールバック",
+    "rollbackComplete": "ロールバック完了",
+    "rollbackFailed": "ロールバック失敗",
+    "rollbackSelectVersion": "ロールバックするバージョンを選択",
+    "rollbackSourceHint": "ソース",
+    "rollbackWarning": "警告：以前のバージョンに戻ります",
+    "rollingBack": "ロールバック中...",
+  },
 }

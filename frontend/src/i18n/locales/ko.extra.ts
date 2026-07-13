@@ -93,7 +93,80 @@ const messages = {
         }
       }
     }
-  }
+  },
+
+  "nav": {
+    "batchImage": "일괄 이미지",
+  },
+  "keys": {
+    "lastUsedIP": "마지막 IP",
+    "useKeyModal": {
+      "cliTabs": {
+        "grokCli": "Grok CLI",
+      },
+      "grok": {
+        "configTomlHint": "config.toml 파일에 추가",
+        "noteWindows": "Windows 사용자 참고",
+      },
+    },
+  },
+  "dashboard": {
+    "batchImageAgent": "일괄 이미지 에이전트",
+    "batchImageAgentDesc": "AI로 여러 이미지 생성",
+  },
+  "admin": {
+    "accounts": {
+      "fromModel": "원본 모델",
+      "toModel": "대상 모델",
+      "openai": {
+        "planType": "플랜 유형",
+        "planTypeClear": "지우기",
+        "planTypeDesc": "OpenAI 구독 플랜 유형 선택",
+      },
+      "bulkActions": {
+        "probeUsage": "사용량 조회",
+      },
+    },
+    "dashboard": {
+      "batchImage": "일괄 이미지",
+      "batchImageDesc": "이미지 일괄 생성",
+      "groupPricing": "그룹 가격",
+      "groupPricingDesc": "그룹 수준 가격 구성",
+    },
+    "usage": {
+      "billingModeVideo": "비디오별",
+      "tokenRanking": {
+        "subtitle": "토큰 사용량 순위",
+        "rowHint": "클릭하여 세부정보 보기",
+        "columns": {
+          "user": "사용자",
+        },
+      },
+    },
+    "users": {
+      "form": {
+        "roleLabel": "역할",
+      },
+      "passwordCopied": "비밀번호 복사됨",
+    },
+  },
+  "version": {
+    "copyCommand": "명령 복사",
+    "deployDocker": "Docker로 배포",
+    "deployScript": "배포 스크립트",
+    "dockerEditCompose": "docker-compose.yml 편집",
+    "dockerRecreate": "컨테이너 재생성",
+    "loadVersionsFailed": "버전 로드 실패",
+    "manualRollbackCommand": "수동 롤백 명령",
+    "noRollbackVersions": "롤백 가능한 버전 없음",
+    "rollback": "롤백",
+    "rollbackComplete": "롤백 완료",
+    "rollbackFailed": "롤백 실패",
+    "rollbackSelectVersion": "롤백할 버전 선택",
+    "rollbackSourceHint": "소스",
+    "rollbackWarning": "경고: 이전 버전으로 되돌립니다",
+    "rollingBack": "롤백 중...",
+  },
 }
 
 const recentI18nPatch = {

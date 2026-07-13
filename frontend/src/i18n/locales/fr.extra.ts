@@ -93,7 +93,80 @@ const messages = {
         }
       }
     }
-  }
+  },
+
+  "nav": {
+    "batchImage": "Image par lot",
+  },
+  "keys": {
+    "lastUsedIP": "Dernière IP",
+    "useKeyModal": {
+      "cliTabs": {
+        "grokCli": "Grok CLI",
+      },
+      "grok": {
+        "configTomlHint": "Ajouter à votre fichier config.toml",
+        "noteWindows": "Note pour Windows",
+      },
+    },
+  },
+  "dashboard": {
+    "batchImageAgent": "Agent d'images par lot",
+    "batchImageAgentDesc": "Générer plusieurs images avec l'IA",
+  },
+  "admin": {
+    "accounts": {
+      "fromModel": "Modèle source",
+      "toModel": "Modèle cible",
+      "openai": {
+        "planType": "Type de plan",
+        "planTypeClear": "Effacer",
+        "planTypeDesc": "Sélectionner le type de plan OpenAI",
+      },
+      "bulkActions": {
+        "probeUsage": "Sonder l'utilisation",
+      },
+    },
+    "dashboard": {
+      "batchImage": "Image par lot",
+      "batchImageDesc": "Générer des images par lot",
+      "groupPricing": "Tarification de groupe",
+      "groupPricingDesc": "Configurer la tarification par groupe",
+    },
+    "usage": {
+      "billingModeVideo": "Par vidéo",
+      "tokenRanking": {
+        "subtitle": "Classement par tokens",
+        "rowHint": "Cliquer pour les détails",
+        "columns": {
+          "user": "Utilisateur",
+        },
+      },
+    },
+    "users": {
+      "form": {
+        "roleLabel": "Rôle",
+      },
+      "passwordCopied": "Mot de passe copié",
+    },
+  },
+  "version": {
+    "copyCommand": "Copier la commande",
+    "deployDocker": "Déployer avec Docker",
+    "deployScript": "Script de déploiement",
+    "dockerEditCompose": "Modifier docker-compose.yml",
+    "dockerRecreate": "Recréer le conteneur",
+    "loadVersionsFailed": "Échec du chargement des versions",
+    "manualRollbackCommand": "Commande de rollback manuelle",
+    "noRollbackVersions": "Aucune version de rollback",
+    "rollback": "Rollback",
+    "rollbackComplete": "Rollback terminé",
+    "rollbackFailed": "Échec du rollback",
+    "rollbackSelectVersion": "Sélectionner la version",
+    "rollbackSourceHint": "Source",
+    "rollbackWarning": "Attention : retour à une version antérieure",
+    "rollingBack": "Rollback en cours...",
+  },
 }
 
 const recentI18nPatch = {

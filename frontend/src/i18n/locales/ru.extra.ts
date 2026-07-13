@@ -93,7 +93,80 @@ const messages = {
         }
       }
     }
-  }
+  },
+
+  "nav": {
+    "batchImage": "Пакет изображений",
+  },
+  "keys": {
+    "lastUsedIP": "Последний IP",
+    "useKeyModal": {
+      "cliTabs": {
+        "grokCli": "Grok CLI",
+      },
+      "grok": {
+        "configTomlHint": "Добавить в config.toml",
+        "noteWindows": "Примечание для Windows",
+      },
+    },
+  },
+  "dashboard": {
+    "batchImageAgent": "Агент пакетных изображений",
+    "batchImageAgentDesc": "Генерация нескольких изображений с помощью ИИ",
+  },
+  "admin": {
+    "accounts": {
+      "fromModel": "Исходная модель",
+      "toModel": "Целевая модель",
+      "openai": {
+        "planType": "Тип плана",
+        "planTypeClear": "Очистить",
+        "planTypeDesc": "Выберите тип плана подписки OpenAI",
+      },
+      "bulkActions": {
+        "probeUsage": "Проверить использование",
+      },
+    },
+    "dashboard": {
+      "batchImage": "Пакет изображений",
+      "batchImageDesc": "Генерация изображений пакетом",
+      "groupPricing": "Групповые цены",
+      "groupPricingDesc": "Настроить цены на уровне групп",
+    },
+    "usage": {
+      "billingModeVideo": "За видео",
+      "tokenRanking": {
+        "subtitle": "Рейтинг использования токенов",
+        "rowHint": "Нажмите для подробностей",
+        "columns": {
+          "user": "Пользователь",
+        },
+      },
+    },
+    "users": {
+      "form": {
+        "roleLabel": "Роль",
+      },
+      "passwordCopied": "Пароль скопирован",
+    },
+  },
+  "version": {
+    "copyCommand": "Копировать команду",
+    "deployDocker": "Развернуть с Docker",
+    "deployScript": "Скрипт развертывания",
+    "dockerEditCompose": "Редактировать docker-compose.yml",
+    "dockerRecreate": "Пересоздать контейнер",
+    "loadVersionsFailed": "Не удалось загрузить версии",
+    "manualRollbackCommand": "Команда ручного отката",
+    "noRollbackVersions": "Нет версий для отката",
+    "rollback": "Откат",
+    "rollbackComplete": "Откат завершен",
+    "rollbackFailed": "Откат не удался",
+    "rollbackSelectVersion": "Выберите версию для отката",
+    "rollbackSourceHint": "Источник",
+    "rollbackWarning": "Предупреждение: возврат к предыдущей версии",
+    "rollingBack": "Откат...",
+  },
 }
 
 const recentI18nPatch = {

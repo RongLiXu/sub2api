@@ -1419,5 +1419,78 @@ export default {
       "weekly": "W",
       "monthly": "M"
     }
-  }
+  },
+
+  "nav": {
+    "batchImage": "Ảnh hàng loạt",
+  },
+  "keys": {
+    "lastUsedIP": "IP cuối",
+    "useKeyModal": {
+      "cliTabs": {
+        "grokCli": "Grok CLI",
+      },
+      "grok": {
+        "configTomlHint": "Thêm vào config.toml",
+        "noteWindows": "Lưu ý cho Windows",
+      },
+    },
+  },
+  "dashboard": {
+    "batchImageAgent": "Tác nhân ảnh hàng loạt",
+    "batchImageAgentDesc": "Tạo nhiều ảnh với AI",
+  },
+  "admin": {
+    "accounts": {
+      "fromModel": "Mô hình nguồn",
+      "toModel": "Mô hình đích",
+      "openai": {
+        "planType": "Loại gói",
+        "planTypeClear": "Xóa",
+        "planTypeDesc": "Chọn loại gói đăng ký OpenAI",
+      },
+      "bulkActions": {
+        "probeUsage": "Kiểm tra sử dụng",
+      },
+    },
+    "dashboard": {
+      "batchImage": "Ảnh hàng loạt",
+      "batchImageDesc": "Tạo ảnh hàng loạt",
+      "groupPricing": "Giá nhóm",
+      "groupPricingDesc": "Cấu hình giá cấp nhóm",
+    },
+    "usage": {
+      "billingModeVideo": "Mỗi video",
+      "tokenRanking": {
+        "subtitle": "Xếp hạng sử dụng token",
+        "rowHint": "Nhấp để xem chi tiết",
+        "columns": {
+          "user": "Người dùng",
+        },
+      },
+    },
+    "users": {
+      "form": {
+        "roleLabel": "Vai trò",
+      },
+      "passwordCopied": "Đã sao chép mật khẩu",
+    },
+  },
+  "version": {
+    "copyCommand": "Sao chép lệnh",
+    "deployDocker": "Triển khai với Docker",
+    "deployScript": "Script triển khai",
+    "dockerEditCompose": "Sửa docker-compose.yml",
+    "dockerRecreate": "Tạo lại container",
+    "loadVersionsFailed": "Tải phiên bản thất bại",
+    "manualRollbackCommand": "Lệnh rollback thủ công",
+    "noRollbackVersions": "Không có phiên bản để rollback",
+    "rollback": "Rollback",
+    "rollbackComplete": "Rollback hoàn tất",
+    "rollbackFailed": "Rollback thất bại",
+    "rollbackSelectVersion": "Chọn phiên bản để rollback",
+    "rollbackSourceHint": "Nguồn",
+    "rollbackWarning": "Cảnh báo: sẽ quay lại phiên bản trước",
+    "rollingBack": "Đang rollback...",
+  },
 }

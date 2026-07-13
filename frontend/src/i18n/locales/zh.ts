@@ -420,6 +420,7 @@ export default {
     usage: '使用记录',
     redeem: '兑换',
     affiliate: '邀请返利',
+    batchImage: '批量生图',
     affiliateManagement: '邀请返利',
     affiliateInviteRecords: '邀请记录',
     affiliateRebateRecords: '返利记录',
@@ -890,6 +891,7 @@ export default {
     total: '近30天',
     quota: '额度',
     lastUsedAt: '上次使用时间',
+    lastUsedIP: '最近 IP',
     useKey: '使用密钥',
     useKeyModal: {
       title: '使用 API 密钥',
@@ -912,7 +914,8 @@ export default {
         geminiCli: 'Gemini CLI',
         codexCli: 'Codex CLI',
         codexCliWs: 'Codex CLI (WebSocket)',
-        opencode: 'OpenCode'
+        opencode: 'OpenCode',
+        grokCli: 'Grok CLI'
       },
       antigravity: {
         description: '为 Antigravity 分组配置 API 访问。请根据您使用的客户端选择对应的配置方式。',
@@ -1059,6 +1062,9 @@ export default {
     cost: '费用',
     firstToken: '首 Token',
     duration: '耗时',
+    latency: '延迟',
+    latencyFirstToken: '首字',
+    latencyDuration: '总耗时',
     time: '时间',
     ws: 'WS',
     stream: '流式',
@@ -1127,7 +1133,7 @@ export default {
       detailAccuracy: '定位精度',
       detailCoordinates: '坐标',
     },
-    tabs: { usage: '用量明细', errors: '错误请求' },
+    tabs: { usage: '用量明细', errors: '错误请求', ranking: '用户排行' },
     errors: {
       time: '时间', model: '模型', endpoint: '端点', status: '状态码',
       category: '分类', platform: '平台', message: '错误信息',
@@ -1249,6 +1255,7 @@ export default {
       billingModeToken: '按 Token',
       billingModePerRequest: '按次',
       billingModeImage: '按图片',
+      billingModeVideo: '按视频',
       inputPrice: '输入',
       outputPrice: '输出',
       cacheWritePrice: '缓存写入',
@@ -2314,7 +2321,8 @@ export default {
         cellColumnTooltip: '仅展示已设限额的平台',
         subscriptionWarning: '此用户有活跃订阅，平台限额仅在余额（标准）模式下生效，订阅模式请求不受此限额约束。',
         invalidNumber: '以下字段填写不是合法数字，请修正后再保存：{fields}',
-      }
+      },
+      passwordCopied: '密码已复制到剪贴板',
     },
 
     // Groups Management
@@ -3988,6 +3996,8 @@ export default {
       modelRestriction: '模型限制（可选）',
       modelWhitelist: '模型白名单',
       modelMapping: '模型映射',
+      fromModel: '源模型',
+      toModel: '目标模型',
       selectAllowedModels: '选择允许的模型。留空则支持所有模型。',
       mapRequestModels: '将请求模型映射到实际模型。左边是请求的模型，右边是发送到 API 的实际模型。',
       selectedModels: '已选择 {count} 个模型',
@@ -7529,7 +7539,23 @@ export default {
     restartRequired: '请重启服务以应用更新',
     restartNow: '立即重启',
     restarting: '正在重启...',
-    retry: '重试'
+    retry: '重试',
+    copyCommand: '复制命令',
+    deployDocker: 'Docker 部署',
+    deployScript: '部署脚本',
+    dockerEditCompose: '编辑 docker-compose.yml',
+    dockerRecreate: '重建容器',
+    loadVersionsFailed: '加载版本失败',
+    manualRollbackCommand: '手动回滚命令',
+    noRollbackVersions: '无可回滚版本',
+    rollback: '回滚',
+    rollbackComplete: '回滚完成',
+    rollbackFailed: '回滚失败',
+    rollbackSelectVersion: '选择回滚版本',
+    rollbackSourceHint: '来源',
+    rollbackWarning: '警告：此操作将恢复到先前的版本',
+    rollingBack: '正在回滚...',
+
   },
 
   // Recharge / Subscription Page
