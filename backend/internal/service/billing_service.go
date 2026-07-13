@@ -145,14 +145,6 @@ func usePriorityServiceTierPricing(serviceTier string, pricing *ModelPricing) bo
 	}
 	return pricing.InputPricePerTokenPriority > 0 || pricing.OutputPricePerTokenPriority > 0 ||
 		pricing.CacheCreationPricePerTokenPriority > 0 || pricing.CacheReadPricePerTokenPriority > 0
-
-	}
-
-func useFlexServiceTierPricing(serviceTier string, pricing *ModelPricing) bool {
-	if pricing == nil || normalizeBillingServiceTier(serviceTier) != "flex" {
-		return false
-	}
-	return pricing.InputPricePerTokenFlex > 0 || pricing.OutputPricePerTokenFlex > 0 || pricing.CacheReadPricePerTokenFlex > 0
 }
 
 func useFlexServiceTierPricing(serviceTier string, pricing *ModelPricing) bool {
@@ -368,9 +360,6 @@ func (s *BillingService) initFallbackPricing() {
 		CacheReadPricePerTokenPriority: 1e-6,    // $1.00 per MTok
 		CacheReadPricePerTokenFlex:     0.25e-6, // $0.25 per MTok
 		SupportsCacheBreakdown:         false,
-		LongContextInputThreshold:      openAIGPT54LongContextInputThreshold,
-		LongContextInputMultiplier:     openAIGPT54LongContextInputMultiplier,
-		LongContextOutputMultiplier:    openAIGPT54LongContextOutputMultiplier,
 	}
 	// GPT-5.6 Terra（官方 Standard: $2.50/$15/$0.25, Priority: $5/$30/$0.50, Flex: $1.25/$7.50/$0.125）
 	s.fallbackPrices["gpt-5.6-terra"] = &ModelPricing{
@@ -385,9 +374,6 @@ func (s *BillingService) initFallbackPricing() {
 		CacheReadPricePerTokenPriority: 0.5e-6,   // $0.50 per MTok
 		CacheReadPricePerTokenFlex:     0.125e-6, // $0.125 per MTok
 		SupportsCacheBreakdown:         false,
-		LongContextInputThreshold:      openAIGPT54LongContextInputThreshold,
-		LongContextInputMultiplier:     openAIGPT54LongContextInputMultiplier,
-		LongContextOutputMultiplier:    openAIGPT54LongContextOutputMultiplier,
 	}
 	// GPT-5.6 Luna（官方 Standard: $1/$6/$0.10, Priority: $2/$12/$0.20, Flex: $0.50/$3/$0.05）
 	s.fallbackPrices["gpt-5.6-luna"] = &ModelPricing{
@@ -402,9 +388,6 @@ func (s *BillingService) initFallbackPricing() {
 		CacheReadPricePerTokenPriority: 0.2e-6,   // $0.20 per MTok
 		CacheReadPricePerTokenFlex:     0.05e-6,  // $0.05 per MTok
 		SupportsCacheBreakdown:         false,
-		LongContextInputThreshold:      openAIGPT54LongContextInputThreshold,
-		LongContextInputMultiplier:     openAIGPT54LongContextInputMultiplier,
-		LongContextOutputMultiplier:    openAIGPT54LongContextOutputMultiplier,
 	}
 
 	s.fallbackPrices["gpt-5.4-mini"] = &ModelPricing{
@@ -1072,7 +1055,6 @@ func (s *BillingService) computeTokenBreakdown(
 		if pricing.CacheCreationPricePerTokenPriority > 0 {
 			cacheCreationPrice = pricing.CacheCreationPricePerTokenPriority
 		}
-		cacheCreationMultiplier *= serviceTierCostMultiplier(serviceTier)
 	} else if useFlexServiceTierPricing(serviceTier, pricing) {
 		if pricing.InputPricePerTokenFlex > 0 {
 			inputPrice = pricing.InputPricePerTokenFlex
@@ -1288,7 +1270,7 @@ func (s *BillingService) applyModelSpecificPricingPolicy(model string, pricing *
 	}
 	normalized := normalizeKnownOpenAICodexModel(model)
 	isGPT56 := isOpenAIGPT56Model(normalized)
-	usesLegacyLongContextPricing := usesOpenAILegacyLongContextPricing(normalized)
+	longCtxThreshold, longCtxInputMul, longCtxOutputMul, usesLegacyLongContextPricing := openAIGPT5LongContextPolicy(normalized)
 	if !isGPT56 && !usesLegacyLongContextPricing {
 		return pricing
 	}
@@ -1300,7 +1282,7 @@ func (s *BillingService) applyModelSpecificPricingPolicy(model string, pricing *
 		return pricing
 	}
 
-	cloned := *adjusted
+	cloned := *pricing
 	if isGPT56 {
 		if cloned.CacheCreationPricePerToken <= 0 {
 			cloned.CacheCreationPricePerToken = cloned.InputPricePerToken * 1.25
@@ -1311,13 +1293,13 @@ func (s *BillingService) applyModelSpecificPricingPolicy(model string, pricing *
 	}
 	if usesLegacyLongContextPricing {
 		if cloned.LongContextInputThreshold <= 0 {
-			cloned.LongContextInputThreshold = threshold
+			cloned.LongContextInputThreshold = longCtxThreshold
 		}
 		if cloned.LongContextInputMultiplier <= 0 {
-			cloned.LongContextInputMultiplier = inputMultiplier
+			cloned.LongContextInputMultiplier = longCtxInputMul
 		}
 		if cloned.LongContextOutputMultiplier <= 0 {
-			cloned.LongContextOutputMultiplier = outputMultiplier
+			cloned.LongContextOutputMultiplier = longCtxOutputMul
 		}
 	}
 	return &cloned

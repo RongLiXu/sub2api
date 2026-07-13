@@ -387,18 +387,7 @@ func extractCCStreamUsage(payload string) *OpenAIUsage {
 	if !ok {
 		return nil
 	}
-
-	imageOutputTokens := 0
-	if imageTokens := gjson.Get(payload, "usage.output_tokens_details.image_tokens"); imageTokens.Exists() {
-		imageOutputTokens = int(imageTokens.Int())
-	}
-
-	return OpenAIUsage{
-		InputTokens:          inputTokens,
-		OutputTokens:         outputTokens,
-		CacheReadInputTokens: cacheReadTokens,
-		ImageOutputTokens:    imageOutputTokens,
-	}
+	return &u
 }
 
 // bufferRawChatCompletions 透传上游 CC 非流式 JSON 响应。
@@ -425,9 +414,13 @@ func (s *OpenAIGatewayService) bufferRawChatCompletions(
 	var ccResp apicompat.ChatCompletionsResponse
 	var usage OpenAIUsage
 	if err := json.Unmarshal(respBody, &ccResp); err == nil && ccResp.Usage != nil {
-		usage = extractRawChatCompletionsUsage(string(respBody))
-	} else if gjson.GetBytes(respBody, "usage").Exists() {
-		usage = extractRawChatCompletionsUsage(string(respBody))
+		usage = OpenAIUsage{
+			InputTokens:  ccResp.Usage.PromptTokens,
+			OutputTokens: ccResp.Usage.CompletionTokens,
+		}
+		if ccResp.Usage.PromptTokensDetails != nil {
+			usage.CacheReadInputTokens = ccResp.Usage.PromptTokensDetails.CachedTokens
+		}
 	}
 
 	if s.responseHeaderFilter != nil {
