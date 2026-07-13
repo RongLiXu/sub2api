@@ -72,13 +72,13 @@ func (s *OpenAIGatewayService) forwardAsRawChatCompletions(
 	}
 	clientStream := gjson.GetBytes(body, "stream").Bool()
 
-	// 1b. Extract reasoning effort and service tier from the raw body before any transformation.
-	reasoningEffort := extractOpenAIReasoningEffortFromBody(body, originalModel)
+	// 1b. Extract service tier from the raw body before any transformation.
 	serviceTier := extractOpenAIServiceTierFromBody(body)
 
 	// 2. Resolve model mapping (same as ForwardAsChatCompletions)
 	billingModel := resolveOpenAIForwardModel(account, originalModel, defaultMappedModel)
 	upstreamModel := normalizeOpenAIModelForUpstream(account, billingModel)
+	reasoningEffort := extractOpenAIReasoningEffortFromBody(body, upstreamModel, billingModel, originalModel)
 	// 国产模型默认 effort 补充：需要 mappedModel 判定，推迟到 billingModel 算出之后。
 	reasoningEffort = ApplyThinkingEnabledFallback(reasoningEffort, body, billingModel)
 
@@ -383,28 +383,9 @@ func extractCCStreamUsage(payload string) *OpenAIUsage {
 	if !usageResult.Exists() || !usageResult.IsObject() {
 		return nil
 	}
-	u := extractRawChatCompletionsUsage(payload)
-	return &u
-}
-
-func extractRawChatCompletionsUsage(payload string) OpenAIUsage {
-	inputTokens := int(gjson.Get(payload, "usage.prompt_tokens").Int())
-	if inputTokens == 0 && !gjson.Get(payload, "usage.prompt_tokens").Exists() {
-		inputTokens = int(gjson.Get(payload, "usage.input_tokens").Int())
-	}
-
-	outputTokens := int(gjson.Get(payload, "usage.completion_tokens").Int())
-	if outputTokens == 0 && !gjson.Get(payload, "usage.completion_tokens").Exists() {
-		outputTokens = int(gjson.Get(payload, "usage.output_tokens").Int())
-	}
-
-	cacheReadTokens := 0
-	if cached := gjson.Get(payload, "usage.prompt_tokens_details.cached_tokens"); cached.Exists() {
-		cacheReadTokens = int(cached.Int())
-	} else if cached := gjson.Get(payload, "usage.prompt_cache_hit_tokens"); cached.Exists() {
-		cacheReadTokens = int(cached.Int())
-	} else if cached := gjson.Get(payload, "usage.input_tokens_details.cached_tokens"); cached.Exists() {
-		cacheReadTokens = int(cached.Int())
+	u, ok := openAIUsageFromGJSON(usageResult)
+	if !ok {
+		return nil
 	}
 
 	imageOutputTokens := 0
