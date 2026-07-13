@@ -249,6 +249,22 @@ const recentI18nPatch = {
       "platforms": {
         "openai": "OpenAI",
         "grok": "Grok"
+      },
+      "failedToSave": "บันทึกกลุ่มไม่สำเร็จ",
+      "videoPricing": {
+        "title": "ราคาการสร้างวิดีโอ",
+        "description": "กำหนดราคาต่อวินาทีสำหรับการสร้างวิดีโอ Grok เป็น USD เว้นว่างเพื่อใช้อัตราค่าเริ่มต้น (grok-imagine-video: 480p $0.05/วินาที, 720p $0.07/วินาที; video-1.5: 480p $0.08/วินาที, 720p $0.14/วินาที, 1080p $0.25/วินาที)",
+        "independentMultiplier": "ใช้ตัวคูณวิดีโออิสระ",
+        "videoMultiplier": "ตัวคูณวิดีโอ",
+        "modeHint": "วิดีโอคิดเงินต่อวินาที: ราคาต่อวินาที × ความยาว (1-15 วินาที, ค่าเริ่มต้น 8 วินาที) ตามค่าเริ่มต้นจะใช้ตัวคูณกลุ่มปัจจุบัน โหมดอิสระใช้ตัวคูณวิดีโอแทน",
+        "finalPricePreview": "ตัวอย่างราคาสุดท้ายต่อวินาที",
+        "notConfigured": "ไม่ได้กำหนดค่า"
+      },
+      "webSearchPricing": {
+        "title": "ราคา Codex Web Search",
+        "pricePerCall": "ราคาต่อการค้นหา (USD)",
+        "pricePerCallHint": "เว้นว่างเพื่อใช้ราคาเริ่มต้น $0.01/ครั้ง (ราคาทางการ: $10 ต่อ 1,000 ครั้ง); 0 หมายถึงฟรี ตัวคูณกลุ่มจะถูกนำไปใช้เพิ่มเติม",
+        "finalPricePreview": "ราคาต่อครั้งหลังจากตัวคูณปัจจุบัน: {price}"
       }
     },
     "channels": {
@@ -636,6 +652,16 @@ const recentI18nPatch = {
       "user_error_view": {
         "label": "Allow users to view their own error requests",
         "description": "When enabled, users can see a redacted view of their failed requests on the usage page (no internal/upstream details). Requires ops monitoring enabled to have data."
+      },
+      "openaiFastPolicy": {
+        "actionForcePriority": "บังคับ priority (fast)",
+        "userIds": "ผู้ใช้ที่ระบุ",
+        "userIdsHint": "พิมพ์ส่วนหนึ่งของอีเมลผู้ใช้เพื่อค้นหา เว้นว่างเพื่อใช้กับผู้ใช้ Sub2API ทั้งหมด คำขอจาก API key ของผู้ใช้ที่เลือกจะสำคัญกว่ากฎทั่วไป",
+        "userSearchPlaceholder": "ค้นหาด้วยอีเมลผู้ใช้",
+        "userSearchEmpty": "ไม่พบผู้ใช้ที่ตรงกัน",
+        "userDeleted": "(ลบแล้ว)",
+        "userIdFallback": "ผู้ใช้ #{id}",
+        "removeUser": "ลบผู้ใช้"
       }
     },
     "riskControl": {
@@ -1048,6 +1074,10 @@ const recentI18nPatch = {
         "validation": {
           "openaiQuotaAutoPauseRange": "OpenAI quota auto-pause threshold must be between 0 and 100"
         }
+      },
+      "customTimeRange": {
+        "startTime": "เวลาเริ่มต้น",
+        "endTime": "เวลาสิ้นสุด"
       }
     },
     "errorPassthrough": {

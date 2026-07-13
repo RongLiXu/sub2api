@@ -186,6 +186,22 @@ export default {
         "modeHint": "By default, image billing uses image price × current effective group multiplier. Independent mode uses image price × image multiplier.",
         "finalPricePreview": "Final per-image price preview",
         "notConfigured": "Not configured"
+      },
+      "failedToSave": "グループの保存に失敗しました",
+      "videoPricing": {
+        "title": "動画生成の料金設定",
+        "description": "Grok動画生成の1秒あたりのUSD単価を設定します。空欄の場合はデフォルト料金（grok-imagine-video: 480p $0.05/秒, 720p $0.07/秒; video-1.5: 480p $0.08/秒, 720p $0.14/秒, 1080p $0.25/秒）が適用されます。",
+        "independentMultiplier": "動画独立倍率を使用",
+        "videoMultiplier": "動画倍率",
+        "modeHint": "動画は秒単位で課金：1秒あたりの価格 × 長さ（1〜15秒、デフォルト8秒）。デフォルトでは現在のグループ有効倍率が適用されます。独立モードでは動画倍率が使用されます。",
+        "finalPricePreview": "最終1秒あたりの価格プレビュー",
+        "notConfigured": "未設定"
+      },
+      "webSearchPricing": {
+        "title": "Codex Web検索の料金設定",
+        "pricePerCall": "検索1回あたりの価格（USD）",
+        "pricePerCallHint": "空欄の場合はデフォルトの$0.01/回（公式価格: 1000回あたり$10）が適用されます。0は無料を意味します。グループ倍率が上乗せされます。",
+        "finalPricePreview": "現在の倍率適用後の1回あたりの価格: {price}"
       }
     },
     "channels": {
@@ -619,6 +635,16 @@ export default {
       "user_error_view": {
         "label": "Allow users to view their own error requests",
         "description": "When enabled, users can see a redacted view of their failed requests on the usage page (no internal/upstream details). Requires ops monitoring enabled to have data."
+      },
+      "openaiFastPolicy": {
+        "actionForcePriority": "priority（fast）を強制",
+        "userIds": "特定のユーザー",
+        "userIdsHint": "ユーザーのメールアドレスの一部を入力して検索します。空欄の場合は全Sub2APIユーザーに適用されます。選択したユーザーのAPIキーリクエストがグローバルルールより優先されます。",
+        "userSearchPlaceholder": "メールアドレスでユーザーを検索",
+        "userSearchEmpty": "一致するユーザーが見つかりません",
+        "userDeleted": "（削除済み）",
+        "userIdFallback": "ユーザー #{id}",
+        "removeUser": "ユーザーを削除"
       }
     },
     "accounts": {
@@ -1171,6 +1197,10 @@ export default {
         "validation": {
           "openaiQuotaAutoPauseRange": "OpenAI quota auto-pause threshold must be between 0 and 100"
         }
+      },
+      "customTimeRange": {
+        "startTime": "開始時間",
+        "endTime": "終了時間"
       }
     },
     "errorPassthrough": {

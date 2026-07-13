@@ -2361,6 +2361,21 @@ const messages = {
         "finalPricePreview": "最终单张价格预览",
         "notConfigured": "未配置"
       },
+      "videoPricing": {
+        "title": "影片生成計費",
+        "description": "設定 Grok 影片生成的每秒單價（USD/秒），留空則使用預設每秒價（grok-imagine-video：480p $0.05/s、720p $0.07/s；video-1.5：480p $0.08/s、720p $0.14/s、1080p $0.25/s）",
+        "independentMultiplier": "影片倍率獨立",
+        "videoMultiplier": "影片獨立倍率",
+        "modeHint": "影片按秒計費：費用 = 每秒價格 × 時長（1-15 秒，未指定預設 8 秒）。預設疊加當前分組有效倍率；開啟獨立倍率後改用影片獨立倍率。",
+        "finalPricePreview": "最終每秒價格預覽",
+        "notConfigured": "未配置"
+      },
+      "webSearchPricing": {
+        "title": "Codex 網頁搜尋計費",
+        "pricePerCall": "搜尋單次價格（USD/次）",
+        "pricePerCallHint": "留空使用預設價 $0.01/次（官方定價 $10/1000 次）；填 0 表示免費。實際扣費會疊加分組費率倍數。",
+        "finalPricePreview": "套用當前倍率後的單次價格：{price}"
+      },
       "modelsList": {
         "title": "自訂 /v1/models 模型列表",
         "hint": "僅影響 /v1/models 顯示結果，不影響白名單模型呼叫與帳號調度。",
@@ -6707,12 +6722,20 @@ const messages = {
         "action": "處理方式",
         "actionPass": "透傳（保留 service_tier）",
         "actionFilter": "篩選（移除 service_tier）",
+        "actionForcePriority": "強制設定 priority（fast）",
         "actionBlock": "攔截（拒絕請求）",
         "scope": "生效範圍",
         "scopeAll": "全部帳號",
         "scopeOAuth": "僅 OAuth 帳號",
         "scopeAPIKey": "僅 API Key 帳號",
         "scopeBedrock": "僅 Bedrock 帳號",
+        "userIds": "指定使用者",
+        "userIdsHint": "輸入任意郵箱關鍵詞進行模糊搜尋。留空表示對全部 Sub2API 使用者生效；選中使用者的 API Key 請求優先比對使用者規則。",
+        "userSearchPlaceholder": "輸入使用者郵箱搜尋",
+        "userSearchEmpty": "未找到符合使用者",
+        "userDeleted": "（已刪除）",
+        "userIdFallback": "使用者 #{id}",
+        "removeUser": "移除使用者",
         "errorMessage": "錯誤訊息",
         "errorMessagePlaceholder": "攔截時傳回的自訂錯誤訊息",
         "errorMessageHint": "留空則使用預設錯誤訊息。",

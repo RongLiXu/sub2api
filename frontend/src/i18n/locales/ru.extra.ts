@@ -250,6 +250,22 @@ const recentI18nPatch = {
       "accountsUnit": "",
       "platforms": {
         "grok": "Grok"
+      },
+      "failedToSave": "Не удалось сохранить группу",
+      "videoPricing": {
+        "title": "Ценообразование генерации видео",
+        "description": "Настройте цены на генерацию видео Grok в USD за секунду. Оставьте пустым для использования стандартных тарифов (grok-imagine-video: 480p $0,05/с, 720p $0,07/с; video-1.5: 480p $0,08/с, 720p $0,14/с, 1080p $0,25/с).",
+        "independentMultiplier": "Использовать независимый видео множитель",
+        "videoMultiplier": "Видео множитель",
+        "modeHint": "Видео оплачивается посекундно: цена за секунду × длительность (1-15с, по умолчанию 8с). По умолчанию применяется текущий эффективный множитель группы; независимый режим использует видео множитель.",
+        "finalPricePreview": "Предпросмотр итоговой цены за секунду",
+        "notConfigured": "Не настроено"
+      },
+      "webSearchPricing": {
+        "title": "Ценообразование Codex Web Search",
+        "pricePerCall": "Цена за поисковый вызов (USD)",
+        "pricePerCallHint": "Оставьте пустым для использования цены по умолчанию $0,01 за вызов (официальная цена: $10 за 1000 вызовов); 0 означает бесплатно. Множитель группы применяется дополнительно.",
+        "finalPricePreview": "Цена за вызов после текущего множителя: {price}"
       }
     },
     "channels": {
@@ -642,6 +658,16 @@ const recentI18nPatch = {
       "user_error_view": {
         "label": "Allow users to view their own error requests",
         "description": "When enabled, users can see a redacted view of their failed requests on the usage page (no internal/upstream details). Requires ops monitoring enabled to have data."
+      },
+      "openaiFastPolicy": {
+        "actionForcePriority": "Принудительно priority (fast)",
+        "userIds": "Определенные пользователи",
+        "userIdsHint": "Введите часть email пользователя для поиска. Оставьте пустым для применения ко всем пользователям Sub2API. Запросы от API-ключей выбранных пользователей имеют приоритет над глобальными правилами.",
+        "userSearchPlaceholder": "Поиск по email пользователя",
+        "userSearchEmpty": "Пользователи не найдены",
+        "userDeleted": "(удален)",
+        "userIdFallback": "Пользователь #{id}",
+        "removeUser": "Удалить пользователя"
       }
     },
     "riskControl": {
@@ -1038,6 +1064,10 @@ const recentI18nPatch = {
         "validation": {
           "openaiQuotaAutoPauseRange": "OpenAI quota auto-pause threshold must be between 0 and 100"
         }
+      },
+      "customTimeRange": {
+        "startTime": "Время начала",
+        "endTime": "Время окончания"
       }
     },
     "errorPassthrough": {

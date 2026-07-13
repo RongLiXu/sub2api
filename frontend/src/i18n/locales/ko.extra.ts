@@ -248,6 +248,22 @@ const recentI18nPatch = {
       },
       "platforms": {
         "grok": "Grok"
+      },
+      "failedToSave": "그룹 저장 실패",
+      "videoPricing": {
+        "title": "비디오 생성 가격 책정",
+        "description": "Grok 비디오 생성의 초당 USD 가격을 설정합니다. 비워두면 기본 요금(grok-imagine-video: 480p $0.05/초, 720p $0.07/초; video-1.5: 480p $0.08/초, 720p $0.14/초, 1080p $0.25/초)이 적용됩니다.",
+        "independentMultiplier": "독립 비디오 배율 사용",
+        "videoMultiplier": "비디오 배율",
+        "modeHint": "비디오는 초당 과금: 초당 가격 × 길이(1~15초, 기본 8초). 기본적으로 현재 그룹 유효 배율이 적용됩니다. 독립 모드는 비디오 배율을 사용합니다.",
+        "finalPricePreview": "최종 초당 가격 미리보기",
+        "notConfigured": "설정되지 않음"
+      },
+      "webSearchPricing": {
+        "title": "Codex 웹 검색 가격 책정",
+        "pricePerCall": "검색 호출당 가격 (USD)",
+        "pricePerCallHint": "비워두면 기본 $0.01/호출(공식 가격: 1,000회당 $10)이 적용됩니다. 0은 무료를 의미합니다. 그룹 배율이 추가로 적용됩니다.",
+        "finalPricePreview": "현재 배율 적용 후 호출당 가격: {price}"
       }
     },
     "channels": {
@@ -625,6 +641,16 @@ const recentI18nPatch = {
       "user_error_view": {
         "label": "Allow users to view their own error requests",
         "description": "When enabled, users can see a redacted view of their failed requests on the usage page (no internal/upstream details). Requires ops monitoring enabled to have data."
+      },
+      "openaiFastPolicy": {
+        "actionForcePriority": "priority(fast) 강제 설정",
+        "userIds": "특정 사용자",
+        "userIdsHint": "사용자 이메일의 일부를 입력하여 검색합니다. 비워두면 모든 Sub2API 사용자에게 적용됩니다. 선택한 사용자의 API 키 요청이 전역 규칙보다 우선합니다.",
+        "userSearchPlaceholder": "이메일로 사용자 검색",
+        "userSearchEmpty": "일치하는 사용자가 없습니다",
+        "userDeleted": "(삭제됨)",
+        "userIdFallback": "사용자 #{id}",
+        "removeUser": "사용자 제거"
       }
     },
     "riskControl": {
@@ -1033,6 +1059,10 @@ const recentI18nPatch = {
         "validation": {
           "openaiQuotaAutoPauseRange": "OpenAI quota auto-pause threshold must be between 0 and 100"
         }
+      },
+      "customTimeRange": {
+        "startTime": "시작 시간",
+        "endTime": "종료 시간"
       }
     },
     "errorPassthrough": {

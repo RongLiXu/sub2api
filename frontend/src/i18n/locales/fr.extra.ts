@@ -272,6 +272,22 @@ const recentI18nPatch = {
       },
       "supportedScopes": {
         "claude": "Claude"
+      },
+      "failedToSave": "Échec de l'enregistrement du groupe",
+      "videoPricing": {
+        "title": "Tarification de la génération vidéo",
+        "description": "Configurez les prix de génération vidéo Grok en USD par seconde de vidéo produite. Laissez vide pour utiliser les tarifs par défaut (grok-imagine-video : 480p $0,05/s, 720p $0,07/s ; video-1.5 : 480p $0,08/s, 720p $0,14/s, 1080p $0,25/s).",
+        "independentMultiplier": "Utiliser un multiplicateur vidéo indépendant",
+        "videoMultiplier": "Multiplicateur vidéo",
+        "modeHint": "Les vidéos sont facturées par seconde : prix par seconde × durée (1-15s, 8s par défaut). Par défaut, le multiplicateur effectif du groupe s'applique ; le mode indépendant utilise le multiplicateur vidéo.",
+        "finalPricePreview": "Aperçu du prix final par seconde",
+        "notConfigured": "Non configuré"
+      },
+      "webSearchPricing": {
+        "title": "Tarification de recherche Web Codex",
+        "pricePerCall": "Prix par recherche (USD)",
+        "pricePerCallHint": "Laissez vide pour utiliser le prix par défaut de 0,01 $ par appel (tarification officielle : 10 $ pour 1 000 appels) ; 0 signifie gratuit. Le multiplicateur de groupe est appliqué en plus.",
+        "finalPricePreview": "Prix par appel après multiplicateur actuel : {price}"
       }
     },
     "channels": {
@@ -649,7 +665,15 @@ const recentI18nPatch = {
         "action": "Action"
       },
       "openaiFastPolicy": {
-        "action": "Action"
+        "action": "Action",
+        "actionForcePriority": "Forcer la priorité (rapide)",
+        "userIds": "Utilisateurs spécifiques",
+        "userIdsHint": "Saisissez une partie de l'e-mail d'un utilisateur pour rechercher. Laissez vide pour appliquer à tous les utilisateurs Sub2API. Les utilisateurs sélectionnés correspondent aux requêtes de leurs clés API et prennent priorité sur les règles globales.",
+        "userSearchPlaceholder": "Rechercher par e-mail",
+        "userSearchEmpty": "Aucun utilisateur trouvé",
+        "userDeleted": "(supprimé)",
+        "userIdFallback": "Utilisateur #{id}",
+        "removeUser": "Supprimer l'utilisateur"
       },
       "wechatConnect": {
         "modeLabel": "Mode"
@@ -1185,6 +1209,10 @@ const recentI18nPatch = {
         "latency": "Request duration statistics, including p50, p90, p95, p99 percentiles.",
         "ttft": "Time To First Token, measuring the speed of first token return in streaming responses.",
         "health": "System health score (0-100), considering SLA, error rate, and resource usage."
+      },
+      "customTimeRange": {
+        "startTime": "Heure de début",
+        "endTime": "Heure de fin"
       }
     },
     "errorPassthrough": {

@@ -199,6 +199,22 @@ export default {
       },
       "supportedScopes": {
         "claude": "Claude"
+      },
+      "failedToSave": "Không lưu được nhóm",
+      "videoPricing": {
+        "title": "Giá tạo video",
+        "description": "Định cấu hình giá tạo video Grok theo USD mỗi giây. Để trống để sử dụng mức giá mặc định (grok-imagine-video: 480p $0,05/giây, 720p $0,07/giây; video-1.5: 480p $0,08/giây, 720p $0,14/giây, 1080p $0,25/giây).",
+        "independentMultiplier": "Sử dụng hệ số video độc lập",
+        "videoMultiplier": "Hệ số video",
+        "modeHint": "Video được tính phí theo giây: giá mỗi giây × thời lượng (1-15 giây, mặc định 8 giây). Mặc định áp dụng hệ số nhóm hiệu quả hiện tại; chế độ độc lập sử dụng hệ số video.",
+        "finalPricePreview": "Xem trước giá cuối cùng mỗi giây",
+        "notConfigured": "Chưa định cấu hình"
+      },
+      "webSearchPricing": {
+        "title": "Giá Codex Web Search",
+        "pricePerCall": "Giá mỗi lần tìm kiếm (USD)",
+        "pricePerCallHint": "Để trống để sử dụng giá mặc định $0,01/lần (giá chính thức: $10 cho 1.000 lần); 0 nghĩa là miễn phí. Hệ số nhóm được áp dụng thêm.",
+        "finalPricePreview": "Giá mỗi lần sau khi áp dụng hệ số hiện tại: {price}"
       }
     },
     "channels": {
@@ -621,6 +637,16 @@ export default {
       "user_error_view": {
         "label": "Allow users to view their own error requests",
         "description": "When enabled, users can see a redacted view of their failed requests on the usage page (no internal/upstream details). Requires ops monitoring enabled to have data."
+      },
+      "openaiFastPolicy": {
+        "actionForcePriority": "Buộc priority (fast)",
+        "userIds": "Người dùng cụ thể",
+        "userIdsHint": "Nhập một phần email người dùng để tìm kiếm. Để trống để áp dụng cho tất cả người dùng Sub2API. Yêu cầu từ khóa API của người dùng được chọn được ưu tiên hơn quy tắc toàn cục.",
+        "userSearchPlaceholder": "Tìm kiếm theo email người dùng",
+        "userSearchEmpty": "Không tìm thấy người dùng phù hợp",
+        "userDeleted": "(đã xóa)",
+        "userIdFallback": "Người dùng #{id}",
+        "removeUser": "Xóa người dùng"
       }
     },
     "accounts": {
@@ -1199,6 +1225,10 @@ export default {
       },
       "queryMode": {
         "preagg": "Preagg"
+      },
+      "customTimeRange": {
+        "startTime": "Thời gian bắt đầu",
+        "endTime": "Thời gian kết thúc"
       }
     },
     "errorPassthrough": {
