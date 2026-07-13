@@ -1082,7 +1082,7 @@ func (s *BillingService) computeTokenBreakdown(
 		// 缓存创建（cache_write）也是输入侧操作，三档价格（标准 / 5m / 1h）
 		// 都通过 computeCacheCreationCost 直接读取 pricing.*，不会经过这里
 		// 的倍率修改，因此显式向下传一个倍率，避免长上下文场景下被漏乘。
-		cacheCreationMultiplier = pricing.LongContextInputMultiplier
+		cacheCreationMultiplier *= pricing.LongContextInputMultiplier
 	}
 
 	bd := &CostBreakdown{}
@@ -1305,6 +1305,13 @@ func (s *BillingService) applyModelSpecificPricingPolicy(model string, pricing *
 			cloned.LongContextOutputMultiplier = longCtxOutputMul
 		}
 	}
+	// Enforce official GPT-5.5 priority/flex pricing (OpenAI published rates).
+	if normalized == "gpt-5.5" || normalized == "gpt-5.5-pro" {
+		tmp := ensureOpenAIGPT55PriorityPricing(&cloned)
+		if tmp != nil {
+			cloned = *tmp
+		}
+	}
 	return &cloned
 }
 
@@ -1351,6 +1358,9 @@ func openAIGPT5LongContextPolicy(normalizedModel string) (threshold int, inputMu
 	case "gpt-5.4", "gpt-5.4-pro":
 		return openAIGPT54LongContextInputThreshold, openAIGPT54LongContextInputMultiplier, openAIGPT54LongContextOutputMultiplier, true
 	case "gpt-5.5", "gpt-5.5-pro":
+		return openAIGPT55LongContextInputThreshold, openAIGPT54LongContextInputMultiplier, openAIGPT54LongContextOutputMultiplier, true
+	case "gpt-5.6", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna",
+		"gpt-5.6-max", "gpt-5.6-fingerling", "gpt-5.6-garlic":
 		return openAIGPT55LongContextInputThreshold, openAIGPT54LongContextInputMultiplier, openAIGPT54LongContextOutputMultiplier, true
 	default:
 		return 0, 0, 0, false

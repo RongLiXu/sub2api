@@ -849,14 +849,67 @@ func (s *SubscriptionService) AdminResetQuota(ctx context.Context, subscriptionI
 	if !resetDaily && !resetWeekly && !resetMonthly {
 		return nil, ErrInvalidInput
 	}
+
+	// Validate usage values are non-negative
+	if dailyUsageUSD != nil && *dailyUsageUSD < 0 {
+		return nil, ErrSubscriptionUsageNegative
+	}
+	if weeklyUsageUSD != nil && *weeklyUsageUSD < 0 {
+		return nil, ErrSubscriptionUsageNegative
+	}
+	if monthlyUsageUSD != nil && *monthlyUsageUSD < 0 {
+		return nil, ErrSubscriptionUsageNegative
+	}
+
 	sub, err := s.userSubRepo.GetByID(ctx, subscriptionID)
 	if err != nil {
 		return nil, err
 	}
 	windowStart := startOfDay(time.Now())
-	if err := s.userSubRepo.ResetUsageWindows(ctx, sub.ID, resetDaily, resetWeekly, resetMonthly, windowStart); err != nil {
-		return nil, err
+
+	// When no custom usage values are set, use the atomic ResetUsageWindows
+	// so that errors in one window don't leave others in an inconsistent state.
+	hasCustomUsage := dailyUsageUSD != nil || weeklyUsageUSD != nil || monthlyUsageUSD != nil
+	if !hasCustomUsage {
+		if err := s.userSubRepo.ResetUsageWindows(ctx, sub.ID, resetDaily, resetWeekly, resetMonthly, windowStart); err != nil {
+			return nil, err
+		}
+	} else {
+		if resetDaily {
+			newUsage := float64(0)
+			if dailyUsageUSD != nil {
+				newUsage = *dailyUsageUSD
+			}
+			if err := s.userSubRepo.ResetDailyUsage(ctx, sub.ID, nil, windowStart, newUsage); err != nil {
+				return nil, err
+			}
+			sub.DailyUsageUSD = newUsage
+			sub.DailyWindowStart = &windowStart
+		}
+		if resetWeekly {
+			newUsage := float64(0)
+			if weeklyUsageUSD != nil {
+				newUsage = *weeklyUsageUSD
+			}
+			if err := s.userSubRepo.ResetWeeklyUsage(ctx, sub.ID, nil, windowStart, newUsage); err != nil {
+				return nil, err
+			}
+			sub.WeeklyUsageUSD = newUsage
+			sub.WeeklyWindowStart = &windowStart
+		}
+		if resetMonthly {
+			newUsage := float64(0)
+			if monthlyUsageUSD != nil {
+				newUsage = *monthlyUsageUSD
+			}
+			if err := s.userSubRepo.ResetMonthlyUsage(ctx, sub.ID, nil, windowStart, newUsage); err != nil {
+				return nil, err
+			}
+			sub.MonthlyUsageUSD = newUsage
+			sub.MonthlyWindowStart = &windowStart
+		}
 	}
+
 	// Invalidate L1 ristretto cache. Ristretto's Del() is asynchronous by design,
 	// so call Wait() immediately after to flush pending operations and guarantee
 	// the deleted key is not returned on the very next Get() call.

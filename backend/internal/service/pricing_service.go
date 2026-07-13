@@ -240,9 +240,6 @@ type LiteLLMRawEntry struct {
 	LongContextInputTokenThreshold      *int                      `json:"long_context_input_token_threshold,omitempty"`
 	LongContextInputCostMultiplier      *float64                  `json:"long_context_input_cost_multiplier,omitempty"`
 	LongContextOutputCostMultiplier     *float64                  `json:"long_context_output_cost_multiplier,omitempty"`
-	LongContextInputTokenThreshold      *int     `json:"long_context_input_token_threshold"`
-	LongContextInputCostMultiplier      *float64 `json:"long_context_input_cost_multiplier"`
-	LongContextOutputCostMultiplier     *float64 `json:"long_context_output_cost_multiplier"`
 	SupportsServiceTier                 bool                      `json:"supports_service_tier"`
 	LiteLLMProvider                     string                    `json:"litellm_provider"`
 	Mode                                string                    `json:"mode"`
@@ -601,15 +598,6 @@ func (s *PricingService) parsePricingData(body []byte) (map[string]*LiteLLMModel
 		}
 		if entry.MaxTokens != nil {
 			pricing.MaxTokens = *entry.MaxTokens
-		}
-		if entry.LongContextInputTokenThreshold != nil {
-			pricing.LongContextInputTokenThreshold = *entry.LongContextInputTokenThreshold
-		}
-		if entry.LongContextInputCostMultiplier != nil {
-			pricing.LongContextInputCostMultiplier = *entry.LongContextInputCostMultiplier
-		}
-		if entry.LongContextOutputCostMultiplier != nil {
-			pricing.LongContextOutputCostMultiplier = *entry.LongContextOutputCostMultiplier
 		}
 		if entry.OutputCostPerImage != nil {
 			pricing.OutputCostPerImage = *entry.OutputCostPerImage

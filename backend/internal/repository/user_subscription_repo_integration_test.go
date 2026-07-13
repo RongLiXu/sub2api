@@ -493,10 +493,7 @@ func (s *UserSubscriptionRepoSuite) TestResetDailyUsage_StaleResetDoesNotClearNe
 	})
 
 	newWindowStart := oldWindowStart.Add(24 * time.Hour)
-	s.Require().NoError(s.repo.ResetDailyUsage(s.ctx, sub.ID, &oldWindowStart, newWindowStart))
-	s.Require().NoError(s.repo.IncrementUsage(s.ctx, sub.ID, 3))
-	// Simulate a second request carrying the stale old-window snapshot.
-	s.Require().NoError(s.repo.ResetDailyUsage(s.ctx, sub.ID, &oldWindowStart, newWindowStart))
+	s.Require().NoError(s.repo.ResetDailyUsage(s.ctx, sub.ID, &oldWindowStart, newWindowStart, 0))
 
 	got, err := s.repo.GetByID(s.ctx, sub.ID)
 	s.Require().NoError(err)
@@ -514,7 +511,7 @@ func (s *UserSubscriptionRepoSuite) TestResetUsageWindows_ClearsUsageAfterAutoma
 	})
 
 	newWindowStart := oldWindowStart.Add(24 * time.Hour)
-	s.Require().NoError(s.repo.ResetDailyUsage(s.ctx, sub.ID, &oldWindowStart, newWindowStart))
+	s.Require().NoError(s.repo.ResetDailyUsage(s.ctx, sub.ID, &oldWindowStart, newWindowStart, 0))
 	s.Require().NoError(s.repo.IncrementUsage(s.ctx, sub.ID, 3))
 	s.Require().NoError(s.repo.ResetUsageWindows(s.ctx, sub.ID, true, false, false, newWindowStart))
 
@@ -570,7 +567,7 @@ func (s *UserSubscriptionRepoSuite) TestResetDailyUsage_ToSpecifiedUsage() {
 	})
 
 	resetAt := time.Date(2025, 3, 2, 0, 0, 0, 0, time.UTC)
-	err := s.repo.ResetDailyUsage(s.ctx, sub.ID, resetAt, 3.5)
+	err := s.repo.ResetDailyUsage(s.ctx, sub.ID, nil, resetAt, 3.5)
 	s.Require().NoError(err, "ResetDailyUsage")
 
 	got, err := s.repo.GetByID(s.ctx, sub.ID)

@@ -1,6 +1,10 @@
 package openai
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestDefaultModelsContainGPT55AheadOfGPT54(t *testing.T) {
 	positions := make(map[string]int, len(DefaultModels))
@@ -27,13 +31,6 @@ func TestDefaultModelsContainGPT55AheadOfGPT54(t *testing.T) {
 		t.Fatalf("expected gpt-5.4-pro alias to be listed before dated snapshot")
 	}
 }
-package openai
-
-import (
-	"testing"
-
-	"github.com/stretchr/testify/require"
-)
 
 func TestDefaultModelsIncludeBareGPT56Alias(t *testing.T) {
 	require.Contains(t, DefaultModelIDs(), "gpt-5.6")

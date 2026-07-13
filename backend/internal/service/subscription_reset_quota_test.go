@@ -41,6 +41,18 @@ func (r *resetQuotaUserSubRepoStub) ResetUsageWindows(_ context.Context, _ int64
 	r.resetDailyCalled = resetDaily
 	r.resetWeeklyCalled = resetWeekly
 	r.resetMonthlyCalled = resetMonthly
+	if resetDaily {
+		zero := float64(0)
+		r.resetDailyUsage = &zero
+	}
+	if resetWeekly {
+		zero := float64(0)
+		r.resetWeeklyUsage = &zero
+	}
+	if resetMonthly {
+		zero := float64(0)
+		r.resetMonthlyUsage = &zero
+	}
 	if resetDaily && r.resetDailyErr != nil {
 		return r.resetDailyErr
 	}
