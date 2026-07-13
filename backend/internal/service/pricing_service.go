@@ -42,7 +42,7 @@ var (
 		SupportsPromptCaching:           true,
 		SupportsServiceTier:             true,
 	}
-	
+
 	openAIGPT55FallbackPricing = &LiteLLMModelPricing{
 		InputCostPerToken:               5e-06,    // $5 per MTok
 		InputCostPerTokenPriority:       12.5e-06, // $12.5 per MTok
@@ -72,9 +72,9 @@ var (
 		CacheCreationInputTokenCost:     6.25e-06,
 		CacheReadInputTokenCost:         0.5e-06,
 		CacheReadInputTokenCostPriority: 1e-06,
-		LongContextInputTokenThreshold:      openAIGPT54LongContextInputThreshold,
-		LongContextInputCostMultiplier:      openAIGPT54LongContextInputMultiplier,
-		LongContextOutputCostMultiplier:     openAIGPT54LongContextOutputMultiplier,
+		LongContextInputTokenThreshold:  openAIGPT54LongContextInputThreshold,
+		LongContextInputCostMultiplier:  openAIGPT54LongContextInputMultiplier,
+		LongContextOutputCostMultiplier: openAIGPT54LongContextOutputMultiplier,
 		CacheReadInputTokenCostFlex:     0.25e-06,
 		LiteLLMProvider:                 "openai",
 		Mode:                            "chat",
@@ -92,9 +92,9 @@ var (
 		CacheCreationInputTokenCost:     3.125e-06,
 		CacheReadInputTokenCost:         0.25e-06,
 		CacheReadInputTokenCostPriority: 0.5e-06,
-		LongContextInputTokenThreshold:      openAIGPT54LongContextInputThreshold,
-		LongContextInputCostMultiplier:      openAIGPT54LongContextInputMultiplier,
-		LongContextOutputCostMultiplier:     openAIGPT54LongContextOutputMultiplier,
+		LongContextInputTokenThreshold:  openAIGPT54LongContextInputThreshold,
+		LongContextInputCostMultiplier:  openAIGPT54LongContextInputMultiplier,
+		LongContextOutputCostMultiplier: openAIGPT54LongContextOutputMultiplier,
 		CacheReadInputTokenCostFlex:     0.125e-06,
 		LiteLLMProvider:                 "openai",
 		Mode:                            "chat",
@@ -232,7 +232,7 @@ type LiteLLMRawEntry struct {
 	OutputCostPerTokenPriority          *float64                  `json:"output_cost_per_token_priority"`
 	OutputCostPerTokenFlex              *float64                  `json:"output_cost_per_token_flex"`
 	CacheCreationInputTokenCost         *float64                  `json:"cache_creation_input_token_cost"`
-	CacheCreationInputTokenCostPriority *float64 `json:"cache_creation_input_token_cost_priority"`
+	CacheCreationInputTokenCostPriority *float64                  `json:"cache_creation_input_token_cost_priority"`
 	CacheCreationInputTokenCostAbove1hr *float64                  `json:"cache_creation_input_token_cost_above_1hr"`
 	CacheReadInputTokenCost             *float64                  `json:"cache_read_input_token_cost"`
 	CacheReadInputTokenCostPriority     *float64                  `json:"cache_read_input_token_cost_priority"`

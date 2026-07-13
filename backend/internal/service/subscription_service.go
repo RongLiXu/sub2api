@@ -833,16 +833,6 @@ func (s *SubscriptionService) CheckAndActivateWindow(ctx context.Context, sub *U
 	return s.userSubRepo.ActivateWindows(ctx, sub.ID, windowStart)
 }
 
-func normalizedResetUsage(value *float64) (float64, error) {
-	if value == nil {
-		return 0, nil
-	}
-	if *value < 0 {
-		return 0, ErrSubscriptionUsageNegative
-	}
-	return *value, nil
-}
-
 // AdminResetQuota manually resets the daily, weekly, and/or monthly usage windows.
 // Uses startOfDay(now) as the new window start, matching automatic resets.
 func (s *SubscriptionService) AdminResetQuota(ctx context.Context, subscriptionID int64, resetDaily, resetWeekly, resetMonthly bool, dailyUsageUSD, weeklyUsageUSD, monthlyUsageUSD *float64) (*UserSubscription, error) {

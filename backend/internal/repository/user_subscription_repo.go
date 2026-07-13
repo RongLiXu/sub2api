@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	stdsql "database/sql"
 	"time"
 
 	dbent "github.com/Wei-Shaw/sub2api/ent"
@@ -384,47 +385,68 @@ func (r *userSubscriptionRepository) ResetUsageWindows(ctx context.Context, id i
 
 func (r *userSubscriptionRepository) ResetDailyUsage(ctx context.Context, id int64, expectedWindowStart *time.Time, newWindowStart time.Time, newUsageUSD float64) error {
 	client := clientFromContext(ctx, r.client)
-	query := client.UserSubscription.Update().Where(usersubscription.IDEQ(id))
+	var (
+		n      int64
+		err    error
+		result stdsql.Result
+	)
 	if expectedWindowStart == nil {
-		query = query.Where(usersubscription.DailyWindowStartIsNil())
+		result, err = client.ExecContext(ctx,
+			`UPDATE user_subscriptions SET daily_usage_usd = $1, daily_window_start = $2, updated_at = NOW() WHERE id = $3 AND daily_window_start IS NULL AND deleted_at IS NULL`,
+			newUsageUSD, newWindowStart, id)
 	} else {
-		query = query.Where(usersubscription.DailyWindowStartEQ(*expectedWindowStart))
+		result, err = client.ExecContext(ctx,
+			`UPDATE user_subscriptions SET daily_usage_usd = $1, daily_window_start = $2, updated_at = NOW() WHERE id = $3 AND daily_window_start = $4 AND deleted_at IS NULL`,
+			newUsageUSD, newWindowStart, id, *expectedWindowStart)
 	}
-	n, err := query.
-		SetDailyUsageUsd(newUsageUSD).
-		SetDailyWindowStart(newWindowStart).
-		Save(ctx)
-	return r.translateConditionalWindowReset(ctx, client, id, n, err)
+	if err == nil {
+		n, _ = result.RowsAffected()
+	}
+	return r.translateConditionalWindowReset(ctx, client, id, int(n), err)
 }
 
 func (r *userSubscriptionRepository) ResetWeeklyUsage(ctx context.Context, id int64, expectedWindowStart *time.Time, newWindowStart time.Time, newUsageUSD float64) error {
 	client := clientFromContext(ctx, r.client)
-	query := client.UserSubscription.Update().Where(usersubscription.IDEQ(id))
+	var (
+		n      int64
+		err    error
+		result stdsql.Result
+	)
 	if expectedWindowStart == nil {
-		query = query.Where(usersubscription.WeeklyWindowStartIsNil())
+		result, err = client.ExecContext(ctx,
+			`UPDATE user_subscriptions SET weekly_usage_usd = $1, weekly_window_start = $2, updated_at = NOW() WHERE id = $3 AND weekly_window_start IS NULL AND deleted_at IS NULL`,
+			newUsageUSD, newWindowStart, id)
 	} else {
-		query = query.Where(usersubscription.WeeklyWindowStartEQ(*expectedWindowStart))
+		result, err = client.ExecContext(ctx,
+			`UPDATE user_subscriptions SET weekly_usage_usd = $1, weekly_window_start = $2, updated_at = NOW() WHERE id = $3 AND weekly_window_start = $4 AND deleted_at IS NULL`,
+			newUsageUSD, newWindowStart, id, *expectedWindowStart)
 	}
-	n, err := query.
-		SetWeeklyUsageUsd(newUsageUSD).
-		SetWeeklyWindowStart(newWindowStart).
-		Save(ctx)
-	return r.translateConditionalWindowReset(ctx, client, id, n, err)
+	if err == nil {
+		n, _ = result.RowsAffected()
+	}
+	return r.translateConditionalWindowReset(ctx, client, id, int(n), err)
 }
 
 func (r *userSubscriptionRepository) ResetMonthlyUsage(ctx context.Context, id int64, expectedWindowStart *time.Time, newWindowStart time.Time, newUsageUSD float64) error {
 	client := clientFromContext(ctx, r.client)
-	query := client.UserSubscription.Update().Where(usersubscription.IDEQ(id))
+	var (
+		n      int64
+		err    error
+		result stdsql.Result
+	)
 	if expectedWindowStart == nil {
-		query = query.Where(usersubscription.MonthlyWindowStartIsNil())
+		result, err = client.ExecContext(ctx,
+			`UPDATE user_subscriptions SET monthly_usage_usd = $1, monthly_window_start = $2, updated_at = NOW() WHERE id = $3 AND monthly_window_start IS NULL AND deleted_at IS NULL`,
+			newUsageUSD, newWindowStart, id)
 	} else {
-		query = query.Where(usersubscription.MonthlyWindowStartEQ(*expectedWindowStart))
+		result, err = client.ExecContext(ctx,
+			`UPDATE user_subscriptions SET monthly_usage_usd = $1, monthly_window_start = $2, updated_at = NOW() WHERE id = $3 AND monthly_window_start = $4 AND deleted_at IS NULL`,
+			newUsageUSD, newWindowStart, id, *expectedWindowStart)
 	}
-	n, err := query.
-		SetMonthlyUsageUsd(newUsageUSD).
-		SetMonthlyWindowStart(newWindowStart).
-		Save(ctx)
-	return r.translateConditionalWindowReset(ctx, client, id, n, err)
+	if err == nil {
+		n, _ = result.RowsAffected()
+	}
+	return r.translateConditionalWindowReset(ctx, client, id, int(n), err)
 }
 
 func (r *userSubscriptionRepository) translateConditionalWindowReset(ctx context.Context, client *dbent.Client, id int64, affected int, err error) error {
