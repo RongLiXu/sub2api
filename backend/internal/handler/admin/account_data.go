@@ -475,6 +475,7 @@ func (h *AccountHandler) importData(ctx context.Context, req DataImportRequest) 
 		if created.Platform == service.PlatformAntigravity && created.Type == service.AccountTypeOAuth {
 			privacyAccounts = append(privacyAccounts, created)
 		}
+		h.scheduleGrokImportProbe(created)
 		if created.Platform == service.PlatformOpenAI && created.Type == service.AccountTypeOAuth {
 			openAIUsageAccounts = append(openAIUsageAccounts, created)
 		}
