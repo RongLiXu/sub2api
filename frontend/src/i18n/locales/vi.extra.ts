@@ -1285,7 +1285,41 @@ export default {
       "countdown": {
         "daysHours": "{d}d {h}h"
       }
-    }
+    },
+    "accounts": {
+      "fromModel": "Mô hình nguồn",
+      "toModel": "Mô hình đích",
+      "openai": {
+        "planType": "Loại gói",
+        "planTypeClear": "Xóa",
+        "planTypeDesc": "Chọn loại gói đăng ký OpenAI",
+      },
+      "bulkActions": {
+        "probeUsage": "Kiểm tra sử dụng",
+      },
+    },
+    "dashboard": {
+      "batchImage": "Ảnh hàng loạt",
+      "batchImageDesc": "Tạo ảnh hàng loạt",
+      "groupPricing": "Giá nhóm",
+      "groupPricingDesc": "Cấu hình giá cấp nhóm",
+    },
+    "usage": {
+      "billingModeVideo": "Mỗi video",
+      "tokenRanking": {
+        "subtitle": "Xếp hạng sử dụng token",
+        "rowHint": "Nhấp để xem chi tiết",
+        "columns": {
+          "user": "Người dùng",
+        },
+      },
+    },
+    "users": {
+      "form": {
+        "roleLabel": "Vai trò",
+      },
+      "passwordCopied": "Đã sao chép mật khẩu",
+    },
   },
   "adminCompliance": {
     "title": "Deployment and Operation Compliance Acknowledgment",
@@ -1314,7 +1348,8 @@ export default {
     "adminCompliance": "Deployment and Operation Compliance Commitment"
   },
   "nav": {
-    "github": "GitHub"
+    "github": "GitHub",
+    "batchImage": "Ảnh hàng loạt",
   },
   "modelsPage": {
     "modes": {
@@ -1323,6 +1358,8 @@ export default {
     }
   },
   "dashboard": {
+    "batchImageAgent": "Tác nhân ảnh hàng loạt",
+    "batchImageAgentDesc": "Tạo nhiều ảnh với AI",
     "platformBreakdown": "Per-platform Breakdown",
     "platformBreakdownEmpty": "No platform usage yet",
     "platformCount": "{count} platforms",
@@ -1338,10 +1375,16 @@ export default {
     }
   },
   "keys": {
+    "lastUsedIP": "IP cuối",
     "useKeyModal": {
       "cliTabs": {
         "codexCli": "Codex CLI",
-        "codexCliWs": "Codex CLI (WebSocket)"
+        "codexCliWs": "Codex CLI (WebSocket)",
+        "grokCli": "Grok CLI",
+      },
+      "grok": {
+        "configTomlHint": "Thêm vào config.toml",
+        "noteWindows": "Lưu ý cho Windows",
       },
       "opencode": {
         "subtitle": "opencode.json"
@@ -1419,62 +1462,6 @@ export default {
       "weekly": "W",
       "monthly": "M"
     }
-  },
-
-  "nav": {
-    "batchImage": "Ảnh hàng loạt",
-  },
-  "keys": {
-    "lastUsedIP": "IP cuối",
-    "useKeyModal": {
-      "cliTabs": {
-        "grokCli": "Grok CLI",
-      },
-      "grok": {
-        "configTomlHint": "Thêm vào config.toml",
-        "noteWindows": "Lưu ý cho Windows",
-      },
-    },
-  },
-  "dashboard": {
-    "batchImageAgent": "Tác nhân ảnh hàng loạt",
-    "batchImageAgentDesc": "Tạo nhiều ảnh với AI",
-  },
-  "admin": {
-    "accounts": {
-      "fromModel": "Mô hình nguồn",
-      "toModel": "Mô hình đích",
-      "openai": {
-        "planType": "Loại gói",
-        "planTypeClear": "Xóa",
-        "planTypeDesc": "Chọn loại gói đăng ký OpenAI",
-      },
-      "bulkActions": {
-        "probeUsage": "Kiểm tra sử dụng",
-      },
-    },
-    "dashboard": {
-      "batchImage": "Ảnh hàng loạt",
-      "batchImageDesc": "Tạo ảnh hàng loạt",
-      "groupPricing": "Giá nhóm",
-      "groupPricingDesc": "Cấu hình giá cấp nhóm",
-    },
-    "usage": {
-      "billingModeVideo": "Mỗi video",
-      "tokenRanking": {
-        "subtitle": "Xếp hạng sử dụng token",
-        "rowHint": "Nhấp để xem chi tiết",
-        "columns": {
-          "user": "Người dùng",
-        },
-      },
-    },
-    "users": {
-      "form": {
-        "roleLabel": "Vai trò",
-      },
-      "passwordCopied": "Đã sao chép mật khẩu",
-    },
   },
   "version": {
     "copyCommand": "Sao chép lệnh",

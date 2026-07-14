@@ -91,8 +91,40 @@ const messages = {
           advancedHide: 'Скрыть расширенные параметры (свой OAuth Client)',
           advancedShow: 'Показать расширенные параметры (свой OAuth Client)'
         }
-      }
-    }
+      },
+      fromModel: 'Исходная модель',
+      toModel: 'Целевая модель',
+      openai: {
+        planType: 'Тип плана',
+        planTypeClear: 'Очистить',
+        planTypeDesc: 'Выберите тип плана подписки OpenAI',
+      },
+      bulkActions: {
+        probeUsage: 'Проверить использование',
+      },
+    },
+    dashboard: {
+      batchImage: 'Пакет изображений',
+      batchImageDesc: 'Генерация изображений пакетом',
+      groupPricing: 'Групповые цены',
+      groupPricingDesc: 'Настроить цены на уровне групп',
+    },
+    usage: {
+      billingModeVideo: 'За видео',
+      tokenRanking: {
+        subtitle: 'Рейтинг использования токенов',
+        rowHint: 'Нажмите для подробностей',
+        columns: {
+          user: 'Пользователь',
+        },
+      },
+    },
+    users: {
+      form: {
+        roleLabel: 'Роль',
+      },
+      passwordCopied: 'Пароль скопирован',
+    },
   },
 
   "nav": {
@@ -113,42 +145,6 @@ const messages = {
   "dashboard": {
     "batchImageAgent": "Агент пакетных изображений",
     "batchImageAgentDesc": "Генерация нескольких изображений с помощью ИИ",
-  },
-  "admin": {
-    "accounts": {
-      "fromModel": "Исходная модель",
-      "toModel": "Целевая модель",
-      "openai": {
-        "planType": "Тип плана",
-        "planTypeClear": "Очистить",
-        "planTypeDesc": "Выберите тип плана подписки OpenAI",
-      },
-      "bulkActions": {
-        "probeUsage": "Проверить использование",
-      },
-    },
-    "dashboard": {
-      "batchImage": "Пакет изображений",
-      "batchImageDesc": "Генерация изображений пакетом",
-      "groupPricing": "Групповые цены",
-      "groupPricingDesc": "Настроить цены на уровне групп",
-    },
-    "usage": {
-      "billingModeVideo": "За видео",
-      "tokenRanking": {
-        "subtitle": "Рейтинг использования токенов",
-        "rowHint": "Нажмите для подробностей",
-        "columns": {
-          "user": "Пользователь",
-        },
-      },
-    },
-    "users": {
-      "form": {
-        "roleLabel": "Роль",
-      },
-      "passwordCopied": "Пароль скопирован",
-    },
   },
   "version": {
     "copyCommand": "Копировать команду",

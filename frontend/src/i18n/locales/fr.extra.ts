@@ -91,8 +91,40 @@ const messages = {
           advancedHide: 'Masquer les options avancées (client OAuth personnalisé)',
           advancedShow: 'Afficher les options avancées (client OAuth personnalisé)'
         }
-      }
-    }
+      },
+      fromModel: 'Modèle source',
+      toModel: 'Modèle cible',
+      openai: {
+        planType: 'Type de plan',
+        planTypeClear: 'Effacer',
+        planTypeDesc: 'Sélectionner le type de plan OpenAI',
+      },
+      bulkActions: {
+        probeUsage: "Sonder l'utilisation",
+      },
+    },
+    dashboard: {
+      batchImage: 'Image par lot',
+      batchImageDesc: 'Générer des images par lot',
+      groupPricing: 'Tarification de groupe',
+      groupPricingDesc: 'Configurer la tarification par groupe',
+    },
+    usage: {
+      billingModeVideo: 'Par vidéo',
+      tokenRanking: {
+        subtitle: 'Classement par tokens',
+        rowHint: 'Cliquer pour les détails',
+        columns: {
+          user: 'Utilisateur',
+        },
+      },
+    },
+    users: {
+      form: {
+        roleLabel: 'Rôle',
+      },
+      passwordCopied: 'Mot de passe copié',
+    },
   },
 
   "nav": {
@@ -113,42 +145,6 @@ const messages = {
   "dashboard": {
     "batchImageAgent": "Agent d'images par lot",
     "batchImageAgentDesc": "Générer plusieurs images avec l'IA",
-  },
-  "admin": {
-    "accounts": {
-      "fromModel": "Modèle source",
-      "toModel": "Modèle cible",
-      "openai": {
-        "planType": "Type de plan",
-        "planTypeClear": "Effacer",
-        "planTypeDesc": "Sélectionner le type de plan OpenAI",
-      },
-      "bulkActions": {
-        "probeUsage": "Sonder l'utilisation",
-      },
-    },
-    "dashboard": {
-      "batchImage": "Image par lot",
-      "batchImageDesc": "Générer des images par lot",
-      "groupPricing": "Tarification de groupe",
-      "groupPricingDesc": "Configurer la tarification par groupe",
-    },
-    "usage": {
-      "billingModeVideo": "Par vidéo",
-      "tokenRanking": {
-        "subtitle": "Classement par tokens",
-        "rowHint": "Cliquer pour les détails",
-        "columns": {
-          "user": "Utilisateur",
-        },
-      },
-    },
-    "users": {
-      "form": {
-        "roleLabel": "Rôle",
-      },
-      "passwordCopied": "Mot de passe copié",
-    },
   },
   "version": {
     "copyCommand": "Copier la commande",

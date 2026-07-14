@@ -91,8 +91,40 @@ const messages = {
           advancedHide: '고급 옵션 숨기기(커스텀 OAuth 클라이언트)',
           advancedShow: '고급 옵션 표시(커스텀 OAuth 클라이언트)'
         }
-      }
-    }
+      },
+      fromModel: '원본 모델',
+      toModel: '대상 모델',
+      openai: {
+        planType: '플랜 유형',
+        planTypeClear: '지우기',
+        planTypeDesc: 'OpenAI 구독 플랜 유형 선택',
+      },
+      bulkActions: {
+        probeUsage: '사용량 조회',
+      },
+    },
+    dashboard: {
+      batchImage: '일괄 이미지',
+      batchImageDesc: '이미지 일괄 생성',
+      groupPricing: '그룹 가격',
+      groupPricingDesc: '그룹 수준 가격 구성',
+    },
+    usage: {
+      billingModeVideo: '비디오별',
+      tokenRanking: {
+        subtitle: '토큰 사용량 순위',
+        rowHint: '클릭하여 세부정보 보기',
+        columns: {
+          user: '사용자',
+        },
+      },
+    },
+    users: {
+      form: {
+        roleLabel: '역할',
+      },
+      passwordCopied: '비밀번호 복사됨',
+    },
   },
 
   "nav": {
@@ -113,42 +145,6 @@ const messages = {
   "dashboard": {
     "batchImageAgent": "일괄 이미지 에이전트",
     "batchImageAgentDesc": "AI로 여러 이미지 생성",
-  },
-  "admin": {
-    "accounts": {
-      "fromModel": "원본 모델",
-      "toModel": "대상 모델",
-      "openai": {
-        "planType": "플랜 유형",
-        "planTypeClear": "지우기",
-        "planTypeDesc": "OpenAI 구독 플랜 유형 선택",
-      },
-      "bulkActions": {
-        "probeUsage": "사용량 조회",
-      },
-    },
-    "dashboard": {
-      "batchImage": "일괄 이미지",
-      "batchImageDesc": "이미지 일괄 생성",
-      "groupPricing": "그룹 가격",
-      "groupPricingDesc": "그룹 수준 가격 구성",
-    },
-    "usage": {
-      "billingModeVideo": "비디오별",
-      "tokenRanking": {
-        "subtitle": "토큰 사용량 순위",
-        "rowHint": "클릭하여 세부정보 보기",
-        "columns": {
-          "user": "사용자",
-        },
-      },
-    },
-    "users": {
-      "form": {
-        "roleLabel": "역할",
-      },
-      "passwordCopied": "비밀번호 복사됨",
-    },
   },
   "version": {
     "copyCommand": "명령 복사",

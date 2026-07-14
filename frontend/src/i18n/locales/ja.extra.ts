@@ -1248,7 +1248,41 @@ export default {
         "hoursMinutes": "{h}h {m}m",
         "minutes": "{m}m"
       }
-    }
+    },
+    "accounts": {
+      "fromModel": "元モデル",
+      "toModel": "対象モデル",
+      "openai": {
+        "planType": "プランタイプ",
+        "planTypeClear": "クリア",
+        "planTypeDesc": "OpenAIサブスクリプションプランタイプを選択",
+      },
+      "bulkActions": {
+        "probeUsage": "使用量を調査",
+      },
+    },
+    "dashboard": {
+      "batchImage": "バッチ画像",
+      "batchImageDesc": "画像を一括生成",
+      "groupPricing": "グループ価格",
+      "groupPricingDesc": "グループレベルの価格を構成",
+    },
+    "usage": {
+      "billingModeVideo": "動画ごと",
+      "tokenRanking": {
+        "subtitle": "トークン使用量ランキング",
+        "rowHint": "クリックして詳細を表示",
+        "columns": {
+          "user": "ユーザー",
+        },
+      },
+    },
+    "users": {
+      "form": {
+        "roleLabel": "役割",
+      },
+      "passwordCopied": "パスワードをコピーしました",
+    },
   },
   "adminCompliance": {
     "title": "Deployment and Operation Compliance Acknowledgment",
@@ -1277,7 +1311,8 @@ export default {
     "adminCompliance": "Deployment and Operation Compliance Commitment"
   },
   "nav": {
-    "github": "GitHub"
+    "github": "GitHub",
+    "batchImage": "バッチ画像",
   },
   "modelsPage": {
     "capabilities": {
@@ -1289,6 +1324,8 @@ export default {
     }
   },
   "dashboard": {
+    "batchImageAgent": "バッチ画像エージェント",
+    "batchImageAgentDesc": "AIで複数の画像を生成",
     "platformBreakdown": "Per-platform Breakdown",
     "platformBreakdownEmpty": "No platform usage yet",
     "platformCount": "{count} platforms",
@@ -1304,6 +1341,16 @@ export default {
     }
   },
   "keys": {
+    "lastUsedIP": "最後のIP",
+    "useKeyModal": {
+      "cliTabs": {
+        "grokCli": "Grok CLI",
+      },
+      "grok": {
+        "configTomlHint": "config.toml ファイルに追加",
+        "noteWindows": "Windowsユーザーへの注意",
+      },
+    },
     "ipWhitelistPlaceholder": "192.168.1.100\n10.0.0.0/8",
     "ipBlacklistPlaceholder": "1.2.3.4\n5.6.0.0/16"
   },
@@ -1364,62 +1411,6 @@ export default {
       "weekly": "W",
       "monthly": "M"
     }
-  },
-
-  "nav": {
-    "batchImage": "バッチ画像",
-  },
-  "keys": {
-    "lastUsedIP": "最後のIP",
-    "useKeyModal": {
-      "cliTabs": {
-        "grokCli": "Grok CLI",
-      },
-      "grok": {
-        "configTomlHint": "config.toml ファイルに追加",
-        "noteWindows": "Windowsユーザーへの注意",
-      },
-    },
-  },
-  "dashboard": {
-    "batchImageAgent": "バッチ画像エージェント",
-    "batchImageAgentDesc": "AIで複数の画像を生成",
-  },
-  "admin": {
-    "accounts": {
-      "fromModel": "元モデル",
-      "toModel": "対象モデル",
-      "openai": {
-        "planType": "プランタイプ",
-        "planTypeClear": "クリア",
-        "planTypeDesc": "OpenAIサブスクリプションプランタイプを選択",
-      },
-      "bulkActions": {
-        "probeUsage": "使用量を調査",
-      },
-    },
-    "dashboard": {
-      "batchImage": "バッチ画像",
-      "batchImageDesc": "画像を一括生成",
-      "groupPricing": "グループ価格",
-      "groupPricingDesc": "グループレベルの価格を構成",
-    },
-    "usage": {
-      "billingModeVideo": "動画ごと",
-      "tokenRanking": {
-        "subtitle": "トークン使用量ランキング",
-        "rowHint": "クリックして詳細を表示",
-        "columns": {
-          "user": "ユーザー",
-        },
-      },
-    },
-    "users": {
-      "form": {
-        "roleLabel": "役割",
-      },
-      "passwordCopied": "パスワードをコピーしました",
-    },
   },
   "version": {
     "copyCommand": "コマンドをコピー",

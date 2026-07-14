@@ -923,6 +923,7 @@ export default {
         codexCli: 'Codex CLI',
         codexCliWs: 'Codex CLI (WebSocket)',
         opencode: 'OpenCode',
+        grokCli: 'Grok CLI',
       },
       antigravity: {
         description: 'Configure API access for Antigravity group. Select the configuration method based on your client.',
@@ -2026,6 +2027,7 @@ export default {
       creating: 'Creating...',
       updating: 'Updating...',
       form: {
+        roleLabel: 'Role',
         rpmLimit: 'Requests Per Minute (RPM)',
         rpmLimitPlaceholder: '0 = unlimited',
         rpmLimitHint: 'Max requests per minute for this user; 0 = unlimited. Acts as a fallback only when the group has no rpm_limit set.'
@@ -2268,9 +2270,6 @@ export default {
         cellColumnTooltip: 'Only platforms with a limit are shown',
         subscriptionWarning: 'This user has an active subscription. Platform quotas only apply to balance (standard) mode requests; subscription mode requests are not subject to these limits.',
         invalidNumber: 'The following fields contain invalid numbers. Please fix them before saving: {fields}',
-      },
-      form: {
-        roleLabel: 'Role',
       },
       passwordCopied: 'Password copied to clipboard',
     },

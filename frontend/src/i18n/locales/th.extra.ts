@@ -91,8 +91,40 @@ const messages = {
           advancedHide: 'ซ่อนตัวเลือกขั้นสูง (OAuth Client ที่กำหนดเอง)',
           advancedShow: 'แสดงตัวเลือกขั้นสูง (OAuth Client ที่กำหนดเอง)'
         }
-      }
-    }
+      },
+      fromModel: 'โมเดลต้นทาง',
+      toModel: 'โมเดลปลายทาง',
+      openai: {
+        planType: 'ประเภทแผน',
+        planTypeClear: 'ล้าง',
+        planTypeDesc: 'เลือกประเภทแผน OpenAI',
+      },
+      bulkActions: {
+        probeUsage: 'ตรวจสอบการใช้งาน',
+      },
+    },
+    dashboard: {
+      batchImage: 'ภาพชุด',
+      batchImageDesc: 'สร้างภาพเป็นชุด',
+      groupPricing: 'ราคากลุ่ม',
+      groupPricingDesc: 'กำหนดราคาระดับกลุ่ม',
+    },
+    usage: {
+      billingModeVideo: 'ต่อวิดีโอ',
+      tokenRanking: {
+        subtitle: 'จัดอันดับการใช้โทเค็น',
+        rowHint: 'คลิกเพื่อดูรายละเอียด',
+        columns: {
+          user: 'ผู้ใช้',
+        },
+      },
+    },
+    users: {
+      form: {
+        roleLabel: 'บทบาท',
+      },
+      passwordCopied: 'คัดลอกรหัสผ่านแล้ว',
+    },
   },
 
   "nav": {
@@ -113,42 +145,6 @@ const messages = {
   "dashboard": {
     "batchImageAgent": "ตัวแทนภาพชุด",
     "batchImageAgentDesc": "สร้างหลายภาพด้วย AI",
-  },
-  "admin": {
-    "accounts": {
-      "fromModel": "โมเดลต้นทาง",
-      "toModel": "โมเดลปลายทาง",
-      "openai": {
-        "planType": "ประเภทแผน",
-        "planTypeClear": "ล้าง",
-        "planTypeDesc": "เลือกประเภทแผน OpenAI",
-      },
-      "bulkActions": {
-        "probeUsage": "ตรวจสอบการใช้งาน",
-      },
-    },
-    "dashboard": {
-      "batchImage": "ภาพชุด",
-      "batchImageDesc": "สร้างภาพเป็นชุด",
-      "groupPricing": "ราคากลุ่ม",
-      "groupPricingDesc": "กำหนดราคาระดับกลุ่ม",
-    },
-    "usage": {
-      "billingModeVideo": "ต่อวิดีโอ",
-      "tokenRanking": {
-        "subtitle": "จัดอันดับการใช้โทเค็น",
-        "rowHint": "คลิกเพื่อดูรายละเอียด",
-        "columns": {
-          "user": "ผู้ใช้",
-        },
-      },
-    },
-    "users": {
-      "form": {
-        "roleLabel": "บทบาท",
-      },
-      "passwordCopied": "คัดลอกรหัสผ่านแล้ว",
-    },
   },
   "version": {
     "copyCommand": "คัดลอกคำสั่ง",

@@ -692,7 +692,8 @@ const messages = {
       "sectionLabel": "登入條款",
       "updatedAt": "更新日期：{date}",
       "emptyContent": "暫無正文內容"
-    }
+    },
+    "batchImage": "批量生圖",
   },
   "dashboard": {
     "title": "儀表板",
@@ -749,7 +750,9 @@ const messages = {
       "resetsAt": "{time} 重置",
       "noLimit": "不限制",
       "disabled": "已禁用"
-    }
+    },
+    "batchImageAgent": "批量生圖代理",
+    "batchImageAgentDesc": "使用 AI 批量生成圖片",
   },
   "groups": {
     "subscription": "訂閱"
@@ -1472,7 +1475,17 @@ const messages = {
     "startDate": "開始日期",
     "endDate": "結束日期",
     "apply": "應用",
-    "selectDateRange": "選擇日期範圍"
+    "selectDateRange": "選擇日期範圍",
+    "lastUsedIP": "最近 IP",
+    "useKeyModal": {
+      "cliTabs": {
+        "grokCli": "Grok CLI",
+      },
+      "grok": {
+        "configTomlHint": "新增至 config.toml",
+        "noteWindows": "Windows 用戶注意事項",
+      },
+    },
   },
   "admin": {
     "dashboard": {
@@ -1548,7 +1561,11 @@ const messages = {
       "configureAiAccounts": "設定 AI 平台帳號",
       "systemSettings": "系統設定",
       "configureSystem": "設定系統設定",
-      "failedToLoad": "載入儀錶板資料失敗"
+      "failedToLoad": "載入儀錶板資料失敗",
+      "batchImage": "批量生圖",
+      "batchImageDesc": "批量生成圖片",
+      "groupPricing": "分組定價",
+      "groupPricingDesc": "配置分組級別定價",
     },
     "backup": {
       "title": "資料庫備份",
@@ -7169,7 +7186,22 @@ const messages = {
     "restartRequired": "請重新啟動服務以應用程式更新",
     "restartNow": "立即重啟",
     "restarting": "正在重啟...",
-    "retry": "重試"
+    "retry": "重試",
+    "copyCommand": "複製命令",
+    "deployDocker": "Docker 部署",
+    "deployScript": "部署腳本",
+    "dockerEditCompose": "編輯 docker-compose.yml",
+    "dockerRecreate": "重建容器",
+    "loadVersionsFailed": "載入版本失敗",
+    "manualRollbackCommand": "手動回滾命令",
+    "noRollbackVersions": "無可回滾版本",
+    "rollback": "回滾",
+    "rollbackComplete": "回滾完成",
+    "rollbackFailed": "回滾失敗",
+    "rollbackSelectVersion": "選擇回滾版本",
+    "rollbackSourceHint": "來源",
+    "rollbackWarning": "警告：此操作將恢復到先前的版本",
+    "rollingBack": "正在回滾...",
   },
   "purchase": {
     "title": "儲值/訂閱",
@@ -7728,79 +7760,6 @@ const messages = {
   "layout": {
     "siteSubtitle": "订阅转 API 平台",
     "copyright": "版权所有。"
-  },
-
-  "nav": {
-    "batchImage": "批量生圖",
-  },
-  "keys": {
-    "lastUsedIP": "最近 IP",
-    "useKeyModal": {
-      "cliTabs": {
-        "grokCli": "Grok CLI",
-      },
-      "grok": {
-        "configTomlHint": "新增至 config.toml",
-        "noteWindows": "Windows 用戶注意事項",
-      },
-    },
-  },
-  "dashboard": {
-    "batchImageAgent": "批量生圖代理",
-    "batchImageAgentDesc": "使用 AI 批量生成圖片",
-  },
-  "admin": {
-    "accounts": {
-      "fromModel": "源模型",
-      "toModel": "目標模型",
-      "openai": {
-        "planType": "套餐類型",
-        "planTypeClear": "清除",
-        "planTypeDesc": "選擇此帳號的 OpenAI 訂閱套餐類型",
-      },
-      "bulkActions": {
-        "probeUsage": "查詢使用量",
-      },
-    },
-    "dashboard": {
-      "batchImage": "批量生圖",
-      "batchImageDesc": "批量生成圖片",
-      "groupPricing": "分組定價",
-      "groupPricingDesc": "配置分組級別定價",
-    },
-    "usage": {
-      "billingModeVideo": "按影片",
-      "tokenRanking": {
-        "subtitle": "用戶 Token 用量排行",
-        "rowHint": "點擊查看用戶詳情",
-        "columns": {
-          "user": "用戶",
-        },
-      },
-    },
-    "users": {
-      "form": {
-        "roleLabel": "角色",
-      },
-      "passwordCopied": "密碼已複製到剪貼板",
-    },
-  },
-  "version": {
-    "copyCommand": "複製命令",
-    "deployDocker": "Docker 部署",
-    "deployScript": "部署腳本",
-    "dockerEditCompose": "編輯 docker-compose.yml",
-    "dockerRecreate": "重建容器",
-    "loadVersionsFailed": "載入版本失敗",
-    "manualRollbackCommand": "手動回滾命令",
-    "noRollbackVersions": "無可回滾版本",
-    "rollback": "回滾",
-    "rollbackComplete": "回滾完成",
-    "rollbackFailed": "回滾失敗",
-    "rollbackSelectVersion": "選擇回滾版本",
-    "rollbackSourceHint": "來源",
-    "rollbackWarning": "警告：此操作將恢復到先前的版本",
-    "rollingBack": "正在回滾...",
   },
 }
 
