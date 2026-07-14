@@ -545,16 +545,6 @@ type contentModerationKeyHealth struct {
 	SyncLatencyMS  int64
 }
 
-func newContentModerationHTTPClient() *http.Client {
-	defaultTransport, ok := http.DefaultTransport.(*http.Transport)
-	if !ok {
-		return &http.Client{Timeout: 15 * time.Second}
-	}
-	transport := defaultTransport.Clone()
-	transport.Proxy = nil
-	return &http.Client{Timeout: 15 * time.Second, Transport: transport}
-}
-
 func NewContentModerationService(
 	settingRepo SettingRepository,
 	repo ContentModerationRepository,

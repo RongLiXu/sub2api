@@ -46,6 +46,21 @@ func InstrumentClient(client *http.Client) *http.Client {
 	return &copyClient
 }
 
+// UnwrapTransport returns the underlying *http.Transport when rt is an
+// *http.Transport or a timingRoundTripper that wraps one; otherwise nil.
+func UnwrapTransport(rt http.RoundTripper) *http.Transport {
+	for {
+		if t, ok := rt.(*http.Transport); ok {
+			return t
+		}
+		if trt, ok := rt.(*timingRoundTripper); ok {
+			rt = trt.base
+			continue
+		}
+		return nil
+	}
+}
+
 // Do records response-header latency without changing the client's transport
 // type. Use it for clients whose callers inspect or configure *http.Transport.
 func Do(client *http.Client, req *http.Request) (*http.Response, error) {

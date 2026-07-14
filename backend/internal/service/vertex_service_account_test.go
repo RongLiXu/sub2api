@@ -1,14 +1,13 @@
 package service
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
+	"context"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/servertiming"
 	"github.com/stretchr/testify/require"
@@ -118,16 +117,11 @@ func TestVertexServiceAccountHTTPClientRecordsDependency(t *testing.T) {
 }
 
 func TestExchangeVertexServiceAccountTokenUsesProxy(t *testing.T) {
-	_, err := rsa.GenerateKey(rand.Reader, 2048)
-	require.NoError(t, err)
-	pemBytes := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(mustRSAKey(t))})
-	require.NotEmpty(t, pemBytes)
-
 	client, err := newVertexServiceAccountHTTPClient("http://proxy.example.com:8080")
 	require.NoError(t, err)
 
-	transport, ok := client.Transport.(*http.Transport)
-	require.True(t, ok)
+	transport := servertiming.UnwrapTransport(client.Transport)
+	require.NotNil(t, transport)
 	require.NotNil(t, transport.Proxy)
 
 	reqURL, err := url.Parse("http://oauth2.googleapis.com/token")
@@ -137,11 +131,4 @@ func TestExchangeVertexServiceAccountTokenUsesProxy(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, proxyURL)
 	require.Equal(t, "http://proxy.example.com:8080", proxyURL.String())
-}
-
-func mustRSAKey(t *testing.T) *rsa.PrivateKey {
-	t.Helper()
-	key, err := rsa.GenerateKey(rand.Reader, 2048)
-	require.NoError(t, err)
-	return key
 }

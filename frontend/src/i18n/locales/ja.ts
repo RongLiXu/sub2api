@@ -753,7 +753,8 @@ const messages = {
         "geminiCli": "ジェミニ CLI",
         "codexCli": "コーデックス CLI",
         "codexCliWs": "コーデックス CLI (WebSocket)",
-        "opencode": "オープンコード"
+        "opencode": "オープンコード",
+        "grokCli": "Grok CLI"
       },
       "antigravity": {
         "description": "Antigravity グループの API アクセスを構成します。クライアントに基づいて構成方法を選択します。",
